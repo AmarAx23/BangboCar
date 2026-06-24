@@ -508,6 +508,15 @@ fromSel.addEventListener('change', update);
 toSel.addEventListener('change', update);
 document.getElementById('tambonFilter').addEventListener('change', update);
 
+// ── URL Parameters (สำหรับ screenshot จาก LINE Bot) ──────────────────
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  const f = p.get('from');
+  const t = p.get('to');
+  if(f && ALL_MONTHS.includes(f)) fromSel.value = f;
+  if(t && ALL_MONTHS.includes(t)) toSel.value   = t;
+})();
+
 update();
 </script>
 </body>
