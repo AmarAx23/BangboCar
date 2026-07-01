@@ -405,14 +405,12 @@ function countBy(arr, fn){
 // Bucket into a small set of canonical categories before counting.
 function bucketModel(model){
   const m = model || '';
-  if(m.includes('เวฟ 110') || m.includes('เวฟ110')) return 'เวฟ 110';
-  if(m.includes('เวฟ 125') || m.includes('เวฟ125')) return 'เวฟ 125';
+  if(m.includes('เวฟ'))     return 'เวฟ';
   if(m.toLowerCase().includes('pcx')) return 'PCX';
   if(m.includes('ดรีม'))    return 'ดรีม';
   if(m.includes('ยามาฮ่า')) return 'ยามาฮ่า';
   if(m.includes('โซนิค'))   return 'โซนิค';
   if(m.includes('คลิก'))    return 'คลิก';
-  if(m.includes('เวฟ'))     return 'เวฟ (รุ่นอื่น)';
   return 'อื่นๆ';
 }
 function modelBadge(m){
