@@ -383,6 +383,26 @@ function count(arr, key){
   return c;
 }
 function topN(obj,n){ return Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n); }
+function countBy(arr, fn){
+  const c = {};
+  arr.forEach(r=>{ const k = fn(r); c[k] = (c[k]||0) + 1; });
+  return c;
+}
+// Sheet cells spell the same model differently ("เวฟ 110ไอ", "รุ่นเวฟ 110 ไอ", "เวฟ110", ...)
+// so grouping by the exact text fragments the "รุ่นที่หายมากสุด" stats into near-duplicates.
+// Bucket into a small set of canonical categories before counting.
+function bucketModel(model){
+  const m = model || '';
+  if(m.includes('เวฟ 110') || m.includes('เวฟ110')) return 'เวฟ 110';
+  if(m.includes('เวฟ 125') || m.includes('เวฟ125')) return 'เวฟ 125';
+  if(m.toLowerCase().includes('pcx')) return 'PCX';
+  if(m.includes('ดรีม'))    return 'ดรีม';
+  if(m.includes('ยามาฮ่า')) return 'ยามาฮ่า';
+  if(m.includes('โซนิค'))   return 'โซนิค';
+  if(m.includes('คลิก'))    return 'คลิก';
+  if(m.includes('เวฟ'))     return 'เวฟ (รุ่นอื่น)';
+  return 'อื่นๆ';
+}
 function modelBadge(m){
   if(m.includes('เวฟ 110')) return `<span class="badge badge-wave110">${m}</span>`;
   if(m.includes('เวฟ 125')) return `<span class="badge badge-wave125">${m}</span>`;
@@ -399,7 +419,7 @@ function render(data){
   const timeLabel={'เย็น-ดึก (18-24น.)':'เย็น-ดึก 18.00 น. - 24.00 น.','กลางคืน (00-06น.)':'กลางคืน 00.00 น. - 06.00 น.','เช้า (06-12น.)':'เช้า 06.00 น. - 12.00 น.','บ่าย (12-18น.)':'บ่าย 12.00 น. - 18.00 น.','ไม่ระบุ':'ไม่ระบุ'};
   document.getElementById('kpiTime').textContent = timeLabel[topTime[0]]||topTime[0];
   document.getElementById('kpiTimeSub').textContent = topTime[1]+' เหตุ ('+(n?Math.round(topTime[1]/n*100):0)+'%)';
-  const modelC = count(data,'model');
+  const modelC = countBy(data, r=>bucketModel(r.model));
   const topModel = topN(modelC,1)[0]||['–',0];
   document.getElementById('kpiModel').textContent = topModel[0];
   document.getElementById('kpiModelSub').textContent = topModel[1]+' คัน';
