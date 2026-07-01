@@ -247,6 +247,7 @@ let RAW = [];
 let ALL_MONTHS = [];
 let MONTH_LABELS = {};
 let TOP_LOCATIONS = []; // curated location counts from the "ข้อมูลรถหาย" summary tab
+let urlParamsApplied = false; // has ?from=&to= from the URL been applied yet?
 const fromSel = document.getElementById('fromMonth');
 const toSel   = document.getElementById('toMonth');
 
@@ -356,6 +357,17 @@ async function loadData(isAutoRefresh){
     });
     fromSel.value = ALL_MONTHS.includes(curFrom) ? curFrom : ALL_MONTHS[0];
     toSel.value   = ALL_MONTHS.includes(curTo)   ? curTo   : ALL_MONTHS[ALL_MONTHS.length-1];
+    // Support ?from=YYYY-MM&to=YYYY-MM in the URL (used by the LINE bot to request a
+    // screenshot of a specific month range) — only apply once on first load, so it
+    // doesn't fight with the user's own filter choices on later auto-refreshes.
+    if(!urlParamsApplied){
+      urlParamsApplied = true;
+      const params = new URLSearchParams(window.location.search);
+      const pFrom = params.get('from');
+      const pTo   = params.get('to');
+      if(pFrom && ALL_MONTHS.includes(pFrom)) fromSel.value = pFrom;
+      if(pTo && ALL_MONTHS.includes(pTo))     toSel.value   = pTo;
+    }
     const navSub = document.querySelector('.nav-sub');
     if(navSub) navSub.textContent = `สถานีตำรวจภูธรบางบ่อ · ${MONTH_LABELS[ALL_MONTHS[0]]} – ${MONTH_LABELS[ALL_MONTHS[ALL_MONTHS.length-1]]}`;
     const now = new Date();
