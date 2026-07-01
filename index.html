@@ -405,12 +405,17 @@ function countBy(arr, fn){
 // Bucket into a small set of canonical categories before counting.
 function bucketModel(model){
   const m = model || '';
-  if(m.includes('เวฟ'))     return 'เวฟ';
+  if(m.includes('เวฟ'))        return 'เวฟ';
   if(m.toLowerCase().includes('pcx')) return 'PCX';
-  if(m.includes('ดรีม'))    return 'ดรีม';
-  if(m.includes('ยามาฮ่า')) return 'ยามาฮ่า';
-  if(m.includes('โซนิค'))   return 'โซนิค';
-  if(m.includes('คลิก'))    return 'คลิก';
+  if(m.includes('ดรีม'))       return 'ดรีม';
+  if(m.includes('ยามาฮ่า'))    return 'ยามาฮ่า';
+  if(m.includes('โซนิค'))      return 'โซนิค';
+  if(m.includes('คลิก'))       return 'คลิก';
+  if(m.includes('ลีด'))        return 'ลีด';
+  if(m.includes('เวสป้า') || m.toLowerCase().includes('vespa')) return 'เวสป้า';
+  if(m.includes('สกู๊ปปี้') || m.includes('สกูปปี้')) return 'สกู๊ปปี้';
+  if(m.includes('ซูเปอร์คัฟ')) return 'ซูเปอร์คัฟ';
+  if(m.toLowerCase().includes('giorno')) return 'Giorno';
   return 'อื่นๆ';
 }
 function modelBadge(m){
@@ -453,7 +458,9 @@ function render(data){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y} เหตุ`}}},scales:{x:{grid:{display:false},ticks:{color:TC,font:{size:9},maxRotation:45,autoSkip:false}},y:{grid:{color:GC},ticks:{color:TC,font:{size:10},stepSize:1},min:0}}}
   });
   // Model chart — custom HTML
-  const topModels = topN(modelC, 8);
+  // topN raised from 8 → 12 so newly-split-out categories (ลีด, เวสป้า, สกู๊ปปี้, ซูเปอร์คัฟ,
+  // Giorno) don't get pushed out of the list now that they're no longer merged into "อื่นๆ"
+  const topModels = topN(modelC, 12);
   const MODEL_COLORS = [
     {color:'#ef4444',bg:'#fee2e2'},
     {color:'#f97316',bg:'#ffedd5'},
@@ -462,6 +469,10 @@ function render(data){
     {color:'#10b981',bg:'#d1fae5'},
     {color:'#f59e0b',bg:'#fef3c7'},
     {color:'#06b6d4',bg:'#cffafe'},
+    {color:'#ec4899',bg:'#fce7f3'},
+    {color:'#84cc16',bg:'#ecfccb'},
+    {color:'#6366f1',bg:'#e0e7ff'},
+    {color:'#14b8a6',bg:'#ccfbf1'},
     {color:'#64748b',bg:'#f1f5f9'},
   ];
   const modelMax = topModels[0]?topModels[0][1]:1;
