@@ -98,7 +98,7 @@ td:first-child{color:#94a3b8;font-size:14px;width:36px}
 <div class="controls">
   <div class="ctrl-group">
     <span class="ctrl-label">🔍 ค้นหา</span>
-    <input type="text" id="searchInput" placeholder="ค้นหา รุ่นรถ / สถานที่ / ผู้เสียหาย...">
+    <input type="text" id="searchInput" placeholder="ค้นหา รุ่นรถ / เลขทะเบียน / สถานที่ / ผู้เสียหาย...">
   </div>
   <div class="ctrl-group">
     <span class="ctrl-label">📅 ตั้งแต่</span>
@@ -261,6 +261,13 @@ function extractModel(cell){
   return model || firstLine || 'ไม่ระบุรุ่น';
 }
 
+function extractPlate(cell){
+  // everything after the first line is usually the plate number + province
+  // (e.g. "ฮอนด้า โซนิค สีเหลือง\nปรค 765 กทม." -> "ปรค 765 กทม.")
+  const lines = (cell||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  return lines.length > 1 ? lines.slice(1).join(' ').trim() : '';
+}
+
 function extractTimeslot(dateRaw){
   const m = (dateRaw||'').match(/(\d{1,2})[.:](\d{2})\s*น/);
   if(!m) return 'ไม่ระบุ';
@@ -304,11 +311,12 @@ function parseSheetRows(gvizResponse){
     const month = `${westYear}-${String(monthNum).padStart(2,'0')}`;
     const date_raw = cleanText(row[1]);
     const model    = extractModel(row[2] || '');
+    const plate    = extractPlate(row[2] || '');
     const location = cleanText(row[3]);
     const victim   = cleanText(row[4]);
     id++;
     out.push({
-      id, month_th: monthRaw, month, date_raw, model, location, victim,
+      id, month_th: monthRaw, month, date_raw, model, plate, location, victim,
       timeslot: extractTimeslot(date_raw),
       tambon: extractTambon(location)
     });
@@ -645,7 +653,7 @@ function render(data){
       <td>${r.id}</td>
       <td style="white-space:nowrap;font-size:12px">${r.month_th}</td>
       <td style="font-size:12px;max-width:200px">${r.date_raw}</td>
-      <td>${modelBadge(r.model)}</td>
+      <td>${modelBadge(r.model)}${r.plate?`<br><span style="font-size:12px;color:#94a3b8;margin-top:3px;display:inline-block">🔖 ${r.plate}</span>`:''}</td>
       <td><div class="loc-text" title="${r.location}">${r.location}</div></td>
       <td>${(()=>{const m=r.victim.match(/(\d[\d\-]+\d)/);const phone=m?m[1]:'';const name=r.victim.replace(phone,'').trim();return `<span style="font-size:15px;color:#334155">${name}</span>${phone?`<br><span style="font-size:13px;color:#3b82f6">📞 ${phone}</span>`:''}`})()}</td>
       <td style="font-size:14px;white-space:nowrap;color:#64748b">${r.timeslot}</td>
@@ -661,6 +669,7 @@ function getFiltered(){
     if(tb && r.tambon !== tb) return false;
     if(q && !(
       r.model.toLowerCase().includes(q) ||
+      (r.plate||'').toLowerCase().includes(q) ||
       r.location.toLowerCase().includes(q) ||
       r.victim.toLowerCase().includes(q) ||
       r.date_raw.toLowerCase().includes(q)
