@@ -110,7 +110,8 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 .fs-card.pseudo-full{position:fixed;inset:0;z-index:1000}
 .fs-card:fullscreen .fs-sub,.fs-card.pseudo-full .fs-sub{display:inline}
 .fs-card:fullscreen .card-title,.fs-card.pseudo-full .card-title{font-size:18px}
-#panel-heat .fs-card:fullscreen #theftMap,#panel-heat .fs-card.pseudo-full #theftMap{flex:1;height:auto;min-height:300px}
+.fs-card:fullscreen .map-wrap,.fs-card.pseudo-full .map-wrap{flex:1;min-height:300px}
+#panel-heat .fs-card:fullscreen #theftMap,#panel-heat .fs-card.pseudo-full #theftMap{height:100%;min-height:300px}
 .fs-card:fullscreen .hm-wrap,.fs-card.pseudo-full .hm-wrap{flex:1;display:flex}
 .fs-card:fullscreen .hm,.fs-card.pseudo-full .hm{flex:1;grid-template-rows:auto repeat(7,1fr);gap:5px}
 .fs-card:fullscreen .hm-c,.fs-card.pseudo-full .hm-c{height:auto;min-height:44px;font-size:clamp(14px,1.6vw,24px)}
@@ -120,6 +121,30 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 /* Heat Map tab: the map takes most of the screen height */
 #panel-heat #theftMap{height:calc(100vh - 300px);min-height:520px}
 @media (max-width:700px){ #panel-heat #theftMap{height:70vh;min-height:380px} }
+/* MAP + HOTSPOT LIST */
+.map-wrap{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px}
+.hot-side{display:flex;flex-direction:column;min-height:0;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--surface2)}
+.hot-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px}
+.hot-list{list-style:none;flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.hot-item{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;background:var(--surface);border:1px solid var(--border);cursor:pointer;text-align:left;width:100%;font-family:'Prompt',sans-serif;color:var(--text)}
+.hot-item:hover{border-color:#ef4444}
+.hot-item:focus-visible{outline:3px solid #3b82f6;outline-offset:1px}
+.hot-rank{flex-shrink:0;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px}
+.hot-body{min-width:0;flex:1}
+.hot-name{font-size:13px;font-weight:600;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.hot-meta{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+.hot-count{flex-shrink:0;font-size:18px;font-weight:700;color:#ef4444;line-height:1}
+.hot-count small{display:block;font-size:10px;font-weight:500;color:var(--faint);text-align:right}
+.hot-empty{font-size:13px;color:var(--faint);padding:10px 2px}
+.hot-foot{font-size:11px;color:var(--faint);margin-top:8px}
+@media (max-width:900px){ .map-wrap{grid-template-columns:1fr} .hot-list{max-height:none} }
+/* TIMELAPSE BAR */
+.tl-bar{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.tl-bar input[type=range]{flex:1;min-width:160px;accent-color:#ef4444}
+.tl-label{font-size:14px;font-weight:700;color:var(--text);min-width:150px}
+.tl-label.off{color:var(--faint);font-weight:500}
+.tl-play{min-width:78px}
+.fs-card:fullscreen .tl-label,.fs-card.pseudo-full .tl-label{font-size:20px}
 /* PAGE TABS */
 .tabbar{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border)}
 .tab{border:none;background:transparent;font-family:'Prompt',sans-serif;font-size:15px;font-weight:600;color:var(--muted);padding:10px 18px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
@@ -137,9 +162,20 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 .mini-btn:hover{color:var(--text)}
 /* MAP */
 #theftMap{height:460px;border-radius:10px;overflow:hidden;background:var(--track);z-index:0}
-:root[data-theme="dark"] #theftMap .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
+:root[data-theme="dark"] #theftMap:not(.sat) .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
+/* Google-Maps-style base map switch: a thumbnail of the other map with its name */
+.layer-btn{width:84px;height:84px;padding:0;border:3px solid #fff;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.35);position:relative;overflow:hidden;font-family:'Prompt',sans-serif}
+.layer-btn span{position:absolute;left:0;right:0;bottom:0;padding:16px 6px 5px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;font-size:12px;font-weight:600;text-align:left;white-space:nowrap}
+.layer-btn:hover{box-shadow:0 2px 10px rgba(0,0,0,.5)}
+.layer-btn:focus-visible{outline:3px solid #3b82f6;outline-offset:1px}
+@media (max-width:700px){ .layer-btn{width:66px;height:66px} }
 @media print{ #theftMap .leaflet-tile-pane{filter:none !important} }
 .leaflet-container{font-family:'Prompt',sans-serif}
+.zone-label{background:rgba(255,255,255,.88);border:1px solid rgba(0,0,0,.15);border-radius:8px;box-shadow:none;color:#0f172a;font-weight:700;font-size:12px;text-align:center;padding:3px 8px;line-height:1.35}
+.zone-label:before{display:none}
+:root[data-theme="dark"] .zone-label{background:rgba(15,23,42,.85);color:#f8fafc;border-color:rgba(255,255,255,.15)}
+.leaflet-heatmap-layer{pointer-events:none}
+.mini-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .cluster-label{background:transparent;border:none;box-shadow:none;color:#fff;font-weight:700;font-size:12px;text-shadow:0 0 3px rgba(0,0,0,.6)}
 .map-legend{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--faint);margin-top:8px;flex-wrap:wrap}
 .map-legend .grad{width:120px;height:8px;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#22c55e,#facc15,#f97316,#ef4444)}
@@ -231,6 +267,10 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
       <option value="ต.บางเพรียง">ต.บางเพรียง</option>
       <option value="อื่นๆ">อื่นๆ</option>
     </select>
+  </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">เขตตรวจ</span>
+    <select id="zoneFilter"><option value="">ทั้งหมด</option></select>
   </div>
   <div class="ctrl-group">
     <span class="ctrl-label">วัน</span>
@@ -332,11 +372,29 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
             <button data-mode="heat" class="on">🔥 Heat Map</button>
             <button data-mode="cluster">⭕ จำนวนต่อจุด</button>
           </div>
-          <button class="mini-btn" id="mapFitBtn" title="ซูมให้เห็นทุกจุด">⤢ ทุกจุด</button>
+          <button class="mini-btn on" id="zoneToggleBtn" title="แสดง/ซ่อนเส้นเขตตรวจ">🗺️ เขตตรวจ</button>
+          <button class="mini-btn" id="mapFitBtn" title="ซูมให้เห็นทั้งพื้นที่">⤢ ทุกจุด</button>
           <button class="mini-btn fs-btn" data-target="mapCard" title="แสดงเต็มจอ (Esc เพื่อออก)">⛶ เต็มจอ</button>
         </div>
       </div>
-      <div id="theftMap"></div>
+      <div class="map-wrap">
+        <div id="theftMap"></div>
+        <aside class="hot-side" aria-label="5 อันดับจุดเกิดเหตุมากที่สุด">
+          <div class="hot-title">🔥 Top 5</div>
+          <ol id="hotList" class="hot-list"></ol>
+          <div class="hot-foot">คลิกรายการเพื่อซูมไปที่จุดนั้น · จุดรวมรัศมี ~200 ม.</div>
+        </aside>
+      </div>
+      <div class="tl-bar">
+        <button class="mini-btn tl-play" id="tlPlay" title="เล่นทีละเดือน">▶ เล่น</button>
+        <input type="range" id="tlRange" min="0" max="0" value="0" aria-label="เลือกเดือน">
+        <span class="tl-label" id="tlLabel">ทุกเดือน</span>
+        <select id="tlWindow" title="จำนวนเดือนที่แสดงในแต่ละเฟรม">
+          <option value="1">ทีละเดือน</option>
+          <option value="3">สะสม 3 เดือน</option>
+        </select>
+        <button class="mini-btn" id="tlAll" title="ออกจาก Timelapse แสดงทุกเดือน">ทั้งหมด</button>
+      </div>
       <div class="map-legend">
         <span>น้อย</span><span class="grad"></span><span>มาก</span>
         <span id="mapNote" style="margin-left:auto"></span>
@@ -393,6 +451,31 @@ const THAI_MONTHS_NODOT = THAI_MONTHS.map(m=>m.replace(/\./g,''));
 // Day-of-week labels in Monday-first order (index = (Date.getDay()+6)%7)
 const DOW_LABELS = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
 const DOW_SHORT  = ['จ.','อ.','พ.','พฤ.','ศ.','ส.','อา.'];
+
+// ===== เขตตรวจ (patrol zones) =====
+// Copied from the Google My Maps "สภ.บางบ่อ แบ่งเขต": 2 zone polygons, the traffic-police
+// booth and 4 light signs. To change a boundary: edit it in My Maps, then ask to re-copy it here.
+const ZONES = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{"name":"เขตตรวจที่ 2","color":"#F48FB1","kind":"zone"},"geometry":{"type":"Polygon","coordinates":[[[100.87911,13.659442],[100.872501,13.663487],[100.871128,13.661568],[100.866235,13.66407],[100.865377,13.656731],[100.865591,13.655438],[100.862308,13.657753],[100.861128,13.656522],[100.859884,13.655647],[100.85973,13.65526],[100.859328,13.655185],[100.858961,13.655105],[100.85874,13.654786],[100.857181,13.65139],[100.853873,13.650974],[100.852453,13.642216],[100.851716,13.638839],[100.846852,13.640134],[100.844762,13.635216],[100.843586,13.632136],[100.842265,13.632233],[100.841511,13.632093],[100.841204,13.630479],[100.840576,13.629944],[100.839658,13.630837],[100.839082,13.630688],[100.839134,13.629721],[100.838978,13.628122],[100.838786,13.626899],[100.837716,13.625786],[100.838407,13.624062],[100.83701,13.62284],[100.836,13.622119],[100.836382,13.620343],[100.838004,13.617541],[100.840476,13.617109],[100.84247,13.614799],[100.839884,13.610648],[100.840035,13.610018],[100.841024,13.607092],[100.842057,13.605159],[100.841807,13.601794],[100.84019,13.60007],[100.838715,13.597289],[100.836538,13.595647],[100.835445,13.593949],[100.835148,13.592389],[100.834184,13.58917],[100.838713,13.587953],[100.845368,13.586604],[100.857476,13.584073],[100.863109,13.583057],[100.867133,13.58227],[100.867295,13.581108],[100.86674,13.577379],[100.868942,13.572971],[100.868712,13.572],[100.867993,13.571809],[100.867327,13.571927],[100.866682,13.571413],[100.865994,13.571636],[100.865733,13.571081],[100.865811,13.570305],[100.864939,13.570339],[100.864223,13.570573],[100.863393,13.569789],[100.862046,13.569992],[100.86167,13.570563],[100.86169,13.569871],[100.860185,13.568569],[100.860055,13.561281],[100.858809,13.557622],[100.857862,13.555184],[100.857899,13.554023],[100.861621,13.55241],[100.865374,13.550935],[100.865326,13.550156],[100.863686,13.547513],[100.86238,13.546648],[100.861197,13.547021],[100.860464,13.546807],[100.859087,13.546343],[100.858183,13.546337],[100.857279,13.545998],[100.856279,13.544891],[100.855354,13.544055],[100.855071,13.543385],[100.859007,13.542541],[100.863701,13.541856],[100.865451,13.54449],[100.868866,13.547172],[100.869478,13.548303],[100.874823,13.547978],[100.875727,13.54758],[100.879082,13.546866],[100.879266,13.548359],[100.880838,13.549508],[100.883724,13.552141],[100.884603,13.554235],[100.885846,13.557172],[100.886874,13.55779],[100.888408,13.557842],[100.88916,13.558112],[100.889462,13.558902],[100.888951,13.563069],[100.889558,13.564646],[100.887426,13.56663],[100.885936,13.567975],[100.888277,13.570833],[100.8909,13.573961],[100.891339,13.576964],[100.892665,13.581215],[100.894244,13.583795],[100.895686,13.585535],[100.896338,13.587345],[100.897042,13.588546],[100.901539,13.584941],[100.90032,13.589828],[100.901057,13.593511],[100.900644,13.593869],[100.900332,13.595505],[100.900652,13.600944],[100.900176,13.601394],[100.899046,13.604364],[100.897644,13.606298],[100.893467,13.610418],[100.892237,13.613151],[100.892723,13.614325],[100.893781,13.614836],[100.895038,13.616192],[100.89678,13.616903],[100.898635,13.618909],[100.898824,13.619667],[100.89903,13.621267],[100.905607,13.628751],[100.905973,13.629371],[100.906018,13.630945],[100.906451,13.631506],[100.908269,13.633001],[100.908816,13.634406],[100.910681,13.636549],[100.909776,13.637498],[100.907194,13.638896],[100.905549,13.639107],[100.903117,13.638276],[100.901257,13.638451],[100.89708,13.639733],[100.897138,13.640796],[100.891875,13.644465],[100.892365,13.645127],[100.892746,13.646118],[100.892736,13.647515],[100.892371,13.649391],[100.890783,13.653895],[100.881942,13.657732],[100.87911,13.659442]]]}},{"type":"Feature","properties":{"name":"เขตตรวจที่ 1","color":"#FFD600","kind":"zone"},"geometry":{"type":"Polygon","coordinates":[[[100.833875,13.539078],[100.834431,13.542554],[100.834623,13.543625],[100.838882,13.541991],[100.839467,13.543197],[100.84302,13.544301],[100.843982,13.545531],[100.845563,13.544002],[100.849143,13.542717],[100.851685,13.542178],[100.854736,13.543307],[100.855082,13.543516],[100.855458,13.544299],[100.856349,13.545039],[100.857304,13.546156],[100.858082,13.546463],[100.859201,13.546513],[100.860628,13.546995],[100.861192,13.547194],[100.862439,13.546814],[100.863492,13.5475],[100.86521,13.55023],[100.865232,13.550816],[100.862518,13.551965],[100.857701,13.553989],[100.857702,13.555095],[100.859976,13.5613],[100.8601,13.568463],[100.861547,13.569868],[100.861605,13.570737],[100.862199,13.570224],[100.863376,13.569947],[100.8642,13.570705],[100.865664,13.570479],[100.865645,13.571368],[100.865893,13.571812],[100.866652,13.571621],[100.867268,13.572005],[100.86809,13.571946],[100.868631,13.572105],[100.868815,13.572873],[100.866718,13.57724],[100.867204,13.581155],[100.866997,13.582153],[100.863331,13.582903],[100.857861,13.583882],[100.852594,13.584998],[100.847117,13.586139],[100.840988,13.587315],[100.834285,13.589017],[100.833337,13.586781],[100.832259,13.584128],[100.832197,13.580678],[100.832338,13.579015],[100.831236,13.578933],[100.830198,13.577913],[100.829707,13.577331],[100.829526,13.576977],[100.827518,13.575647],[100.825633,13.574941],[100.823147,13.575401],[100.8226,13.575047],[100.822268,13.574588],[100.822043,13.574067],[100.821768,13.573282],[100.821922,13.572122],[100.823433,13.57147],[100.825187,13.571377],[100.826334,13.571671],[100.827567,13.571945],[100.827672,13.571241],[100.827804,13.569769],[100.827873,13.568818],[100.827746,13.568358],[100.827232,13.568358],[100.827169,13.56792],[100.826943,13.567899],[100.826552,13.566637],[100.826118,13.565375],[100.82481,13.561338],[100.824317,13.560055],[100.824083,13.559428],[100.824134,13.559278],[100.824035,13.558849],[100.824001,13.558567],[100.823934,13.558317],[100.823772,13.557981],[100.823805,13.558198],[100.823643,13.557647],[100.823475,13.557506],[100.823258,13.557219],[100.822925,13.556833],[100.822678,13.556572],[100.822458,13.556331],[100.822238,13.556133],[100.821685,13.555538],[100.819995,13.553358],[100.818817,13.55074],[100.821797,13.549259],[100.823811,13.548112],[100.823462,13.54732],[100.82345,13.54632],[100.823813,13.54578],[100.824581,13.544617],[100.824573,13.544085],[100.824337,13.543345],[100.82408,13.542802],[100.82365,13.542489],[100.824562,13.541248],[100.833875,13.539078]]]}},{"type":"Feature","properties":{"name":"ตู้ยามแยกบางบ่อ (จร.)","color":"#0288D1","kind":"booth"},"geometry":{"type":"Point","coordinates":[100.837628,13.587454]}},{"type":"Feature","properties":{"name":"ป้ายไฟ แยกบางบ่อ","color":"#C2185B","kind":"sign"},"geometry":{"type":"Point","coordinates":[100.837535,13.587266]}},{"type":"Feature","properties":{"name":"ป้ายไฟ แยกบายพาส","color":"#C2185B","kind":"sign"},"geometry":{"type":"Point","coordinates":[100.836559,13.584513]}},{"type":"Feature","properties":{"name":"ป้ายไฟ แยกกสิกรไทย","color":"#C2185B","kind":"sign"},"geometry":{"type":"Point","coordinates":[100.837302,13.572384]}},{"type":"Feature","properties":{"name":"ป้ายไฟ ปากซอยเก้าแสน","color":"#C2185B","kind":"sign"},"geometry":{"type":"Point","coordinates":[100.837239,13.561423]}}]};
+const ZONE_POLYS = ZONES.features.filter(f=>f.properties.kind==='zone')
+  .sort((a,b)=>a.properties.name.localeCompare(b.properties.name,'th'));
+function pointInRing(x, y, ring){ // ray casting; ring = [[lng,lat],...]
+  let inside = false;
+  for(let i=0, j=ring.length-1; i<ring.length; j=i++){
+    const [xi,yi] = ring[i], [xj,yj] = ring[j];
+    if(((yi>y) !== (yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function zoneOf(coord){
+  if(!coord) return 'ไม่มีพิกัด';
+  const f = ZONE_POLYS.find(f=>pointInRing(coord.lng, coord.lat, f.geometry.coordinates[0]));
+  return f ? f.properties.name : 'นอกเขต';
+}
+(function(){
+  const sel = document.getElementById('zoneFilter');
+  [...ZONE_POLYS.map(f=>f.properties.name), 'นอกเขต', 'ไม่มีพิกัด']
+    .forEach(z=>{ sel.innerHTML += `<option value="${z}">${z}</option>`; });
+})();
 const SHEET_ID = '1w6jiYrOfr7k8MlJg_i-3rTSGjd8Dh1LtE6IsUEf_xic';
 const SHEET_GID_MAIN = '0';            // raw incident records
 const SHEET_GID_LOCATIONS = '1743762383'; // curated "location -> count" summary tab
@@ -599,6 +682,7 @@ function parseSheetRows(gvizResponse){
       range: extractTimeRange(date_raw, start)
     };
     rec.cells = timeCells(rec);
+    rec.zone = zoneOf(coord);
     out.push(rec);
   }
   return out;
@@ -815,7 +899,7 @@ function render(data){
   // Only fall back to grouping raw records live once the user narrows the view with a filter,
   // since the curated tab isn't itself filterable by date range / ตำบล / search.
   const noFiltersActive = !document.getElementById('searchInput').value.trim()
-    && !document.getElementById('tambonFilter').value && !dowSel.value && !cellFilter && !mapFilter
+    && !document.getElementById('tambonFilter').value && !document.getElementById('zoneFilter').value && !dowSel.value && !cellFilter && !mapFilter
     && fromSel.value === ALL_MONTHS[0] && toSel.value === ALL_MONTHS[ALL_MONTHS.length-1];
   const topLoc = (noFiltersActive && TOP_LOCATIONS.length)
     ? TOP_LOCATIONS.slice(0,6).map(r=>[r.location, r.count])
@@ -977,49 +1061,216 @@ document.querySelectorAll('#hmModeSeg button').forEach(btn=>btn.addEventListener
 // ~110 m for the heat layer, ~220 m for the count circles.
 const HEAT_GRID = 0.001, CLUSTER_GRID = 0.002;
 const snap = (v, g) => Math.round(v/g)*g;
+let zoneLayer = null, zoneBounds = null, zonePolyLayers = {}, showZones = true;
 let theftMap = null, heatLayer = null, clusterLayer = null, mapMode = 'heat', mapFitted = false, lastMapBounds = null;
 function initMap(){
   if(theftMap || typeof L === 'undefined') return !!theftMap;
-  theftMap = L.map('theftMap', {maxZoom:16, minZoom:10, scrollWheelZoom:false}).setView([13.585, 100.85], 13);
+  theftMap = L.map('theftMap', {maxZoom:16, minZoom:10, zoomSnap:0.25, zoomDelta:0.5, scrollWheelZoom:false}).setView([13.585, 100.85], 13);
   updateMapTiles();
   heatLayer = L.heatLayer([], {radius:28, blur:22, maxZoom:15, minOpacity:0.35,
     gradient:{0.2:'#3b82f6',0.4:'#22c55e',0.6:'#facc15',0.8:'#f97316',1:'#ef4444'}});
   clusterLayer = L.layerGroup();
+  // Patrol zones drawn under the heat layer, styled like the My Maps original
+  zoneLayer = L.layerGroup();
+  ZONES.features.forEach(f=>{
+    const p = f.properties;
+    if(p.kind === 'zone'){
+      const poly = L.polygon(f.geometry.coordinates[0].map(([x,y])=>[y,x]),
+        {color:p.color, weight:3, opacity:0.95, fillColor:p.color, fillOpacity:0.18, interactive:false});
+      poly.bindTooltip(p.name, {permanent:true, direction:'center', className:'zone-label'});
+      zonePolyLayers[p.name] = poly;
+      zoneLayer.addLayer(poly);
+    } else {
+      const [x,y] = f.geometry.coordinates;
+      zoneLayer.addLayer(L.circleMarker([y,x], {radius:6, color:'#fff', weight:2, fillColor:p.color, fillOpacity:1})
+        .bindTooltip((p.kind==='booth'?'🚔 ':'💡 ') + p.name, {direction:'top'}));
+    }
+  });
+  zoneLayer.addTo(theftMap);
+  zoneBounds = L.latLngBounds(ZONE_POLYS.flatMap(f=>f.geometry.coordinates[0].map(([x,y])=>[y,x])));
   heatLayer.addTo(theftMap);
   theftMap.on('focus', ()=>theftMap.scrollWheelZoom.enable());
   theftMap.on('blur',  ()=>theftMap.scrollWheelZoom.disable());
   return true;
 }
-// Base map. Tested from amarax23.github.io: OpenStreetMap tiles load fine (Thai labels);
-// CARTO returns "API KEY REQUIRED". OSM refuses requests with no website address, which
-// is what a file opened straight from disk sends (403 "Access blocked"), so a local
-// preview falls back to Esri's street map instead. Dark mode inverts the tiles via CSS.
-let tileLayer = null;
+// Base maps (all tested from amarax23.github.io):
+//  - street: OpenStreetMap (Thai labels). OSM refuses requests with no website address,
+//    which is what a file opened straight from disk sends (403), so a local preview uses
+//    Esri's street map instead. CARTO is not used: it answers "API KEY REQUIRED".
+//  - sat: Esri World Imagery + Esri road and place-name overlays (hybrid, like Google).
+// Dark mode inverts only the street map (via CSS); satellite photos are shown as they are.
+const LOCAL_FILE = location.protocol === 'file:';
+const BASEMAPS = {
+  street: {
+    label: 'แผนที่',
+    thumb: LOCAL_FILE ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/14/7568/12782'
+                      : 'https://tile.openstreetmap.org/14/12782/7568.png',
+    make: ()=> LOCAL_FILE
+      ? L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {maxZoom:16, attribution:'Tiles &copy; Esri'})
+      : L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:16, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+  },
+  sat: {
+    label: 'ดาวเทียม',
+    thumb: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/14/7568/12782',
+    make: ()=> L.layerGroup([
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:16, attribution:'Imagery &copy; Esri, Maxar, Earthstar Geographics'}),
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {maxZoom:16, opacity:0.8}),
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {maxZoom:16})
+    ])
+  }
+};
+let tileLayer = null, baseMode = 'street', layerBtn = null;
+try{ if(localStorage.getItem('bangbo-basemap') === 'sat') baseMode = 'sat'; }catch(e){}
+function setBaseMap(mode){
+  baseMode = mode;
+  try{ localStorage.setItem('bangbo-basemap', mode); }catch(e){}
+  if(tileLayer){ theftMap.removeLayer(tileLayer); tileLayer = null; }
+  updateMapTiles();
+}
 function updateMapTiles(){
   if(!theftMap || tileLayer) return;
-  const local = location.protocol === 'file:';
-  tileLayer = local
-    ? L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom:16, attribution:'Tiles &copy; Esri'})
-    : L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom:16, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
-  tileLayer.addTo(theftMap);
-  tileLayer.bringToBack();
+  // tiles live in Leaflet's tile pane, always under the zone lines and heat layer
+  tileLayer = BASEMAPS[baseMode].make().addTo(theftMap);
+  document.getElementById('theftMap').classList.toggle('sat', baseMode === 'sat');
+  // The "เลเยอร์" button previews the OTHER base map, like Google Maps
+  if(!layerBtn){
+    const Ctl = L.Control.extend({ options:{position:'bottomleft'}, onAdd(){
+      const b = L.DomUtil.create('button', 'layer-btn');
+      b.type = 'button';
+      L.DomEvent.disableClickPropagation(b);
+      L.DomEvent.on(b, 'click', ()=>setBaseMap(baseMode === 'sat' ? 'street' : 'sat'));
+      return b;
+    }});
+    layerBtn = new Ctl().addTo(theftMap).getContainer();
+  }
+  const other = baseMode === 'sat' ? 'street' : 'sat';
+  layerBtn.style.backgroundImage = `url("${BASEMAPS[other].thumb}")`;
+  layerBtn.title = `เปลี่ยนเป็น${BASEMAPS[other].label}`;
+  layerBtn.setAttribute('aria-label', layerBtn.title);
+  const icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><path d="M12 2 1 8l11 6 11-6-11-6zm0 15.2L3.2 12.4 1 13.6 12 19.6l11-6-2.2-1.2L12 17.2zm0 4L3.2 16.4 1 17.6l11 6 11-6-2.2-1.2L12 21.2z"/></svg>';
+  layerBtn.innerHTML = `<span>${icon}${BASEMAPS[other].label}</span>`;
 }
 function mapKey(r){ return `${snap(r.coord.lat,CLUSTER_GRID).toFixed(3)},${snap(r.coord.lng,CLUSTER_GRID).toFixed(3)}`; }
-function renderMap(data){
+function heatAggregate(pts){
+  const agg = new Map();
+  pts.forEach(r=>{
+    const k = `${snap(r.coord.lat,HEAT_GRID).toFixed(4)},${snap(r.coord.lng,HEAT_GRID).toFixed(4)}`;
+    agg.set(k, (agg.get(k)||0) + r.coordW);
+  });
+  return agg;
+}
+function clusterAggregate(pts){
+  const agg = new Map();
+  pts.forEach(r=>{ const k = mapKey(r); if(!agg.has(k)) agg.set(k, []); agg.get(k).push(r); });
+  return agg;
+}
+
+// ===== Timelapse =====
+// The map steps through the months of the selected date range. Colour scales are locked
+// to the busiest frame so a quiet month really looks quiet.
+let tlIndex = null, tlTimer = null;
+const tlRange = document.getElementById('tlRange'), tlWindowSel = document.getElementById('tlWindow');
+// Every calendar month in the selected range, including months with no incidents
+function tlMonths(){
+  const out = []; if(!fromSel.value || !toSel.value) return out;
+  let [y, m] = fromSel.value.split('-').map(Number);
+  const [ty, tm] = toSel.value.split('-').map(Number);
+  while(y < ty || (y === ty && m <= tm)){
+    out.push(`${y}-${String(m).padStart(2,'0')}`);
+    if(++m > 12){ m = 1; y++; }
+  }
+  return out;
+}
+function tlFrameMonths(months, i){ const w = parseInt(tlWindowSel.value,10)||1; return months.slice(Math.max(0, i-w+1), i+1); }
+function tlStop(){ if(tlTimer){ clearInterval(tlTimer); tlTimer = null; } document.getElementById('tlPlay').textContent = '▶ เล่น'; }
+function tlRedraw(){ renderMap(getFiltered({skipMap:true})); updateFsSub(); }
+function tlPlay(){
+  const months = tlMonths(); if(!months.length) return;
+  if(tlTimer){ tlStop(); return; }
+  if(tlIndex === null || tlIndex >= months.length-1) tlIndex = 0;
+  document.getElementById('tlPlay').textContent = '⏸ หยุด';
+  tlRedraw();
+  tlTimer = setInterval(()=>{
+    if(tlIndex >= tlMonths().length-1){ tlStop(); return; }
+    tlIndex++; tlRedraw();
+  }, 1300);
+}
+document.getElementById('tlPlay').addEventListener('click', tlPlay);
+tlRange.addEventListener('input', ()=>{ tlStop(); tlIndex = parseInt(tlRange.value,10); tlRedraw(); });
+tlWindowSel.addEventListener('change', ()=>{ if(tlIndex!==null) tlRedraw(); });
+document.getElementById('tlAll').addEventListener('click', ()=>{ tlStop(); tlIndex = null; tlRedraw(); });
+
+// ===== Top 5 hotspots =====
+const SLOT_SHORT = {'เย็น-ดึก (18-24น.)':'เย็น–ดึก 18–24 น.','กลางคืน (00-06น.)':'กลางคืน 00–06 น.','เช้า (06-12น.)':'เช้า 06–12 น.','บ่าย (12-18น.)':'บ่าย 12–18 น.'};
+// Place name for the list: drop district/province and any house numbers (this list is public)
+function shortPlace(s){
+  return (s||'')
+    .replace(/(บ้านพัก|บ้านเช่า|ห้องเช่า)?\s*(บ้าน)?เลขที่\s*[\d\/\-]+/g, '$1')
+    .replace(/^\s*[\d\/\-]+\s+/, '')
+    .replace(/\s*(อ\.|อำเภอ)\s*บางบ่อ.*$/, '').replace(/\s*(จ\.|จังหวัด)\s*สมุทรปราการ.*$/, '')
+    .replace(/\s+/g,' ').trim() || 'ไม่ระบุชื่อสถานที่';
+}
+function topOf(arr){ const c = {}; arr.forEach(v=>{ if(v!=null && v!=='') c[v]=(c[v]||0)+1; }); return Object.entries(c).sort((a,b)=>b[1]-a[1])[0] || null; }
+let hotPulse = null;
+function renderHotspots(clusters){
+  const el = document.getElementById('hotList');
+  const top = [...clusters].sort((a,b)=>b[1].length-a[1].length || a[0].localeCompare(b[0])).slice(0,5);
+  if(!top.length){ el.innerHTML = '<li class="hot-empty">ไม่มีเหตุที่มีพิกัดในช่วงนี้</li>'; return; }
+  const COLORS = ['#ef4444','#f97316','#f59e0b','#eab308','#84cc16'];
+  el.innerHTML = top.map(([k, rows], i)=>{
+    const name = shortPlace((topOf(rows.map(r=>r.location))||[''])[0]);
+    const slot = topOf(rows.map(r=>r.timeslot).filter(t=>t!=='ไม่ระบุ'));
+    const dow  = topOf(rows.map(r=>r.dow));
+    const zone = topOf(rows.map(r=>r.zone));
+    const meta = [];
+    if(slot) meta.push('🕒 ' + SLOT_SHORT[slot[0]] + (rows.length>1 ? ` (${slot[1]}/${rows.length})` : ''));
+    if(dow && dow[1] >= 2) meta.push('📅 บ่อยวัน' + DOW_LABELS[dow[0]]);
+    if(zone && zone[0].startsWith('เขต')) meta.push('🗺️ ' + zone[0]);
+    return `<li><button class="hot-item" data-key="${k}" title="ซูมไปที่จุดนี้">
+      <span class="hot-rank" style="background:${COLORS[i]}">${i+1}</span>
+      <span class="hot-body"><span class="hot-name">${esc(name)}</span><span class="hot-meta">${esc(meta.join(' · '))}</span></span>
+      <span class="hot-count">${rows.length}<small>เหตุ</small></span>
+    </button></li>`;
+  }).join('');
+  el.querySelectorAll('.hot-item').forEach(b=>b.addEventListener('click', ()=>{
+    const [la, ln] = b.dataset.key.split(',').map(Number);
+    theftMap.flyTo([la, ln], 16, {duration:0.8});
+    if(hotPulse) theftMap.removeLayer(hotPulse);
+    hotPulse = L.circle([la, ln], {radius:220, color:'#ef4444', weight:3, dashArray:'6 6', fill:false, interactive:false}).addTo(theftMap);
+    setTimeout(()=>{ if(hotPulse){ theftMap.removeLayer(hotPulse); hotPulse = null; } }, 5000);
+  }));
+}
+
+function renderMap(dataAll){
   const noteEl = document.getElementById('mapNote');
   if(!initMap()){ noteEl.textContent = '⚠️ โหลดแผนที่ไม่สำเร็จ'; return; }
   updateMapTiles(); // follows light/dark mode
+  // Timelapse: limit the map to the current frame's months
+  const months = tlMonths();
+  if(tlIndex !== null && tlIndex > months.length-1) tlIndex = months.length ? months.length-1 : null;
+  tlRange.max = Math.max(0, months.length-1);
+  tlRange.value = tlIndex === null ? Math.max(0, months.length-1) : tlIndex;
+  const frame = tlIndex === null ? null : tlFrameMonths(months, tlIndex);
+  const data = frame ? dataAll.filter(r=>frame.includes(r.month)) : dataAll;
+  const tlLabel = document.getElementById('tlLabel');
+  tlLabel.classList.toggle('off', !frame);
+  tlLabel.textContent = frame
+    ? `${frame.length>1 ? monthLabel(frame[0])+' – ' : ''}${monthLabel(frame[frame.length-1])} · ${data.length} เหตุ`
+    : 'ทุกเดือน (กด ▶ เพื่อไล่ดูทีละเดือน)';
+  // Locked colour scale while in timelapse: the busiest frame sets the maximum
+  let lockedHeatMax = null, lockedClusterMax = null;
+  if(frame){
+    months.forEach((_, i)=>{
+      const fm = tlFrameMonths(months, i);
+      const fp = dataAll.filter(r=>r.coord && fm.includes(r.month));
+      lockedHeatMax    = Math.max(lockedHeatMax||1, ...heatAggregate(fp).values());
+      lockedClusterMax = Math.max(lockedClusterMax||1, ...[...clusterAggregate(fp).values()].map(a=>a.length));
+    });
+  }
   const pts = data.filter(r=>r.coord);
   // Heat layer
-  const heatAgg = new Map();
-  pts.forEach(r=>{
-    const k = `${snap(r.coord.lat,HEAT_GRID).toFixed(4)},${snap(r.coord.lng,HEAT_GRID).toFixed(4)}`;
-    heatAgg.set(k, (heatAgg.get(k)||0) + r.coordW);
-  });
-  const heatPts = [...heatAgg].map(([k,w])=>{ const [la,ln] = k.split(',').map(Number); return [la, ln, w]; });
-  const heatMax = Math.max(1, ...heatPts.map(p=>p[2]));
+  const heatPts = [...heatAggregate(pts)].map(([k,w])=>{ const [la,ln] = k.split(',').map(Number); return [la, ln, w]; });
+  const heatMax = lockedHeatMax || Math.max(1, ...heatPts.map(p=>p[2]));
   // Swap layers first: the heat layer can only redraw while it is attached to the map
   if(mapMode==='heat'){ theftMap.removeLayer(clusterLayer); if(!theftMap.hasLayer(heatLayer)) heatLayer.addTo(theftMap); }
   else{ theftMap.removeLayer(heatLayer); if(!theftMap.hasLayer(clusterLayer)) clusterLayer.addTo(theftMap); }
@@ -1028,10 +1279,10 @@ function renderMap(data){
   else heatLayer._latlngs = heatPts; // drawn when the layer is added back
   // Count circles
   clusterLayer.clearLayers();
-  const clusters = new Map();
-  pts.forEach(r=>{ const k = mapKey(r); clusters.set(k, (clusters.get(k)||0) + 1); });
-  const cMax = Math.max(1, ...clusters.values());
-  [...clusters].sort((a,b)=>a[1]-b[1]).forEach(([k,n])=>{
+  const clusters = clusterAggregate(pts);
+  const cMax = lockedClusterMax || Math.max(1, ...[...clusters.values()].map(a=>a.length));
+  [...clusters].sort((a,b)=>a[1].length-b[1].length).forEach(([k,rows])=>{
+    const n = rows.length;
     const [la,ln] = k.split(',').map(Number);
     const t = n/cMax;
     const color = t>=0.75 ? '#ef4444' : t>=0.45 ? '#f97316' : t>=0.2 ? '#facc15' : '#3b82f6';
@@ -1044,8 +1295,17 @@ function renderMap(data){
     });
     clusterLayer.addLayer(c);
   });
-  lastMapBounds = pts.length ? L.latLngBounds(pts.map(r=>[r.coord.lat, r.coord.lng])) : null;
-  if(!mapFitted && lastMapBounds && !document.getElementById('panel-heat').hidden){ theftMap.fitBounds(lastMapBounds, {padding:[30,30], maxZoom:15}); mapFitted = true; }
+  renderHotspots(clusters);
+  const allPts = dataAll.filter(r=>r.coord); // keep "ทุกจุด" framing stable during timelapse
+  lastMapBounds = allPts.length ? L.latLngBounds(allPts.map(r=>[r.coord.lat, r.coord.lng])) : null;
+  if(zoneBounds) lastMapBounds = lastMapBounds ? lastMapBounds.extend(zoneBounds) : L.latLngBounds(zoneBounds.getSouthWest(), zoneBounds.getNorthEast());
+  // Zone labels show how many incidents (in the current filter / frame) fall inside each zone
+  Object.entries(zonePolyLayers).forEach(([name, poly])=>{
+    poly.setTooltipContent(`${name}<br>${data.filter(r=>r.zone===name).length} เหตุ`);
+  });
+  if(showZones && !theftMap.hasLayer(zoneLayer)) zoneLayer.addTo(theftMap);
+  if(!showZones && theftMap.hasLayer(zoneLayer)) theftMap.removeLayer(zoneLayer);
+  if(!mapFitted && lastMapBounds && !document.getElementById('panel-heat').hidden){ theftMap.fitBounds(lastMapBounds, {padding:[20,20], maxZoom:15}); mapFitted = true; }
   const low = pts.filter(r=>r.coordW<1).length;
   noteEl.textContent = data.length
     ? `มีพิกัด ${pts.length} จาก ${data.length} เหตุ` + (low?` · จุดความแม่นยำกลาง/ต่ำ ${low} เหตุ (ถ่วงน้ำหนักน้อยลง)`:'')
@@ -1056,8 +1316,13 @@ document.querySelectorAll('#mapModeSeg button').forEach(btn=>btn.addEventListene
   document.querySelectorAll('#mapModeSeg button').forEach(b=>b.classList.toggle('on', b===btn));
   render(getFiltered());
 }));
+document.getElementById('zoneToggleBtn').addEventListener('click', e=>{
+  showZones = !showZones;
+  e.currentTarget.classList.toggle('on', showZones);
+  if(theftMap){ if(showZones) zoneLayer.addTo(theftMap); else theftMap.removeLayer(zoneLayer); }
+});
 document.getElementById('mapFitBtn').addEventListener('click', ()=>{
-  if(theftMap && lastMapBounds) theftMap.fitBounds(lastMapBounds, {padding:[30,30], maxZoom:15});
+  if(theftMap && lastMapBounds) theftMap.fitBounds(lastMapBounds, {padding:[20,20], maxZoom:15});
 });
 window.addEventListener('beforeprint', ()=>{ if(theftMap) theftMap.invalidateSize(); });
 
@@ -1189,13 +1454,13 @@ document.querySelectorAll('thead th[data-sort]').forEach(th=>{
 // ===== CSV export (filtered data, UTF-8 with BOM so Excel shows Thai correctly) =====
 function exportCSV(){
   const data = sortData(getFiltered());
-  const header = ['ลำดับ','เดือน','วันที่เริ่มเหตุ','วัน','วัน/เวลาเกิดเหตุ (ตามชีท)','รุ่นรถ','กลุ่มรุ่น','ทะเบียน','สถานที่เกิดเหตุ','ตำบล','ผู้เสียหาย','ช่วงเวลา','พิกัด','ความแม่นยำพิกัด'];
+  const header = ['ลำดับ','เดือน','วันที่เริ่มเหตุ','วัน','วัน/เวลาเกิดเหตุ (ตามชีท)','รุ่นรถ','กลุ่มรุ่น','ทะเบียน','สถานที่เกิดเหตุ','ตำบล','ผู้เสียหาย','ช่วงเวลา','พิกัด','ความแม่นยำพิกัด','เขตตรวจ'];
   const pad = x=>String(x).padStart(2,'0');
   const rows = data.map(r=>[
     r.id, r.month_th,
     r.start ? `${r.start.getFullYear()}-${pad(r.start.getMonth()+1)}-${pad(r.start.getDate())}` : '',
     r.dow!==null ? DOW_LABELS[r.dow] : '',
-    r.date_raw, r.model, bucketModel(r.model), r.plate, r.location, r.tambon, r.victim, r.timeslot, r.coordRaw, r.coordConf
+    r.date_raw, r.model, bucketModel(r.model), r.plate, r.location, r.tambon, r.victim, r.timeslot, r.coordRaw, r.coordConf, r.zone
   ]);
   const csvCell = v => { const s = String(v==null?'':v); return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; };
   const csv = '﻿' + [header, ...rows].map(row=>row.map(csvCell).join(',')).join('\r\n');
@@ -1213,12 +1478,14 @@ function getFiltered(opts){
   const fm  = fromSel.value;
   const tm  = toSel.value;
   const tb  = document.getElementById('tambonFilter').value;
+  const zf  = document.getElementById('zoneFilter').value;
   const dw  = dowSel.value;
   const cf  = opts.skipCell ? null : cellFilter;
   const mf  = opts.skipMap  ? null : mapFilter;
   return RAW.filter(r=>{
     if(r.month < fm || r.month > tm) return false;
     if(tb && r.tambon !== tb) return false;
+    if(zf && r.zone !== zf) return false;
     if(dw !== '' && r.dow !== parseInt(dw,10)) return false;
     if(cf && !(r.cells && (hmMode==='start' ? r.cells.startCell===cf.key : r.cells.spread.has(cf.key)))) return false;
     if(mf && !(r.coord && mapKey(r)===mf.key)) return false;
@@ -1236,6 +1503,7 @@ function resetFilters(){
   document.getElementById('searchInput').value = '';
   document.getElementById('tambonFilter').value = '';
   dowSel.value = '';
+  document.getElementById('zoneFilter').value = '';
   cellFilter = null; mapFilter = null;
   if(ALL_MONTHS.length){
     fromSel.value = ALL_MONTHS[0];
@@ -1246,6 +1514,7 @@ function resetFilters(){
 document.getElementById('searchInput').addEventListener('input', ()=>render(getFiltered()));
 document.getElementById('tambonFilter').addEventListener('change', ()=>render(getFiltered()));
 dowSel.addEventListener('change', ()=>render(getFiltered()));
+document.getElementById('zoneFilter').addEventListener('change', ()=>render(getFiltered()));
 fromSel.addEventListener('change', ()=>render(getFiltered()));
 toSel.addEventListener('change', ()=>render(getFiltered()));
 
