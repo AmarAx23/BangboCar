@@ -104,6 +104,29 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 .loc-text{max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:14px}
 .no-result{text-align:center;padding:40px;color:var(--faint);font-size:15px}
 .dow-tag{display:inline-block;font-size:11px;color:var(--muted);background:var(--track);border-radius:6px;padding:1px 6px;margin-bottom:3px}
+/* FULL SCREEN cards (real Fullscreen API, or .pseudo-full where it isn't supported e.g. iPhone) */
+.fs-sub{display:none;font-weight:500;text-transform:none;letter-spacing:0;margin-left:10px;color:var(--faint)}
+.fs-card:fullscreen,.fs-card.pseudo-full{display:flex;flex-direction:column;border-radius:0;border:none;padding:20px 24px;background:var(--surface);overflow:auto}
+.fs-card.pseudo-full{position:fixed;inset:0;z-index:1000}
+.fs-card:fullscreen .fs-sub,.fs-card.pseudo-full .fs-sub{display:inline}
+.fs-card:fullscreen .card-title,.fs-card.pseudo-full .card-title{font-size:18px}
+#panel-heat .fs-card:fullscreen #theftMap,#panel-heat .fs-card.pseudo-full #theftMap{flex:1;height:auto;min-height:300px}
+.fs-card:fullscreen .hm-wrap,.fs-card.pseudo-full .hm-wrap{flex:1;display:flex}
+.fs-card:fullscreen .hm,.fs-card.pseudo-full .hm{flex:1;grid-template-rows:auto repeat(7,1fr);gap:5px}
+.fs-card:fullscreen .hm-c,.fs-card.pseudo-full .hm-c{height:auto;min-height:44px;font-size:clamp(14px,1.6vw,24px)}
+.fs-card:fullscreen .hm-h,.fs-card.pseudo-full .hm-h{font-size:14px}
+.fs-card:fullscreen .hm-d,.fs-card.pseudo-full .hm-d{font-size:16px}
+.fs-card:fullscreen .card-note,.fs-card.pseudo-full .card-note{font-size:14px}
+/* Heat Map tab: the map takes most of the screen height */
+#panel-heat #theftMap{height:calc(100vh - 300px);min-height:520px}
+@media (max-width:700px){ #panel-heat #theftMap{height:70vh;min-height:380px} }
+/* PAGE TABS */
+.tabbar{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.tab{border:none;background:transparent;font-family:'Prompt',sans-serif;font-size:15px;font-weight:600;color:var(--muted);padding:10px 18px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+.tab-panel[hidden]{display:none}
+@media print{ .tabbar{display:none} }
 /* card header with title + small controls on the right */
 .card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .card-head .card-title{margin-bottom:0}
@@ -225,6 +248,11 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
     <h1>รายงานสถิติรถจักรยานยนต์หาย</h1>
     <p id="printDate">สถานีตำรวจภูธรบางบ่อ</p>
   </div>
+  <!-- Tabs -->
+  <div class="tabbar" role="tablist">
+    <button class="tab on" role="tab" data-tab="overview" aria-selected="true">📊 ภาพรวม</button>
+    <button class="tab" role="tab" data-tab="heat" aria-selected="false">🔥 Heat Map</button>
+  </div>
   <!-- KPI -->
   <div class="kpi-row">
     <div class="kpi">
@@ -248,26 +276,7 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
       <div class="kpi-sub" id="kpiTambonSub"></div>
     </div>
   </div>
-  <!-- Map heat map -->
-  <div class="chart-row chart-row-1">
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">แผนที่ความหนาแน่นจุดเกิดเหตุ</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div class="seg" id="mapModeSeg">
-            <button data-mode="heat" class="on">🔥 Heat Map</button>
-            <button data-mode="cluster">⭕ จำนวนต่อจุด</button>
-          </div>
-          <button class="mini-btn" id="mapFitBtn" title="ซูมให้เห็นทุกจุด">⤢ ทุกจุด</button>
-        </div>
-      </div>
-      <div id="theftMap"></div>
-      <div class="map-legend">
-        <span>น้อย</span><span class="grad"></span><span>มาก</span>
-        <span id="mapNote" style="margin-left:auto"></span>
-      </div>
-    </div>
-  </div>
+  <div class="tab-panel" id="panel-overview">
   <!-- Model + Location + Trend -->
   <div class="chart-row chart-row-3">
     <div class="card">
@@ -311,22 +320,49 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
       <div class="card-note" id="hourNote"></div>
     </div>
   </div>
+  </div>
+  <div class="tab-panel" id="panel-heat" hidden>
+  <!-- Map heat map -->
+  <div class="chart-row chart-row-1">
+    <div class="card fs-card" id="mapCard">
+      <div class="card-head">
+        <div class="card-title">แผนที่ความหนาแน่นจุดเกิดเหตุ<span class="fs-sub"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="seg" id="mapModeSeg">
+            <button data-mode="heat" class="on">🔥 Heat Map</button>
+            <button data-mode="cluster">⭕ จำนวนต่อจุด</button>
+          </div>
+          <button class="mini-btn" id="mapFitBtn" title="ซูมให้เห็นทุกจุด">⤢ ทุกจุด</button>
+          <button class="mini-btn fs-btn" data-target="mapCard" title="แสดงเต็มจอ (Esc เพื่อออก)">⛶ เต็มจอ</button>
+        </div>
+      </div>
+      <div id="theftMap"></div>
+      <div class="map-legend">
+        <span>น้อย</span><span class="grad"></span><span>มาก</span>
+        <span id="mapNote" style="margin-left:auto"></span>
+      </div>
+    </div>
+  </div>
   <!-- Day x time heat map -->
   <div class="chart-row chart-row-1">
-    <div class="card">
+    <div class="card fs-card" id="hmCard">
       <div class="card-head">
-        <div class="card-title">Heat Map วัน × ช่วงเวลา (ช่องละ 2 ชั่วโมง)</div>
-        <div class="seg" id="hmModeSeg">
-          <button data-mode="start" class="on" title="นับเหตุละ 1 ที่เวลาเริ่มเกิดเหตุ">นับที่เวลาเริ่ม</button>
-          <button data-mode="spread" title="กระจายน้ำหนักไปทุกช่วงที่รถอาจหาย">กระจายตามช่วงเวลา</button>
+        <div class="card-title">Heat Map วัน × ช่วงเวลา (ช่องละ 2 ชั่วโมง)<span class="fs-sub"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="seg" id="hmModeSeg">
+            <button data-mode="start" class="on" title="นับเหตุละ 1 ที่เวลาเริ่มเกิดเหตุ">นับที่เวลาเริ่ม</button>
+            <button data-mode="spread" title="กระจายน้ำหนักไปทุกช่วงที่รถอาจหาย">กระจายตามช่วงเวลา</button>
+          </div>
+          <button class="mini-btn fs-btn" data-target="hmCard" title="แสดงเต็มจอ (Esc เพื่อออก)">⛶ เต็มจอ</button>
         </div>
       </div>
       <div class="hm-wrap"><div class="hm" id="timeHeatmap"></div></div>
       <div class="card-note" id="hmNote"></div>
     </div>
   </div>
+  </div>
   <!-- Table -->
-  <div class="table-card">
+  <div class="table-card" id="tableCard">
     <div class="table-header">
       <h3>รายการเหตุทั้งหมด</h3>
       <span id="tableCount" style="font-size:12px;color:var(--muted)"></span>
@@ -864,8 +900,10 @@ function render(data){
     : '';
   // Heat maps — each ignores its own click-filter so the whole grid / map stays visible
   renderTimeHeatmap(getFiltered({skipCell:true}));
-  renderMap(getFiltered({skipMap:true}));
+  // The map can only draw while its tab is visible (Leaflet needs a real size); showTab draws it on open
+  if(!document.getElementById('panel-heat').hidden) renderMap(getFiltered({skipMap:true}));
   renderChips();
+  updateFsSub();
   // Table
   renderTable(data);
 }
@@ -1007,7 +1045,7 @@ function renderMap(data){
     clusterLayer.addLayer(c);
   });
   lastMapBounds = pts.length ? L.latLngBounds(pts.map(r=>[r.coord.lat, r.coord.lng])) : null;
-  if(!mapFitted && lastMapBounds){ theftMap.fitBounds(lastMapBounds, {padding:[30,30], maxZoom:15}); mapFitted = true; }
+  if(!mapFitted && lastMapBounds && !document.getElementById('panel-heat').hidden){ theftMap.fitBounds(lastMapBounds, {padding:[30,30], maxZoom:15}); mapFitted = true; }
   const low = pts.filter(r=>r.coordW<1).length;
   noteEl.textContent = data.length
     ? `มีพิกัด ${pts.length} จาก ${data.length} เหตุ` + (low?` · จุดความแม่นยำกลาง/ต่ำ ${low} เหตุ (ถ่วงน้ำหนักน้อยลง)`:'')
@@ -1022,6 +1060,78 @@ document.getElementById('mapFitBtn').addEventListener('click', ()=>{
   if(theftMap && lastMapBounds) theftMap.fitBounds(lastMapBounds, {padding:[30,30], maxZoom:15});
 });
 window.addEventListener('beforeprint', ()=>{ if(theftMap) theftMap.invalidateSize(); });
+
+// ===== Full screen for the two heat map cards =====
+function refreshMapSize(){
+  if(!theftMap) return;
+  theftMap.invalidateSize();
+  // re-attach the heat layer so its canvas matches the new map size
+  if(theftMap.hasLayer(heatLayer)){ theftMap.removeLayer(heatLayer); heatLayer.addTo(theftMap); }
+}
+function fsElement(){ return document.fullscreenElement || document.webkitFullscreenElement || document.querySelector('.fs-card.pseudo-full'); }
+function updateFsButtons(){
+  const cur = fsElement();
+  document.querySelectorAll('.fs-btn').forEach(b=>{
+    const on = cur && cur.id === b.dataset.target;
+    b.textContent = on ? '✕ ออกจากเต็มจอ' : '⛶ เต็มจอ';
+  });
+  updateFsSub();
+  setTimeout(()=>{
+    refreshMapSize();
+    // the map just changed size a lot: zoom to fit the points again
+    if(theftMap && lastMapBounds) theftMap.fitBounds(lastMapBounds, {padding:[40,40], maxZoom:15});
+  }, 50);
+}
+// Subtitle shown only in full screen: the period and number of incidents on screen
+function updateFsSub(){
+  const sub = ALL_MONTHS.length ? ` · ${MONTH_LABELS[fromSel.value]||''} – ${MONTH_LABELS[toSel.value]||''} · ${getFiltered().length} เหตุ` : '';
+  document.querySelectorAll('.fs-sub').forEach(el=>el.textContent = sub);
+}
+function toggleFullscreen(card){
+  const cur = fsElement();
+  if(cur){
+    if(cur.classList.contains('pseudo-full')){ cur.classList.remove('pseudo-full'); document.body.style.overflow=''; updateFsButtons(); }
+    else (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    if(cur === card) return;
+  }
+  const req = card.requestFullscreen || card.webkitRequestFullscreen;
+  if(req) req.call(card).catch(()=>{ card.classList.add('pseudo-full'); document.body.style.overflow='hidden'; updateFsButtons(); });
+  else { card.classList.add('pseudo-full'); document.body.style.overflow='hidden'; updateFsButtons(); }
+}
+document.querySelectorAll('.fs-btn').forEach(b=>b.addEventListener('click', ()=>toggleFullscreen(document.getElementById(b.dataset.target))));
+document.addEventListener('fullscreenchange', updateFsButtons);
+document.addEventListener('webkitfullscreenchange', updateFsButtons);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const c=document.querySelector('.fs-card.pseudo-full'); if(c) toggleFullscreen(c); } });
+
+// ===== Page tabs: ภาพรวม / Heat Map =====
+// The filter bar, KPIs and incident table are shared; only the chart area switches.
+// Open a tab directly with #heatmap in the URL (e.g. .../BangboCar/#heatmap).
+function showTab(name, updateHash){
+  if(name !== 'heat') name = 'overview';
+  document.querySelectorAll('.tabbar .tab').forEach(t=>{
+    const on = t.dataset.tab === name;
+    t.classList.toggle('on', on); t.setAttribute('aria-selected', on);
+  });
+  document.getElementById('panel-overview').hidden = name !== 'overview';
+  document.getElementById('panel-heat').hidden     = name !== 'heat';
+  // the incident table belongs to the overview tab only
+  document.getElementById('tableCard').hidden      = name === 'heat';
+  if(updateHash) history.replaceState(null, '', name==='heat' ? '#heatmap' : location.pathname + location.search);
+  if(name === 'heat'){
+    setTimeout(()=>{
+      if(theftMap){
+        // the map was hidden since its last draw: re-measure it and re-attach the heat
+        // layer so its canvas matches the visible size
+        theftMap.invalidateSize();
+        if(theftMap.hasLayer(heatLayer)){ theftMap.removeLayer(heatLayer); heatLayer.addTo(theftMap); }
+      }
+      if(RAW.length) renderMap(getFiltered({skipMap:true})); // first open creates the map and fits it to the points
+    }, 0);
+  }
+  if(name === 'overview') Object.values(charts).forEach(c=>c && c.resize && c.resize());
+}
+document.querySelectorAll('.tabbar .tab').forEach(t=>t.addEventListener('click', ()=>showTab(t.dataset.tab, true)));
+showTab(location.hash === '#heatmap' ? 'heat' : 'overview', false);
 
 // ===== Table (sortable) =====
 const SLOT_ORDER = ['กลางคืน (00-06น.)','เช้า (06-12น.)','บ่าย (12-18น.)','เย็น-ดึก (18-24น.)','ไม่ระบุ'];
