@@ -1561,7 +1561,7 @@ function hideZones(){
     const p = poly._path; if(p){ p.style.transition = 'opacity .35s ease'; p.style.opacity = 0; }
     const t = poly.getTooltip() && poly.getTooltip().getElement(); if(t){ t.style.transition = 'opacity .35s ease'; t.style.opacity = 0; }
   });
-  zoneAnimTimer = setTimeout(()=>{ if(!showZones) theftMap.removeLayer(zoneLayer); finishZoneAnim(); }, 380);
+  zoneAnimTimer = setTimeout(()=>{ finishZoneAnim(); if(!showZones) theftMap.removeLayer(zoneLayer); }, 380);
 }
 // Base maps (all tested from amarax23.github.io):
 //  - street: OpenStreetMap (Thai labels). OSM refuses requests with no website address,
