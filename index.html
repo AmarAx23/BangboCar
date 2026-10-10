@@ -232,6 +232,39 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 .print-header{display:none;text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #000}
 .print-header h1{font-size:18px;font-weight:700;margin-bottom:4px}
 .print-header p{font-size:12px;color:#555}
+/* ================= MOTION =================
+   Short, purposeful animations: they play on page load, filter changes and tab switches,
+   but not on the silent 60-second auto-refresh. All off for "reduce motion" and print. */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ring{0%{transform:scale(.4);opacity:.45}100%{transform:scale(2.4);opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.reveal{animation:fadeUp .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
+.anim-bars .bl-fill{transform-origin:left center;animation:growX .7s cubic-bezier(.2,.7,.2,1) both}
+.anim-bars .hm-c:not(.zero){animation:fadeUp .4s ease-out both}
+/* pulsing rings on the #1 hotspot */
+.hot-pulse{pointer-events:none}
+.hot-pulse span{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;border:2px solid #ef4444;animation:ring 3.6s ease-out infinite}
+.hot-pulse span:nth-child(2){animation-delay:1.2s}
+.hot-pulse span:nth-child(3){animation-delay:2.4s}
+.hot-pulse b{position:absolute;left:17px;top:17px;width:10px;height:10px;border-radius:50%;background:#ef4444;opacity:.85;box-shadow:0 0 0 2px #fff}
+/* live data indicator */
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;vertical-align:1px;animation:blink 2s ease-in-out infinite}
+.live-dot.busy{background:#f59e0b;animation-duration:.6s}
+.live-dot.err{background:#ef4444;animation:none}
+/* buttons and list items respond to the pointer */
+.btn,.mini-btn,.tab,.hot-item,.seg button,.layer-btn{transition:transform .15s ease,box-shadow .15s ease,background-color .15s ease,color .15s ease,border-color .15s ease}
+.btn:hover,.mini-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.btn:active,.mini-btn:active,.hot-item:active{transform:translateY(0) scale(.97)}
+.hot-item:hover{transform:translateX(3px)}
+.layer-btn:hover{transform:translateY(-2px)}
+.btn .arr{display:inline-block;transition:transform .2s ease}
+.btn:hover .arr{transform:translateX(3px)}
+.btn-csv:hover .arr{transform:translateY(2px)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+@media print{ .reveal,.anim-bars .bl-fill{animation:none!important} .hot-pulse{display:none} }
 </style>
 </head>
 <body>
@@ -241,7 +274,7 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
     <div class="nav-sub">สถานีตำรวจภูธรบางบ่อ · เม.ย. 2567 – พ.ค. 2569</div>
   </div>
   <div class="nav-right">
-    <span id="syncStatus" style="font-size:12px;color:var(--faint)">⏳ กำลังโหลดข้อมูล...</span>
+    <span id="syncStatus" style="font-size:12px;color:var(--faint)"><span class="live-dot busy"></span>กำลังโหลดข้อมูล...</span>
     <button class="btn btn-reset btn-icon" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
     <button class="btn btn-reset" onclick="loadData(false)">🔄 รีเฟรช</button>
     <button class="btn btn-print" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
@@ -279,7 +312,7 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
     </select>
   </div>
   <button class="btn btn-reset" onclick="resetFilters()">✕ รีเซ็ต</button>
-  <button class="btn btn-csv" onclick="exportCSV()" title="ดาวน์โหลดข้อมูลตามตัวกรองปัจจุบัน เปิดได้ใน Excel">⬇️ ส่งออก CSV</button>
+  <button class="btn btn-csv" onclick="exportCSV()" title="ดาวน์โหลดข้อมูลตามตัวกรองปัจจุบัน เปิดได้ใน Excel"><span class="arr">⬇️</span> ส่งออก CSV</button>
   <span class="result-count" id="resultCount">แสดง 0 รายการ</span>
   <div class="chips" id="chips" style="flex-basis:100%"></div>
 </div>
@@ -373,6 +406,7 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
             <button data-mode="cluster">⭕ จำนวนต่อจุด</button>
           </div>
           <button class="mini-btn on" id="zoneToggleBtn" title="แสดง/ซ่อนเส้นเขตตรวจ">🗺️ เขตตรวจ</button>
+          <button class="mini-btn on" id="pulseToggleBtn" title="แสดง/ซ่อนวงกระเพื่อมที่จุดเกิดเหตุมากที่สุด (อันดับ 1 ใน Top 5)" aria-pressed="true">🎯 อันดับ 1</button>
           <button class="mini-btn" id="mapFitBtn" title="ซูมให้เห็นทั้งพื้นที่">⤢ ทุกจุด</button>
           <button class="mini-btn fs-btn" data-target="mapCard" title="แสดงเต็มจอ (Esc เพื่อออก)">⛶ เต็มจอ</button>
         </div>
@@ -734,10 +768,43 @@ function applyData(rows, locRows){
   render(getFiltered());
 }
 
+// ===== Motion helpers =====
+let quietRender = false;      // true while the 60-second auto-refresh re-renders: no animation
+let firstRevealDone = false;
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function wantMotion(){ return !quietRender && !reduceMotion; }
+// Cards slide up one after another (KPIs, then the visible tab's cards)
+function revealVisible(){
+  if(reduceMotion) return;
+  const cards = [...document.querySelectorAll('.kpi-row .kpi, .tab-panel:not([hidden]) .card, #tableCard:not([hidden])')];
+  cards.forEach((c,i)=>{ c.classList.remove('reveal'); c.style.setProperty('--d', Math.min(i,10)*55 + 'ms'); void c.offsetWidth; c.classList.add('reveal'); });
+}
+// Meters grow from zero and heat-map cells fade in (re-triggered on each animated render)
+function animateBars(){
+  if(!wantMotion()) return;
+  const m = document.querySelector('main');
+  m.classList.remove('anim-bars'); void m.offsetWidth; m.classList.add('anim-bars');
+  clearTimeout(animateBars._t); animateBars._t = setTimeout(()=>m.classList.remove('anim-bars'), 1000);
+}
+// KPI number counts from its previous value to the new one
+function countTo(el, to, unitHTML){
+  const from = parseInt(el.dataset.v || '0', 10) || 0;
+  el.dataset.v = to;
+  if(!wantMotion() || from === to){ el.innerHTML = `${to} ${unitHTML}`; return; }
+  const t0 = performance.now(), dur = 700;
+  cancelAnimationFrame(el._raf);
+  const step = now=>{
+    const p = Math.min(1, (now - t0)/dur), e = 1 - Math.pow(1-p, 3);
+    el.innerHTML = `${Math.round(from + (to-from)*e)} ${unitHTML}`;
+    if(p < 1) el._raf = requestAnimationFrame(step);
+  };
+  el._raf = requestAnimationFrame(step);
+}
 async function loadData(isAutoRefresh){
   const statusEl = document.getElementById('syncStatus');
   try{
-    if(statusEl) statusEl.textContent = '⏳ กำลังซิงก์ข้อมูล...';
+    if(statusEl && !isAutoRefresh) statusEl.innerHTML = '<span class="live-dot busy"></span>กำลังซิงก์ข้อมูล...';
+    quietRender = !!isAutoRefresh;
     const [gvizMain, gvizLoc] = await Promise.all([
       loadSheetJSONP(SHEET_GID_MAIN),
       loadSheetJSONP(SHEET_GID_LOCATIONS).catch(err => { console.error('location tab load failed:', err); return null; })
@@ -749,10 +816,13 @@ async function loadData(isAutoRefresh){
     const stamp = now.toLocaleString('th-TH', {dateStyle:'long', timeStyle:'short'});
     const footerEl = document.getElementById('footerUpdated');
     if(footerEl) footerEl.textContent = `ข้อมูล ณ วันที่ ${stamp} · สถานีตำรวจภูธรบางบ่อ (ซิงก์อัตโนมัติจาก Google Sheet)`;
-    if(statusEl) statusEl.textContent = `✅ อัปเดตล่าสุด ${now.toLocaleTimeString('th-TH')}`;
+    if(statusEl) statusEl.innerHTML = `<span class="live-dot" title="ซิงก์สดจาก Google Sheet ทุก 1 นาที"></span>อัปเดตล่าสุด ${now.toLocaleTimeString('th-TH')}`;
+    quietRender = false;
+    if(!firstRevealDone){ firstRevealDone = true; revealVisible(); }
   }catch(err){
     console.error('loadData failed:', err);
-    if(statusEl) statusEl.textContent = '⚠️ ซิงก์ข้อมูลไม่สำเร็จ — จะลองใหม่อัตโนมัติ';
+    quietRender = false;
+    if(statusEl) statusEl.innerHTML = '<span class="live-dot err"></span>ซิงก์ข้อมูลไม่สำเร็จ — จะลองใหม่อัตโนมัติ';
   }
 }
 
@@ -780,7 +850,7 @@ function mkChart(id, cfg){
 }
 function barOptions(tooltipUnit, xFont){
   const {tc, gc} = axisColors();
-  return {responsive:true,maintainAspectRatio:false,animation:{duration:300},
+  return {responsive:true,maintainAspectRatio:false,animation: wantMotion() ? {duration:700, easing:'easeOutCubic'} : false,
     plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y} ${tooltipUnit}`}}},
     scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:xFont||10,family:'Prompt'},maxRotation:45,autoSkip:false}},
             y:{grid:{color:gc},ticks:{color:tc,font:{size:10},precision:0},min:0}}};
@@ -845,7 +915,8 @@ function barRow({icon, name, sub, title, val, unit, pct, barW, color, nameStyle}
 function render(data){
   const n = data.length;
   // KPI
-  document.getElementById('kpiTotal').innerHTML = `${n} <span class="kpi-unit">เหตุ</span>`;
+  countTo(document.getElementById('kpiTotal'), n, '<span class="kpi-unit">เหตุ</span>');
+  animateBars();
   const monthsInRange = ALL_MONTHS.filter(m=>m>=fromSel.value && m<=toSel.value);
   const monthC = {};
   ALL_MONTHS.forEach(m=>{ monthC[m]=0; });
@@ -1080,11 +1151,8 @@ function initMap(){
       poly.bindTooltip(p.name, {permanent:true, direction:'center', className:'zone-label'});
       zonePolyLayers[p.name] = poly;
       zoneLayer.addLayer(poly);
-    } else {
-      const [x,y] = f.geometry.coordinates;
-      zoneLayer.addLayer(L.circleMarker([y,x], {radius:6, color:'#fff', weight:2, fillColor:p.color, fillOpacity:1})
-        .bindTooltip((p.kind==='booth'?'🚔 ':'💡 ') + p.name, {direction:'top'}));
     }
+    // The booth / light-sign points from My Maps are kept in ZONES but not drawn (removed on request)
   });
   zoneLayer.addTo(theftMap);
   zoneBounds = L.latLngBounds(ZONE_POLYS.flatMap(f=>f.geometry.coordinates[0].map(([x,y])=>[y,x])));
@@ -1212,9 +1280,34 @@ function shortPlace(s){
 }
 function topOf(arr){ const c = {}; arr.forEach(v=>{ if(v!=null && v!=='') c[v]=(c[v]||0)+1; }); return Object.entries(c).sort((a,b)=>b[1]-a[1])[0] || null; }
 let hotPulse = null;
+let topPulse = null, lastTopKey = null, showTopPulse = true;
+try{ if(localStorage.getItem('bangbo-top-pulse') === 'off') showTopPulse = false; }catch(e){}
+function placeTopPulse(){
+  if(topPulse){ theftMap.removeLayer(topPulse); topPulse = null; }
+  if(!showTopPulse || !lastTopKey) return;
+  const [la, ln] = lastTopKey.split(',').map(Number);
+  topPulse = L.marker([la, ln], {interactive:false, keyboard:false, zIndexOffset:-100,
+    icon: L.divIcon({className:'hot-pulse', html:'<span></span><span></span><span></span><b></b>', iconSize:[44,44], iconAnchor:[22,22]})
+  }).addTo(theftMap);
+}
+function syncPulseBtn(){
+  const b = document.getElementById('pulseToggleBtn');
+  b.classList.toggle('on', showTopPulse); b.setAttribute('aria-pressed', showTopPulse);
+}
+document.getElementById('pulseToggleBtn').addEventListener('click', ()=>{
+  showTopPulse = !showTopPulse;
+  try{ localStorage.setItem('bangbo-top-pulse', showTopPulse ? 'on' : 'off'); }catch(e){}
+  syncPulseBtn();
+  if(theftMap) placeTopPulse();
+});
+syncPulseBtn();
 function renderHotspots(clusters){
   const el = document.getElementById('hotList');
   const top = [...clusters].sort((a,b)=>b[1].length-a[1].length || a[0].localeCompare(b[0])).slice(0,5);
+  // Pulsing rings on the #1 hotspot (only when it clearly leads: at least 2 incidents);
+  // the 🎯 อันดับ 1 button turns them on/off
+  lastTopKey = (top.length && top[0][1].length >= 2) ? top[0][0] : null;
+  placeTopPulse();
   if(!top.length){ el.innerHTML = '<li class="hot-empty">ไม่มีเหตุที่มีพิกัดในช่วงนี้</li>'; return; }
   const COLORS = ['#ef4444','#f97316','#f59e0b','#eab308','#84cc16'];
   el.innerHTML = top.map(([k, rows], i)=>{
@@ -1373,6 +1466,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const c=document
 // Open a tab directly with #heatmap in the URL (e.g. .../BangboCar/#heatmap).
 function showTab(name, updateHash){
   if(name !== 'heat') name = 'overview';
+  setTimeout(()=>{ if(firstRevealDone) revealVisible(); }, 0);
   document.querySelectorAll('.tabbar .tab').forEach(t=>{
     const on = t.dataset.tab === name;
     t.classList.toggle('on', on); t.setAttribute('aria-selected', on);
