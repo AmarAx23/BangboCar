@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>รายงานรถจักรยานยนต์หาย – สภ.บางบ่อ</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="logo.webp">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -31,15 +33,65 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);min-
 /* NAV */
 nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .nav-title{font-size:17px;font-weight:700;color:var(--text-strong)}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.nav-logo{width:44px;height:51px;flex-shrink:0;perspective:300px}
+.nav-coin{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:navSpin 6s linear infinite}
+.nav-coin .coin-face{filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+@keyframes navSpin{to{transform:rotateY(360deg)}}
+html.no-motion .nav-coin{animation:none}
+@media print{ .nav-coin{animation:none} }
+@media (max-width:700px){ .nav-logo{width:36px;height:42px} }
+/* ===== Loading screen ===== */
+#bootLoader{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .5s ease,visibility .5s}
+#bootLoader.done{opacity:0;visibility:hidden;pointer-events:none}
+.boot-text{font-size:14px;color:var(--muted)}
+/* Spinning station logo (embedded in the page so it shows even before/without logo.webp) */
+.logo-loader{display:flex;flex-direction:column;align-items:center;gap:16px;perspective:700px}
+.logo-spin{position:relative;width:180px;height:209px;transform-style:preserve-3d;animation:logoSpin 3.25s ease-in-out infinite}
+.coin-face{position:absolute;inset:0;background:url(data:image/webp;base64,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) center/contain no-repeat;backface-visibility:hidden;-webkit-backface-visibility:hidden;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25))}
+.coin-face.back{transform:rotateY(180deg)}
+@keyframes logoSpin{0%{transform:translateY(0) rotateY(0)}50%{transform:translateY(-18px) rotateY(180deg)}100%{transform:translateY(0) rotateY(360deg)}}
+.logo-floor{width:135px;height:20px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.28),transparent);animation:logoFloor 3.25s ease-in-out infinite}
+@keyframes logoFloor{0%,100%{transform:scaleX(1);opacity:1}50%{transform:scaleX(.6);opacity:.55}}
+@media (prefers-reduced-motion:reduce){ .logo-spin,.logo-floor{animation:none} }
+@media print{ #bootLoader{display:none!important} }
 .nav-sub{font-size:13px;color:var(--muted);margin-top:2px}
 .nav-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 /* CONTROLS */
 .controls{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .ctrl-group{display:flex;align-items:center;gap:8px}
 .ctrl-label{font-size:13px;color:var(--muted);white-space:nowrap}
+/* Filter dropdowns: white drop-down list with turning arrow, adapted from "gentle-vampirebat-46" by 3bdel3ziz-T on Uiverse.io (MIT).
+   The real <select> stays in the page (hidden) and keeps driving the filters; this is only its face. */
+.csel{position:relative;display:inline-block;font-family:'Prompt',sans-serif}
+.csel-native{position:absolute!important;left:0;top:0;width:1px!important;height:1px!important;opacity:0;pointer-events:none}
+.csel-selected{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:118px;background:#fff;color:#111;
+  border:1px solid #d5dbe5;border-radius:6px;padding:6px 8px 6px 12px;font:inherit;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.csel-selected:focus-visible{outline:2px solid #3b82f6;outline-offset:1px}
+.csel-arrow{height:10px;width:22px;fill:#111;transform:rotate(-90deg);transition:transform .3s;flex-shrink:0}
+.csel-options{position:absolute;left:0;top:calc(100% + 3px);z-index:1200;display:flex;flex-direction:column;min-width:max(100%,150px);max-height:300px;overflow-y:auto;
+  background:#fff;border:1px solid #e3e8ef;border-radius:6px;padding:5px;box-shadow:0 10px 24px rgba(0,0,0,.14);
+  opacity:0;visibility:hidden;transform:translateY(-14px);transition:opacity .3s,transform .3s,visibility .3s}
+.csel-option{border-radius:5px;padding:6px 8px;font-size:14px;color:#111;white-space:nowrap;cursor:pointer;transition:background-color .3s}
+.csel-option:hover{background:#eef2f7}
+.csel-option.is-sel{display:none}
+.csel.open .csel-options{opacity:1;visibility:visible;transform:none}
+.csel.open .csel-arrow{transform:rotate(0)}
+@media (hover:hover){
+  .csel:not(.picked):hover .csel-options{opacity:1;visibility:visible;transform:none}
+  .csel:not(.picked):hover .csel-arrow{transform:rotate(0)}
+}
+@media print{ .csel-arrow,.csel-options{display:none} .csel-selected{border:none;box-shadow:none;padding:0;min-width:0} }
 input[type=text],select{background:var(--surface2);border:1px solid var(--input-border);color:var(--text);border-radius:8px;padding:7px 12px;font-size:14px;font-family:'Prompt',sans-serif;outline:none}
 input[type=text]{width:260px}
 input[type=text]:focus,select:focus{border-color:#3b82f6;background:var(--surface)}
+/* Search box: underline input with a wave label, adapted from "warm-eel-62" by liyaxu123 on Uiverse.io (MIT) */
+.form-control{position:relative;width:340px;margin:16px 0 2px}
+.form-control input[type=text]{background:transparent;border:0;border-bottom:2px solid var(--muted);border-radius:0;display:block;width:100%;padding:8px 0 6px;font-size:15px;color:var(--text)}
+.form-control input[type=text]:focus,.form-control input[type=text]:not(:placeholder-shown){outline:0;background:transparent;border-bottom-color:var(--accent-hover)}
+.form-control label{position:absolute;top:9px;left:0;pointer-events:none;white-space:nowrap}
+.form-control label span{display:inline-block;font-size:15px;min-width:4px;color:var(--muted);transition:.3s cubic-bezier(.68,-.55,.265,1.55)}
+.form-control input:focus+label span,.form-control input:not(:placeholder-shown)+label span{color:var(--accent-hover);transform:translateY(-24px);font-size:13px}
 .btn{padding:7px 16px;border-radius:8px;border:none;font-size:14px;font-family:'Prompt',sans-serif;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
 .btn-print{background:var(--accent);color:#fff}
 .btn-print:hover{background:var(--accent-hover)}
@@ -146,10 +198,21 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 .tl-play{min-width:78px}
 .fs-card:fullscreen .tl-label,.fs-card.pseudo-full .tl-label{font-size:20px}
 /* PAGE TABS */
-.tabbar{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border)}
-.tab{border:none;background:transparent;font-family:'Prompt',sans-serif;font-size:15px;font-weight:600;color:var(--muted);padding:10px 18px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
-.tab:hover{color:var(--text)}
-.tab.on{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+/* Page tabs: white pill that lifts, with a fading ring on hover — adapted from "friendly-dragon-76" by cssbuttons-io on Uiverse.io (MIT) */
+.tabbar{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0 22px}
+.tab{
+  position:relative;z-index:0;display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  font-family:'Prompt',sans-serif;font-size:16px;font-weight:600;padding:.8em 2.3em;border:none;border-radius:6em;
+  color:#111;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08);transition:all .2s
+}
+.tab::after{content:'';position:absolute;inset:0;border-radius:100px;z-index:-1;background:#fff;transition:all .4s}
+.tab:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(0,0,0,.2)}
+.tab:active{transform:translateY(-1px);box-shadow:0 5px 10px rgba(0,0,0,.2)}
+.tab:hover::after{transform:scaleX(1.4) scaleY(1.6);opacity:0}
+.tab.on{color:#fff;background:var(--accent-hover)}
+.tab.on::after{background:var(--accent-hover)}
+.tab:focus-visible{outline:3px solid #3b82f6;outline-offset:3px}
+@media (max-width:480px){ .tabbar{gap:10px} .tab{flex:1;justify-content:center;font-size:15px;padding:.75em 1em} }
 .tab-panel[hidden]{display:none}
 @media print{ .tabbar{display:none} }
 /* card header with title + small controls on the right */
@@ -173,10 +236,45 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 .leaflet-container{font-family:'Prompt',sans-serif}
 .zone-label{background:rgba(255,255,255,.88);border:1px solid rgba(0,0,0,.15);border-radius:8px;box-shadow:none;color:#0f172a;font-weight:700;font-size:12px;text-align:center;padding:3px 8px;line-height:1.35}
 .zone-label:before{display:none}
+.zone-label.zl-wait{opacity:0}
+.zone-label.zl-pop{animation:zlPop .4s ease}
+@keyframes zlPop{0%{opacity:0}100%{opacity:1}}
 :root[data-theme="dark"] .zone-label{background:rgba(15,23,42,.85);color:#f8fafc;border-color:rgba(255,255,255,.15)}
 .leaflet-heatmap-layer{pointer-events:none}
 .mini-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Map mode + on/off pairs: joined toggle buttons, adapted from "wicked-deer-90" by WhiteNervosa on Uiverse.io (MIT) */
+.cbox-group{display:flex}
+.cbox{position:relative;overflow:hidden;cursor:pointer;user-select:none;border:none;display:flex;align-items:center;justify-content:center;
+  height:30px;min-width:55px;padding:2px 12px;font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;
+  background:rgba(0,0,0,.08);color:#5b6475;border-radius:0;outline:none;
+  box-shadow:rgba(0,0,0,.15) 0 2px 1px 0 inset,rgba(255,255,255,.17) 0 1px 1px 0;
+  transition:color .3s cubic-bezier(.25,.8,.25,1),background-color .3s cubic-bezier(.25,.8,.25,1),box-shadow .3s cubic-bezier(.25,.8,.25,1)}
+.cbox:first-child{border-radius:5px 0 0 5px}
+.cbox:last-child{border-radius:0 5px 5px 0}
+.cbox .inner{pointer-events:none;transform:translateY(0);transition:transform .3s cubic-bezier(.25,.8,.25,1)}
+.cbox:hover{background:#2c2c2c;color:#fff;box-shadow:rgba(0,0,0,.23) 0 -4px 1px 0 inset,rgba(255,255,255,.17) 0 -1px 1px 0,rgba(0,0,0,.17) 0 2px 4px 1px}
+.cbox:hover .inner,.cbox.on .inner{transform:translateY(-2px)}
+.cbox.on{background:#2d6737;color:#fff;box-shadow:rgba(0,0,0,.23) 0 -4px 1px 0 inset,rgba(255,255,255,.17) 0 -1px 1px 0,rgba(0,0,0,.17) 0 2px 4px 1px}
+.cbox.on:hover{background:#34723f;box-shadow:rgba(0,0,0,.26) 0 -4px 1px 0 inset,rgba(255,255,255,.17) 0 -1px 1px 0,rgba(0,0,0,.15) 0 3px 6px 2px}
+.cbox:focus-visible{outline:2px solid #3b82f6;outline-offset:2px;z-index:1}
+:root[data-theme="dark"] .cbox:not(.on):not(:hover){background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)}
+/* map-mode pair: one green bar slides between the two buttons */
+.cbox-group.sliding{position:relative;border-radius:5px;background:rgba(0,0,0,.08);box-shadow:rgba(0,0,0,.15) 0 2px 1px 0 inset,rgba(255,255,255,.17) 0 1px 1px 0}
+.cbox-group.sliding .cbox{background:transparent!important;box-shadow:none!important;z-index:1;transition:color .3s ease}
+.cbox-group.sliding .cbox:not(.on):hover{color:#111}
+.cbox-slider{position:absolute;top:0;bottom:0;left:0;width:0;border-radius:5px;background:#2d6737;pointer-events:none;
+  box-shadow:rgba(0,0,0,.23) 0 -4px 1px 0 inset,rgba(255,255,255,.17) 0 -1px 1px 0,rgba(0,0,0,.17) 0 2px 4px 1px;
+  transition:left .3s cubic-bezier(.65,0,.35,1),width .3s cubic-bezier(.65,0,.35,1)}
+:root[data-theme="dark"] .cbox-group.sliding{background:rgba(255,255,255,.08)}
+:root[data-theme="dark"] .cbox-group.sliding .cbox:not(.on):hover{color:#fff}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .cbox-group.sliding{background:rgba(255,255,255,.08)} :root:not([data-theme="light"]) .cbox-group.sliding .cbox:not(.on):hover{color:#fff} }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .cbox:not(.on):not(:hover){background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)} }
 .cluster-label{background:transparent;border:none;box-shadow:none;color:#fff;font-weight:700;font-size:12px;text-shadow:0 0 3px rgba(0,0,0,.6)}
+.cl-pop{transform-box:fill-box;transform-origin:center;animation:clPop .45s cubic-bezier(.34,1.56,.64,1) both}
+.cl-out{transform-box:fill-box;transform-origin:center;animation:clOut .5s cubic-bezier(.4,0,.2,1) both}
+@keyframes clPop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes clOut{to{transform:scale(.35);opacity:0}}
+.cluster-label.cl-lab-pop{animation:zlPop .3s ease both}
 .map-legend{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--faint);margin-top:8px;flex-wrap:wrap}
 .map-legend .grad{width:120px;height:8px;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#22c55e,#facc15,#f97316,#ef4444)}
 /* FILTER CHIPS */
@@ -207,6 +305,7 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
   .chart-row-2,.chart-row-3{grid-template-columns:1fr}
   .ctrl-group{flex:1 1 100%}
   input[type=text]{width:100%}
+  .form-control{width:100%}
   .result-count{margin-left:0}
 }
 /* PRINT */
@@ -244,10 +343,22 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 .anim-bars .hm-c:not(.zero){animation:fadeUp .4s ease-out both}
 /* pulsing rings on the #1 hotspot */
 .hot-pulse{pointer-events:none}
-.hot-pulse span{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;border:2px solid #ef4444;animation:ring 3.6s ease-out infinite}
-.hot-pulse span:nth-child(2){animation-delay:1.2s}
-.hot-pulse span:nth-child(3){animation-delay:2.4s}
+/* rings stay hidden during their start delay (fill-mode backwards), so nothing flashes when the marker appears */
+.hot-pulse span{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;border:2px solid #ef4444;opacity:0;animation:ring 3.6s ease-out infinite backwards}
+.hot-pulse span:nth-child(3){animation-delay:1.2s}
+.hot-pulse span:nth-child(4){animation-delay:2.4s}
 .hot-pulse b{position:absolute;left:17px;top:17px;width:10px;height:10px;border-radius:50%;background:#ef4444;opacity:.85;box-shadow:0 0 0 2px #fff}
+.hot-pulse i{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;border:2px solid #ef4444;opacity:0}
+/* turning it on: a ring closes in on the spot like a target lock, the dot pops, then the slow pulse starts */
+.hot-pulse.intro i{animation:pulseLock .8s cubic-bezier(.22,1,.36,1) both}
+.hot-pulse.intro b{animation:pulseDot .45s cubic-bezier(.34,1.56,.64,1) .55s both}
+.hot-pulse.intro span{animation-delay:.9s}
+.hot-pulse.intro span:nth-child(3){animation-delay:2.1s}
+.hot-pulse.intro span:nth-child(4){animation-delay:3.3s}
+@keyframes pulseLock{0%{transform:scale(3.2);opacity:0}55%{opacity:.9}100%{transform:scale(.55);opacity:0}}
+@keyframes pulseDot{0%{transform:scale(0)}100%{transform:scale(1)}}
+.hot-pulse.outro{transition:opacity .3s ease;opacity:0}
+@media (prefers-reduced-motion:reduce){ .hot-pulse span:nth-child(2){opacity:.4} }
 /* live data indicator */
 .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;vertical-align:1px;animation:blink 2s ease-in-out infinite}
 .live-dot.busy{background:#f59e0b;animation-duration:.6s}
@@ -265,25 +376,265 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 @media print{ .reveal,.anim-bars .bl-fill{animation:none!important} .hot-pulse{display:none} }
+/* Light/dark switch — "strong-squid-82" by Galahhad on Uiverse.io (MIT) */
+.theme-switch {
+  --toggle-size: 7px;
+  /* the size is adjusted using font-size,
+     this is not transform scale,
+     so you can choose any size */
+  --container-width: 5.625em;
+  --container-height: 2.5em;
+  --container-radius: 6.25em;
+  /* radius 0 - minecraft mode :) */
+  --container-light-bg: #3D7EAE;
+  --container-night-bg: #1D1F2C;
+  --circle-container-diameter: 3.375em;
+  --sun-moon-diameter: 2.125em;
+  --sun-bg: #ECCA2F;
+  --moon-bg: #C4C9D1;
+  --spot-color: #959DB1;
+  --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+  --stars-color: #fff;
+  --clouds-color: #F3FDFF;
+  --back-clouds-color: #AACADF;
+  --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17);
+}
+
+.theme-switch, .theme-switch *, .theme-switch *::before, .theme-switch *::after {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-size: var(--toggle-size);
+}
+
+.theme-switch__container {
+  width: var(--container-width);
+  height: var(--container-height);
+  background-color: var(--container-light-bg);
+  border-radius: var(--container-radius);
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+  box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+  position: relative;
+}
+
+.theme-switch__container::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  -webkit-box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+  box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+  border-radius: var(--container-radius)
+}
+
+.theme-switch__checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.theme-switch { position: relative; display: inline-block; flex-shrink: 0; }
+.theme-switch__checkbox:focus-visible + .theme-switch__container { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+.theme-switch__circle-container {
+  width: var(--circle-container-diameter);
+  height: var(--circle-container-diameter);
+  background-color: rgba(255, 255, 255, 0.1);
+  position: absolute;
+  left: var(--circle-container-offset);
+  top: var(--circle-container-offset);
+  border-radius: var(--container-radius);
+  -webkit-box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-transition: var(--circle-transition);
+  -o-transition: var(--circle-transition);
+  transition: var(--circle-transition);
+  pointer-events: none;
+}
+
+.theme-switch__sun-moon-container {
+  pointer-events: auto;
+  position: relative;
+  z-index: 2;
+  width: var(--sun-moon-diameter);
+  height: var(--sun-moon-diameter);
+  margin: auto;
+  border-radius: var(--container-radius);
+  background-color: var(--sun-bg);
+  -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+  box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+  -webkit-filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+  overflow: hidden;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+}
+
+.theme-switch__moon {
+  -webkit-transform: translateX(100%);
+  -ms-transform: translateX(100%);
+  transform: translateX(100%);
+  width: 100%;
+  height: 100%;
+  background-color: var(--moon-bg);
+  border-radius: inherit;
+  -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+  box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+  position: relative;
+}
+
+.theme-switch__spot {
+  position: absolute;
+  top: 0.75em;
+  left: 0.312em;
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: var(--container-radius);
+  background-color: var(--spot-color);
+  -webkit-box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+  box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+}
+
+.theme-switch__spot:nth-of-type(2) {
+  width: 0.375em;
+  height: 0.375em;
+  top: 0.937em;
+  left: 1.375em;
+}
+
+.theme-switch__spot:nth-last-of-type(3) {
+  width: 0.25em;
+  height: 0.25em;
+  top: 0.312em;
+  left: 0.812em;
+}
+
+.theme-switch__clouds {
+  width: 1.25em;
+  height: 1.25em;
+  background-color: var(--clouds-color);
+  border-radius: var(--container-radius);
+  position: absolute;
+  bottom: -0.625em;
+  left: 0.312em;
+  -webkit-box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+  box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+  -webkit-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  -o-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+}
+
+.theme-switch__stars-container {
+  position: absolute;
+  color: var(--stars-color);
+  top: -100%;
+  left: 0.312em;
+  width: 2.75em;
+  height: auto;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+}
+
+/* actions */
+
+.theme-switch__checkbox:checked + .theme-switch__container {
+  background-color: var(--container-night-bg);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
+  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter));
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
+  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em)
+}
+
+.theme-switch__circle-container:hover {
+  left: calc(var(--circle-container-offset) + 0.187em);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon {
+  -webkit-transform: translate(0);
+  -ms-transform: translate(0);
+  transform: translate(0);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds {
+  bottom: -4.062em;
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container {
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
 </style>
 </head>
 <body>
+<!-- Loading screen: spinning station logo, fades out once the sheet data arrives -->
+<div id="bootLoader" role="status" aria-live="polite">
+  <div class="logo-loader" aria-hidden="true">
+    <div class="logo-spin"><div class="coin-face"></div><div class="coin-face back"></div></div>
+    <div class="logo-floor"></div>
+  </div>
+  <div class="boot-text" id="bootText">กำลังโหลดข้อมูล...</div>
+</div>
+<script>
+// Links with ?from=/&to= are used by the LINE bot to take screenshots: no loading screen there
+if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader').remove(); document.documentElement.classList.add('no-motion'); }
+</script>
 <nav>
-  <div>
-    <div class="nav-title">🏍️ Dashboard รถจักรยานยนต์หาย</div>
-    <div class="nav-sub">สถานีตำรวจภูธรบางบ่อ · เม.ย. 2567 – พ.ค. 2569</div>
+  <div class="nav-brand">
+    <div class="nav-logo" role="img" aria-label="ตราสถานีตำรวจภูธรบางบ่อ"><div class="nav-coin"><div class="coin-face"></div><div class="coin-face back"></div></div></div>
+    <div>
+      <div class="nav-title">Dashboard รถจักรยานยนต์หาย</div>
+      <div class="nav-sub">สถานีตำรวจภูธรบางบ่อ · เม.ย. 2567 – พ.ค. 2569</div>
+    </div>
   </div>
   <div class="nav-right">
     <span id="syncStatus" style="font-size:12px;color:var(--faint)"><span class="live-dot busy"></span>กำลังโหลดข้อมูล...</span>
-    <button class="btn btn-reset btn-icon" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
+    <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
+      <input type="checkbox" class="theme-switch__checkbox" id="themeBtn" aria-label="โหมดมืด">
+      <div class="theme-switch__container">
+        <div class="theme-switch__clouds"></div>
+        <div class="theme-switch__stars-container">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545ZM56.8313 24.0069C56.0551 24.8503 55.1114 25.2995 54 25.3545C55.1114 25.4095 56.0551 25.8587 56.8313 26.7112C57.6075 27.5546 57.9956 28.563 57.9956 29.7273C57.9956 28.9572 58.172 28.2513 58.5248 27.5913C58.8864 26.9312 59.3716 26.3995 59.9802 26.0053C60.5976 25.602 61.2679 25.3911 62 25.3545C60.8798 25.2903 59.9361 24.8503 59.1599 24.0069C58.3837 23.1635 57.9956 22.1642 57.9956 21C57.9956 22.1642 57.6075 23.1635 56.8313 24.0069ZM81 25.3545C82.1114 25.2995 83.0551 24.8503 83.8313 24.0069C84.6075 23.1635 84.9956 22.1642 84.9956 21C84.9956 22.1642 85.3837 23.1635 86.1599 24.0069C86.9361 24.8503 87.8798 25.2903 89 25.3545C88.2679 25.3911 87.5976 25.602 86.9802 26.0053C86.3716 26.3995 85.8864 26.9312 85.5248 27.5913C85.172 28.2513 84.9956 28.9572 84.9956 29.7273C84.9956 28.563 84.6075 27.5546 83.8313 26.7112C83.0551 25.8587 82.1114 25.4095 81 25.3545ZM136 36.3545C137.111 36.2995 138.055 35.8503 138.831 35.0069C139.607 34.1635 139.996 33.1642 139.996 32C139.996 33.1642 140.384 34.1635 141.16 35.0069C141.936 35.8503 142.88 36.2903 144 36.3545C143.268 36.3911 142.598 36.602 141.98 37.0053C141.372 37.3995 140.886 37.9312 140.525 38.5913C140.172 39.2513 139.996 39.9572 139.996 40.7273C139.996 39.563 139.607 38.5546 138.831 37.7112C138.055 36.8587 137.111 36.4095 136 36.3545ZM101.831 49.0069C101.055 49.8503 100.111 50.2995 99 50.3545C100.111 50.4095 101.055 50.8587 101.831 51.7112C102.607 52.5546 102.996 53.563 102.996 54.7273C102.996 53.9572 103.172 53.2513 103.525 52.5913C103.886 51.9312 104.372 51.3995 104.98 51.0053C105.598 50.602 106.268 50.3911 107 50.3545C105.88 50.2903 104.936 49.8503 104.16 49.0069C103.384 48.1635 102.996 47.1642 102.996 46C102.996 47.1642 102.607 48.1635 101.831 49.0069Z" fill="currentColor"></path>
+      </svg>
+        </div>
+        <div class="theme-switch__circle-container">
+          <div class="theme-switch__sun-moon-container">
+            <div class="theme-switch__moon"><div class="theme-switch__spot"></div><div class="theme-switch__spot"></div><div class="theme-switch__spot"></div></div>
+          </div>
+        </div>
+      </div>
+    </label>
     <button class="btn btn-reset" onclick="loadData(false)">🔄 รีเฟรช</button>
     <button class="btn btn-print" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
   </div>
 </nav>
 <div class="controls">
   <div class="ctrl-group">
-    <span class="ctrl-label">🔍 ค้นหา</span>
-    <input type="text" id="searchInput" placeholder="ค้นหา รุ่นรถ / เลขทะเบียน / สถานที่ / ผู้เสียหาย...">
+    <div class="form-control">
+      <input type="text" id="searchInput" placeholder=" " aria-label="ค้นหา รุ่นรถ / เลขทะเบียน / สถานที่ / ผู้เสียหาย">
+      <label for="searchInput" aria-hidden="true"><span style="transition-delay:0ms">ค้</span><span style="transition-delay:20ms">น</span><span style="transition-delay:40ms">ห</span><span style="transition-delay:60ms">า</span><span style="transition-delay:80ms">&nbsp;</span><span style="transition-delay:100ms">รุ่</span><span style="transition-delay:120ms">น</span><span style="transition-delay:140ms">ร</span><span style="transition-delay:160ms">ถ</span><span style="transition-delay:180ms">&nbsp;</span><span style="transition-delay:200ms">/</span><span style="transition-delay:220ms">&nbsp;</span><span style="transition-delay:240ms">เ</span><span style="transition-delay:260ms">ล</span><span style="transition-delay:280ms">ข</span><span style="transition-delay:300ms">ท</span><span style="transition-delay:320ms">ะ</span><span style="transition-delay:340ms">เ</span><span style="transition-delay:360ms">บี</span><span style="transition-delay:380ms">ย</span><span style="transition-delay:400ms">น</span><span style="transition-delay:420ms">&nbsp;</span><span style="transition-delay:440ms">/</span><span style="transition-delay:460ms">&nbsp;</span><span style="transition-delay:480ms">ส</span><span style="transition-delay:500ms">ถ</span><span style="transition-delay:520ms">า</span><span style="transition-delay:540ms">น</span><span style="transition-delay:560ms">ที่</span><span style="transition-delay:580ms">&nbsp;</span><span style="transition-delay:600ms">/</span><span style="transition-delay:620ms">&nbsp;</span><span style="transition-delay:640ms">ผู้</span><span style="transition-delay:660ms">เ</span><span style="transition-delay:680ms">สี</span><span style="transition-delay:700ms">ย</span><span style="transition-delay:720ms">ห</span><span style="transition-delay:740ms">า</span><span style="transition-delay:760ms">ย</span></label>
+    </div>
   </div>
   <div class="ctrl-group">
     <span class="ctrl-label">📅 ตั้งแต่</span>
@@ -400,15 +751,20 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
     <div class="card fs-card" id="mapCard">
       <div class="card-head">
         <div class="card-title">แผนที่ความหนาแน่นจุดเกิดเหตุ<span class="fs-sub"></span></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div class="seg" id="mapModeSeg">
-            <button data-mode="heat" class="on">🔥 Heat Map</button>
-            <button data-mode="cluster">⭕ จำนวนต่อจุด</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <div class="cbox-group sliding" id="mapModeSeg" role="group" aria-label="รูปแบบแผนที่">
+            <span class="cbox-slider" aria-hidden="true"></span>
+            <button class="cbox on" data-mode="heat"><span class="inner">🔥 Heat Map</span></button>
+            <button class="cbox" data-mode="cluster"><span class="inner">⭕ จำนวนต่อจุด</span></button>
           </div>
-          <button class="mini-btn on" id="zoneToggleBtn" title="แสดง/ซ่อนเส้นเขตตรวจ">🗺️ เขตตรวจ</button>
-          <button class="mini-btn on" id="pulseToggleBtn" title="แสดง/ซ่อนวงกระเพื่อมที่จุดเกิดเหตุมากที่สุด (อันดับ 1 ใน Top 5)" aria-pressed="true">🎯 อันดับ 1</button>
-          <button class="mini-btn" id="mapFitBtn" title="ซูมให้เห็นทั้งพื้นที่">⤢ ทุกจุด</button>
-          <button class="mini-btn fs-btn" data-target="mapCard" title="แสดงเต็มจอ (Esc เพื่อออก)">⛶ เต็มจอ</button>
+          <div class="cbox-group" role="group" aria-label="แสดงบนแผนที่">
+            <button class="cbox on" id="zoneToggleBtn" title="แสดง/ซ่อนเส้นเขตตรวจ" aria-pressed="true"><span class="inner">🗺️ เขตตรวจ</span></button>
+            <button class="cbox on" id="pulseToggleBtn" title="แสดง/ซ่อนวงกระเพื่อมที่จุดเกิดเหตุมากที่สุด (อันดับ 1 ใน Top 5)" aria-pressed="true"><span class="inner">🎯 อันดับ 1</span></button>
+          </div>
+          <div class="cbox-group" role="group" aria-label="มุมมองแผนที่">
+            <button class="cbox" id="mapFitBtn" title="ซูมให้เห็นทั้งพื้นที่"><span class="inner">⤢ ทุกจุด</span></button>
+            <button class="cbox fs-btn" data-target="mapCard" title="แสดงเต็มจอ (Esc เพื่อออก)"><span class="inner">⛶ เต็มจอ</span></button>
+          </div>
         </div>
       </div>
       <div class="map-wrap">
@@ -769,10 +1125,16 @@ function applyData(rows, locRows){
   render(getFiltered());
 }
 
+// ===== Loading screen =====
+function hideBootLoader(){ const b = document.getElementById('bootLoader'); if(b) b.classList.add('done'); }
+setTimeout(hideBootLoader, 15000); // never block the page for long, even if the sheet is slow
+
 // ===== Motion helpers =====
 let quietRender = false;      // true while the 60-second auto-refresh re-renders: no animation
 let firstRevealDone = false;
-const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// No animation for the LINE bot's screenshot links (?from=&to=) so captures never catch a half-finished frame
+const BOT_VIEW = /[?&](from|to)=/.test(location.search);
+const reduceMotion = BOT_VIEW || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 function wantMotion(){ return !quietRender && !reduceMotion; }
 // Cards slide up one after another (KPIs, then the visible tab's cards)
 function revealVisible(){
@@ -819,11 +1181,12 @@ async function loadData(isAutoRefresh){
     if(footerEl) footerEl.textContent = `ข้อมูล ณ วันที่ ${stamp} · สถานีตำรวจภูธรบางบ่อ (ซิงก์อัตโนมัติจาก Google Sheet)`;
     if(statusEl) statusEl.innerHTML = `<span class="live-dot" title="ซิงก์สดจาก Google Sheet ทุก 1 นาที"></span>อัปเดตล่าสุด ${now.toLocaleTimeString('th-TH')}`;
     quietRender = false;
-    if(!firstRevealDone){ firstRevealDone = true; revealVisible(); }
+    if(!firstRevealDone){ firstRevealDone = true; hideBootLoader(); revealVisible(); }
   }catch(err){
     console.error('loadData failed:', err);
     quietRender = false;
     if(statusEl) statusEl.innerHTML = '<span class="live-dot err"></span>ซิงก์ข้อมูลไม่สำเร็จ — จะลองใหม่อัตโนมัติ';
+    hideBootLoader();
   }
 }
 
@@ -832,12 +1195,12 @@ function isDark(){ return document.documentElement.getAttribute('data-theme')===
 function setTheme(t, save){
   if(t==='dark') document.documentElement.setAttribute('data-theme','dark');
   else document.documentElement.removeAttribute('data-theme');
-  document.getElementById('themeBtn').textContent = t==='dark' ? '☀️' : '🌙';
+  document.getElementById('themeBtn').checked = t==='dark';
   if(save){ try{ localStorage.setItem('bangbo-theme', t); }catch(e){} }
   if(RAW.length) render(getFiltered()); // redraw canvas charts with new axis colors
 }
-document.getElementById('themeBtn').addEventListener('click', ()=>setTheme(isDark()?'light':'dark', true));
-document.getElementById('themeBtn').textContent = isDark() ? '☀️' : '🌙';
+document.getElementById('themeBtn').addEventListener('change', e=>setTheme(e.target.checked ? 'dark' : 'light', true));
+document.getElementById('themeBtn').checked = isDark();
 // Print always uses light colors for canvas charts too
 window.addEventListener('beforeprint', ()=>{ if(isDark()){ document.documentElement.dataset.printWasDark='1'; setTheme('light', false); } });
 window.addEventListener('afterprint',  ()=>{ if(document.documentElement.dataset.printWasDark){ delete document.documentElement.dataset.printWasDark; setTheme('dark', false); } });
@@ -1158,9 +1521,47 @@ function initMap(){
   zoneLayer.addTo(theftMap);
   zoneBounds = L.latLngBounds(ZONE_POLYS.flatMap(f=>f.geometry.coordinates[0].map(([x,y])=>[y,x])));
   heatLayer.addTo(theftMap);
+  theftMap.on('zoomstart', ()=>{ if(zoneAnimTimer) finishZoneAnim(); });
   theftMap.on('focus', ()=>theftMap.scrollWheelZoom.enable());
   theftMap.on('blur',  ()=>theftMap.scrollWheelZoom.disable());
   return true;
+}
+// Zone outlines draw themselves (line traced around each zone, then the fill fades in, then the label pops)
+let zoneAnimTimer = null;
+function finishZoneAnim(){
+  clearTimeout(zoneAnimTimer); zoneAnimTimer = null;
+  Object.values(zonePolyLayers).forEach(poly=>{
+    const p = poly._path; if(p){ p.style.transition = p.style.strokeDasharray = p.style.strokeDashoffset = p.style.fillOpacity = p.style.opacity = ''; }
+    const t = poly.getTooltip() && poly.getTooltip().getElement(); if(t){ t.classList.remove('zl-wait','zl-pop'); t.style.opacity = ''; t.style.transition = ''; }
+  });
+}
+function animateZones(){
+  if(reduceMotion || !theftMap || !theftMap.hasLayer(zoneLayer)) return;
+  finishZoneAnim();
+  const polys = Object.values(zonePolyLayers);
+  const DRAW = 1400, STAGGER = 250, FILL = 500;
+  polys.forEach((poly, i)=>{
+    const p = poly._path; if(!p || !p.getTotalLength) return;
+    const len = Math.ceil(p.getTotalLength()) + 2;
+    p.style.transition = 'none';
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len; p.style.fillOpacity = 0;
+    const t = poly.getTooltip() && poly.getTooltip().getElement(); if(t) t.classList.add('zl-wait');
+    p.getBoundingClientRect(); // start from the hidden state
+    const d = i*STAGGER;
+    p.style.transition = `stroke-dashoffset ${DRAW}ms cubic-bezier(.65,0,.35,1) ${d}ms, fill-opacity ${FILL}ms ease ${d+DRAW-200}ms`;
+    p.style.strokeDashoffset = 0; p.style.fillOpacity = '';
+    if(t) setTimeout(()=>{ t.classList.remove('zl-wait'); t.classList.add('zl-pop'); }, d+DRAW-100);
+  });
+  zoneAnimTimer = setTimeout(finishZoneAnim, (polys.length-1)*STAGGER + DRAW + FILL + 500);
+}
+function hideZones(){
+  if(reduceMotion || !theftMap.hasLayer(zoneLayer)){ theftMap.removeLayer(zoneLayer); return; }
+  finishZoneAnim();
+  Object.values(zonePolyLayers).forEach(poly=>{
+    const p = poly._path; if(p){ p.style.transition = 'opacity .35s ease'; p.style.opacity = 0; }
+    const t = poly.getTooltip() && poly.getTooltip().getElement(); if(t){ t.style.transition = 'opacity .35s ease'; t.style.opacity = 0; }
+  });
+  zoneAnimTimer = setTimeout(()=>{ if(!showZones) theftMap.removeLayer(zoneLayer); finishZoneAnim(); }, 380);
 }
 // Base maps (all tested from amarax23.github.io):
 //  - street: OpenStreetMap (Thai labels). OSM refuses requests with no website address,
@@ -1291,13 +1692,25 @@ function topOf(arr){ const c = {}; arr.forEach(v=>{ if(v!=null && v!=='') c[v]=(
 let hotPulse = null;
 let topPulse = null, lastTopKey = null, lastTopCenter = null, showTopPulse = true;
 try{ if(localStorage.getItem('bangbo-top-pulse') === 'off') showTopPulse = false; }catch(e){}
-function placeTopPulse(){
-  if(topPulse){ theftMap.removeLayer(topPulse); topPulse = null; }
-  if(!showTopPulse || !lastTopKey) return;
-  const [la, ln] = lastTopCenter;
-  topPulse = L.marker([la, ln], {interactive:false, keyboard:false, zIndexOffset:-100,
-    icon: L.divIcon({className:'hot-pulse', html:'<span></span><span></span><span></span><b></b>', iconSize:[44,44], iconAnchor:[22,22]})
+function placeTopPulse(intro){
+  if(!theftMap) return;
+  if(!showTopPulse || !lastTopKey){ if(topPulse){ theftMap.removeLayer(topPulse); topPulse = null; } return; }
+  const ll = lastTopCenter;
+  if(topPulse) topPulse.setLatLng(ll);   // keep the running animation on re-render / auto-refresh
+  else topPulse = L.marker(ll, {interactive:false, keyboard:false, zIndexOffset:-100,
+    icon: L.divIcon({className:'hot-pulse', html:'<i></i><span></span><span></span><span></span><b></b>', iconSize:[44,44], iconAnchor:[22,22]})
   }).addTo(theftMap);
+  const el = topPulse.getElement();
+  if(intro && el && !reduceMotion){
+    el.classList.add('intro');   // stays on this marker: removing it would shift the ring timing mid-pulse
+  }
+}
+function hideTopPulse(){
+  if(!topPulse) return;
+  const m = topPulse, el = m.getElement(); topPulse = null;
+  if(reduceMotion || !el){ theftMap.removeLayer(m); return; }
+  el.classList.add('outro');
+  setTimeout(()=>theftMap.removeLayer(m), 350);
 }
 function syncPulseBtn(){
   const b = document.getElementById('pulseToggleBtn');
@@ -1307,7 +1720,7 @@ document.getElementById('pulseToggleBtn').addEventListener('click', ()=>{
   showTopPulse = !showTopPulse;
   try{ localStorage.setItem('bangbo-top-pulse', showTopPulse ? 'on' : 'off'); }catch(e){}
   syncPulseBtn();
-  if(theftMap) placeTopPulse();
+  if(theftMap){ if(showTopPulse) placeTopPulse(true); else hideTopPulse(); }
 });
 syncPulseBtn();
 function renderHotspots(clusters){
@@ -1399,6 +1812,17 @@ function renderMap(dataAll){
     });
     clusterLayer.addLayer(c);
   });
+  if(popClustersNext){
+    popClustersNext = false;
+    // biggest spots first, then the smaller ones
+    const ls = clusterLayer.getLayers().sort((a,b)=>b.getRadius()-a.getRadius());
+    ls.forEach((c, i)=>{
+      const d = Math.min(i*35, 650);
+      if(c._path){ c._path.style.animationDelay = d + 'ms'; c._path.classList.add('cl-pop'); }
+      // the number fades in where it sits once its circle has grown (no scaling: it would fly in from the corner)
+      const t = c.getTooltip() && c.getTooltip().getElement(); if(t){ t.style.animationDelay = (d + 250) + 'ms'; t.classList.add('cl-lab-pop'); }
+    });
+  }
   renderHotspots(clusters);
   const allPts = dataAll.filter(r=>r.coord); // keep "ทุกจุด" framing stable during timelapse
   lastMapBounds = allPts.length ? L.latLngBounds(allPts.map(r=>[r.coord.lat, r.coord.lng])) : null;
@@ -1408,22 +1832,63 @@ function renderMap(dataAll){
     poly.setTooltipContent(`${name}<br>${data.filter(r=>r.zone===name).length} เหตุ`);
   });
   if(showZones && !theftMap.hasLayer(zoneLayer)) zoneLayer.addTo(theftMap);
-  if(!showZones && theftMap.hasLayer(zoneLayer)) theftMap.removeLayer(zoneLayer);
-  if(!mapFitted && lastMapBounds && !document.getElementById('panel-heat').hidden){ theftMap.fitBounds(lastMapBounds, {padding:[20,20], maxZoom:15}); mapFitted = true; }
+  if(!showZones && theftMap.hasLayer(zoneLayer) && !zoneAnimTimer) theftMap.removeLayer(zoneLayer);
+  if(!mapFitted && lastMapBounds && !document.getElementById('panel-heat').hidden){ theftMap.fitBounds(lastMapBounds, {padding:[20,20], maxZoom:15, animate:false}); mapFitted = true; setTimeout(animateZones, 150); }
   const low = pts.filter(r=>r.coordW<1).length;
   noteEl.textContent = data.length
     ? `มีพิกัด ${pts.length} จาก ${data.length} เหตุ` + (low?` · จุดความแม่นยำกลาง/ต่ำ ${low} เหตุ (ถ่วงน้ำหนักน้อยลง)`:'')
     : '';
 }
+// Switching Heat Map <-> count circles: the old layer fades/shrinks away, then the new one comes in
+let modeSwitchTimer = null, popClustersNext = false;
+function fadeInHeat(){
+  const cv = heatLayer && heatLayer._canvas; if(!cv) return;
+  cv.style.transition = 'none'; cv.style.opacity = 0; cv.getBoundingClientRect();
+  cv.style.transition = 'opacity .7s ease'; cv.style.opacity = '';
+  setTimeout(()=>{ cv.style.transition = ''; }, 750);
+}
 document.querySelectorAll('#mapModeSeg button').forEach(btn=>btn.addEventListener('click', ()=>{
+  if(btn.dataset.mode === mapMode && !modeSwitchTimer) return;
   mapMode = btn.dataset.mode;
   document.querySelectorAll('#mapModeSeg button').forEach(b=>b.classList.toggle('on', b===btn));
-  render(getFiltered());
+  positionSegSlider();
+  clearTimeout(modeSwitchTimer); modeSwitchTimer = null;
+  if(reduceMotion || !theftMap || document.getElementById('panel-heat').hidden){ render(getFiltered()); return; }
+  const toCluster = mapMode === 'cluster';
+  if(toCluster){
+    const cv = heatLayer._canvas;
+    if(cv && theftMap.hasLayer(heatLayer)){ cv.style.transition = 'opacity .3s ease'; cv.style.opacity = 0; }
+  }else{
+    // numbers fade first, then the circles shrink and fade (small ones first, the biggest last)
+    // while the heat map fades in underneath: a cross-fade instead of a hard cut
+    const ls = clusterLayer.getLayers().sort((a,b)=>a.getRadius()-b.getRadius());
+    ls.forEach((c, i)=>{
+      const t = c.getTooltip() && c.getTooltip().getElement(); if(t){ t.classList.remove('cl-lab-pop'); t.style.animationDelay = ''; t.style.transition = 'opacity .25s ease'; t.style.opacity = 0; }
+      if(c._path){ c._path.classList.remove('cl-pop'); c._path.getBoundingClientRect(); c._path.style.animationDelay = (60 + Math.round(i/Math.max(1,ls.length-1)*260)) + 'ms'; c._path.classList.add('cl-out'); }
+    });
+    setTimeout(()=>{ if(mapMode!=='heat') return; if(!theftMap.hasLayer(heatLayer)) heatLayer.addTo(theftMap); fadeInHeat(); }, 120);
+  }
+  modeSwitchTimer = setTimeout(()=>{
+    modeSwitchTimer = null;
+    if(toCluster){ popClustersNext = true; const cv = heatLayer._canvas; if(cv){ cv.style.transition = ''; cv.style.opacity = ''; } }
+    render(getFiltered());
+  }, toCluster ? 300 : 900);
 }));
+// green bar that slides under the selected map-mode button
+function positionSegSlider(instant){
+  const g = document.getElementById('mapModeSeg'), sl = g && g.querySelector('.cbox-slider');
+  const on = g && g.querySelector('.cbox.on');
+  if(!sl || !on || !on.offsetWidth) return;
+  if(instant) sl.style.transition = 'none';
+  sl.style.left = on.offsetLeft + 'px'; sl.style.width = on.offsetWidth + 'px';
+  if(instant){ sl.getBoundingClientRect(); sl.style.transition = ''; }
+}
+if(window.ResizeObserver) new ResizeObserver(()=>positionSegSlider(true)).observe(document.getElementById('mapModeSeg'));
+positionSegSlider(true);
 document.getElementById('zoneToggleBtn').addEventListener('click', e=>{
   showZones = !showZones;
-  e.currentTarget.classList.toggle('on', showZones);
-  if(theftMap){ if(showZones) zoneLayer.addTo(theftMap); else theftMap.removeLayer(zoneLayer); }
+  e.currentTarget.classList.toggle('on', showZones); e.currentTarget.setAttribute('aria-pressed', showZones);
+  if(theftMap){ if(showZones){ zoneLayer.addTo(theftMap); animateZones(); } else hideZones(); }
 });
 document.getElementById('mapFitBtn').addEventListener('click', ()=>{
   if(theftMap && lastMapBounds) theftMap.fitBounds(lastMapBounds, {padding:[20,20], maxZoom:15});
@@ -1442,7 +1907,8 @@ function updateFsButtons(){
   const cur = fsElement();
   document.querySelectorAll('.fs-btn').forEach(b=>{
     const on = cur && cur.id === b.dataset.target;
-    b.textContent = on ? '✕ ออกจากเต็มจอ' : '⛶ เต็มจอ';
+    const t = on ? '✕ ออกจากเต็มจอ' : '⛶ เต็มจอ';
+    if(b.classList.contains('cbox')){ b.innerHTML = '<span class="inner"></span>'; b.firstChild.textContent = t; } else b.textContent = t;
   });
   updateFsSub();
   setTimeout(()=>{
@@ -1622,6 +2088,67 @@ dowSel.addEventListener('change', ()=>render(getFiltered()));
 document.getElementById('zoneFilter').addEventListener('change', ()=>render(getFiltered()));
 fromSel.addEventListener('change', ()=>render(getFiltered()));
 toSel.addEventListener('change', ()=>render(getFiltered()));
+
+// Custom white drop-downs for the filter row (the native <select>s stay hidden and remain the source of truth)
+const CSEL_ARROW = '<svg class="csel-arrow" viewBox="0 0 512 512" aria-hidden="true"><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>';
+let openCsel = null;
+function closeCsel(w){ if(!w) return; w.classList.remove('open'); w.querySelector('.csel-selected').setAttribute('aria-expanded','false'); if(openCsel===w) openCsel = null; }
+function enhanceSelect(sel){
+  const wrap = document.createElement('div'); wrap.className = 'csel';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'csel-selected';
+  btn.setAttribute('aria-haspopup','listbox'); btn.setAttribute('aria-expanded','false');
+  const lab = sel.previousElementSibling && sel.previousElementSibling.classList.contains('ctrl-label') ? sel.previousElementSibling.textContent.replace(/[^\u0E00-\u0E7Fa-zA-Z ]/g,'').trim() : '';
+  if(lab) btn.setAttribute('aria-label', lab);
+  btn.innerHTML = '<span class="csel-txt"></span>' + CSEL_ARROW;
+  const list = document.createElement('div'); list.className = 'csel-options'; list.setAttribute('role','listbox');
+  sel.parentNode.insertBefore(wrap, sel);
+  wrap.append(sel, btn, list);
+  sel.classList.add('csel-native'); sel.tabIndex = -1; sel.setAttribute('aria-hidden','true');
+  const build = ()=>{
+    list.textContent = '';
+    [...sel.options].forEach((o,i)=>{
+      const d = document.createElement('div');
+      d.className = 'csel-option' + (i===sel.selectedIndex ? ' is-sel' : '');
+      d.setAttribute('role','option'); d.dataset.i = i; d.textContent = o.textContent;
+      list.appendChild(d);
+    });
+    const cur = sel.options[sel.selectedIndex];
+    btn.querySelector('.csel-txt').textContent = cur ? cur.textContent : '';
+  };
+  const pick = i=>{
+    if(i<0 || i>=sel.options.length || i===sel.selectedIndex) return;
+    sel.selectedIndex = i;
+    sel.dispatchEvent(new Event('change', {bubbles:true}));
+  };
+  // keep the face in step when code changes the select (filters reset, URL range, data refresh)
+  ['value','selectedIndex'].forEach(k=>{
+    const d = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, k);
+    Object.defineProperty(sel, k, {configurable:true, get(){ return d.get.call(sel); }, set(v){ d.set.call(sel, v); build(); }});
+  });
+  sel.addEventListener('change', build);
+  new MutationObserver(build).observe(sel, {childList:true, subtree:true, characterData:true});
+  btn.addEventListener('click', ()=>{
+    const willOpen = !wrap.classList.contains('open');
+    if(openCsel && openCsel!==wrap) closeCsel(openCsel);
+    wrap.classList.toggle('open', willOpen); btn.setAttribute('aria-expanded', String(willOpen));
+    if(willOpen){ openCsel = wrap; wrap.classList.remove('picked'); }
+  });
+  btn.addEventListener('keydown', e=>{
+    if(e.key==='ArrowDown'){ e.preventDefault(); pick(sel.selectedIndex+1); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); pick(sel.selectedIndex-1); }
+    else if(e.key==='Escape') closeCsel(wrap);
+  });
+  list.addEventListener('click', e=>{
+    const o = e.target.closest('.csel-option'); if(!o) return;
+    pick(+o.dataset.i);
+    closeCsel(wrap); wrap.classList.add('picked');   // close even while the mouse is still over it
+  });
+  wrap.addEventListener('mouseleave', ()=>wrap.classList.remove('picked'));
+  build();
+}
+['fromMonth','toMonth','tambonFilter','zoneFilter','dowFilter'].forEach(id=>{ const s = document.getElementById(id); if(s) enhanceSelect(s); });
+document.addEventListener('click', e=>{ if(openCsel && !openCsel.contains(e.target)) closeCsel(openCsel); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && openCsel) closeCsel(openCsel); });
 
 // Print header shows the actual print date
 document.getElementById('printDate').textContent =
