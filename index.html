@@ -41,6 +41,30 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px
 html.no-motion .nav-coin{animation:none}
 @media print{ .nav-coin{animation:none} }
 @media (max-width:700px){ .nav-logo{width:36px;height:42px} }
+/* ===== Home chooser ===== */
+#homeChooser{position:fixed;inset:0;z-index:6000;background:var(--bg);overflow:auto;display:flex;align-items:center;justify-content:center;padding:24px 16px;transition:opacity .35s ease}
+#homeChooser[hidden]{display:none}
+#homeChooser.leaving{opacity:0;pointer-events:none}
+.hc-inner{max-width:880px;width:100%;text-align:center}
+.hc-logo{display:flex;justify-content:center;perspective:700px;margin-bottom:10px}
+.hc-title{font-size:26px;color:var(--text-strong);margin:6px 0 2px}
+.hc-sub{color:var(--muted);margin:0 0 26px;font-size:15px}
+.hc-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:640px){ .hc-cards{grid-template-columns:1fr} }
+.hc-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 22px;border-radius:18px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);text-decoration:none;cursor:pointer;font-family:'Prompt',sans-serif;box-shadow:var(--shadow);
+  transition:transform .25s ease,box-shadow .3s ease;animation:fadeUp .5s cubic-bezier(.2,.7,.2,1) both}
+.hc-card:nth-child(2){animation-delay:.08s}
+.hc-card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;background:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .3s}
+.hc-card:hover{transform:translateY(-4px);box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
+.hc-card:hover::after{opacity:1}
+.hc-card:focus-visible{outline:3px solid #3b82f6;outline-offset:3px}
+.hc-ico{font-size:52px;line-height:1}
+.hc-name{font-size:20px;font-weight:700;color:var(--text-strong)}
+.hc-desc{font-size:13px;color:var(--muted)}
+.hc-stat{font-size:13px;font-weight:600;color:var(--accent-hover);min-height:1.2em}
+@media print{ #homeChooser{display:none!important} }
 /* ===== Loading screen ===== */
 #bootLoader{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .5s ease,visibility .5s}
 #bootLoader.done{opacity:0;visibility:hidden;pointer-events:none}
@@ -677,9 +701,35 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 // Links with ?from=/&to= are used by the LINE bot to take screenshots: no loading screen there
 if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader').remove(); document.documentElement.classList.add('no-motion'); }
 </script>
+<!-- Home: pick which report to open (skipped for bot links, #theft / #heatmap links) -->
+<div id="homeChooser" hidden>
+  <div class="hc-inner">
+    <div class="hc-logo"><div class="logo-spin" style="width:96px;height:111px"><div class="coin-face"></div><div class="coin-face back"></div></div></div>
+    <h1 class="hc-title">สถานีตำรวจภูธรบางบ่อ</h1>
+    <p class="hc-sub">เลือกรายงานที่ต้องการดู</p>
+    <div class="hc-cards">
+      <button class="hc-card" id="hcTheft" type="button">
+        <span class="hc-ico">🏍️</span>
+        <span class="hc-name">ข้อมูลรถจักรยานยนต์หาย</span>
+        <span class="hc-desc">สถิติ แผนที่จุดเกิดเหตุ Heat Map และตารางข้อมูล</span>
+        <span class="hc-stat" id="hcTheftStat">กำลังโหลด...</span>
+      </button>
+      <a class="hc-card" id="hcRedbox" href="redbox.html">
+        <span class="hc-ico">🚨</span>
+        <span class="hc-name">ผลการตรวจตู้แดง</span>
+        <span class="hc-desc">เจ้าหน้าที่แต่ละนายตรวจตู้แดงกี่ครั้ง แยกรายเดือน</span>
+        <span class="hc-stat" id="hcRedboxStat"></span>
+      </a>
+    </div>
+  </div>
+</div>
+<script>
+// show the chooser on a plain visit; links that point into the dashboard go straight there
+if(!/[?&](from|to)=/.test(location.search) && !location.hash) document.getElementById('homeChooser').hidden = false;
+</script>
 <nav>
   <div class="nav-brand">
-    <div class="nav-logo" role="img" aria-label="ตราสถานีตำรวจภูธรบางบ่อ"><div class="nav-coin"><div class="coin-face"></div><div class="coin-face back"></div></div></div>
+    <a href="index.html" title="กลับหน้าแรก" style="text-decoration:none"><div class="nav-logo" role="img" aria-label="ตราสถานีตำรวจภูธรบางบ่อ"><div class="nav-coin"><div class="coin-face"></div><div class="coin-face back"></div></div></div></a>
     <div>
       <div class="nav-title">Dashboard รถจักรยานยนต์หาย</div>
       <div class="nav-sub">สถานีตำรวจภูธรบางบ่อ · เม.ย. 2567 – พ.ค. 2569</div>
@@ -707,6 +757,7 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
         </div>
       </div>
     </label>
+    <a class="btn btn-reset" href="redbox.html" style="text-decoration:none">🚨 ตู้แดง</a>
     <button class="btn btn-reset" onclick="loadData(false)">🔄 รีเฟรช</button>
     <button class="btn btn-print" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
   </div>
@@ -1244,6 +1295,29 @@ function countTo(el, to, unitHTML){
   };
   el._raf = requestAnimationFrame(step);
 }
+// ===== Home chooser =====
+function chooserOpen(){ const c = document.getElementById('homeChooser'); return c && !c.hidden; }
+function playEntrance(){
+  if(wantMotion()){ document.getElementById('kpiTotal').dataset.v = '0'; render(getFiltered()); }
+  revealVisible();
+}
+function setChooserStat(){
+  const el = document.getElementById('hcTheftStat');
+  if(el && RAW.length) el.textContent = `${RAW.length} เหตุ · ${MONTH_LABELS[ALL_MONTHS[0]]} – ${MONTH_LABELS[ALL_MONTHS[ALL_MONTHS.length-1]]}`;
+}
+(function initChooser(){
+  const c = document.getElementById('homeChooser'); if(!c) return;
+  document.getElementById('hcTheft').addEventListener('click', ()=>{
+    history.replaceState(null, '', location.pathname + location.search + '#theft');
+    c.classList.add('leaving');
+    setTimeout(()=>{ c.hidden = true; c.classList.remove('leaving'); if(firstRevealDone) playEntrance(); }, 350);
+  });
+  if(c.hidden) return;
+  // red-box summary for its card (small counts-only file, loaded only when the chooser shows)
+  const sc = document.createElement('script'); sc.src = 'redbox-data.js';
+  sc.onload = ()=>{ const D = window.REDBOX; if(D) document.getElementById('hcRedboxStat').textContent = `${D.total.toLocaleString('th-TH')} ครั้ง · ${D.officers.length} นาย`; };
+  document.head.appendChild(sc);
+})();
 async function loadData(isAutoRefresh){
   const statusEl = document.getElementById('syncStatus');
   try{
@@ -1268,10 +1342,9 @@ async function loadData(isAutoRefresh){
       // bars growing) went unseen. Once the loader has faded, play the whole entrance again.
       const hadLoader = !!document.getElementById('bootLoader');
       hideBootLoader();
-      setTimeout(()=>{
-        if(wantMotion()){ document.getElementById('kpiTotal').dataset.v = '0'; render(getFiltered()); }
-        revealVisible();
-      }, hadLoader ? 450 : 0);
+      setChooserStat();
+      // while the home chooser is still open the entrance waits for the dashboard to be picked
+      if(!chooserOpen()) setTimeout(playEntrance, hadLoader ? 450 : 0);
     }
   }catch(err){
     console.error('loadData failed:', err);
