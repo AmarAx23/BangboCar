@@ -416,6 +416,8 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 .reveal{animation:fadeUp .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
 .anim-bars .bl-fill{transform-origin:left center;animation:growX .7s cubic-bezier(.2,.7,.2,1) both}
+.anim-bars .mc-lab{animation:labIn .45s ease .35s both}
+@keyframes labIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
 .anim-bars .hm-c:not(.zero){animation:fadeUp .4s ease-out both}
 /* pulsing rings on the #1 hotspot */
 .hot-pulse{pointer-events:none}
@@ -451,7 +453,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
-@media print{ .reveal,.anim-bars .bl-fill{animation:none!important} .hot-pulse{display:none} }
+@media print{ .reveal,.anim-bars .bl-fill,.anim-bars .mc-lab{animation:none!important} .hot-pulse{display:none} }
 /* Light/dark switch — "strong-squid-82" by Galahhad on Uiverse.io (MIT) */
 .theme-switch {
   --toggle-size: 7px;
@@ -1260,7 +1262,17 @@ async function loadData(isAutoRefresh){
     if(footerEl) footerEl.textContent = `ข้อมูล ณ วันที่ ${stamp} · สถานีตำรวจภูธรบางบ่อ (ซิงก์อัตโนมัติจาก Google Sheet)`;
     if(statusEl) statusEl.innerHTML = `<span class="live-dot" title="ซิงก์สดจาก Google Sheet ทุก 1 นาที"></span>อัปเดตล่าสุด ${now.toLocaleTimeString('th-TH')}`;
     quietRender = false;
-    if(!firstRevealDone){ firstRevealDone = true; hideBootLoader(); revealVisible(); }
+    if(!firstRevealDone){
+      firstRevealDone = true;
+      // The loading screen covered the first render, so its motion (cards sliding in, numbers counting,
+      // bars growing) went unseen. Once the loader has faded, play the whole entrance again.
+      const hadLoader = !!document.getElementById('bootLoader');
+      hideBootLoader();
+      setTimeout(()=>{
+        if(wantMotion()){ document.getElementById('kpiTotal').dataset.v = '0'; render(getFiltered()); }
+        revealVisible();
+      }, hadLoader ? 450 : 0);
+    }
   }catch(err){
     console.error('loadData failed:', err);
     quietRender = false;
@@ -1492,6 +1504,8 @@ function render(data){
     }).join('');
   }
   document.getElementById('modelChart').innerHTML = modelHTML;
+  const heroNum = document.querySelector('#modelChart .mc-hero-num');
+  if(heroNum && wantMotion()){ const v = parseInt(heroNum.textContent,10)||0; heroNum.dataset.v = '0'; countTo(heroNum, v, ''); }
   // Location chart — custom HTML
   // Prefer the curated "ข้อมูลรถหาย" summary tab (locations already merged/normalized by hand).
   // Only fall back to grouping raw records live once the user narrows the view with a filter,
