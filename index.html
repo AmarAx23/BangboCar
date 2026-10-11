@@ -97,8 +97,32 @@ input[type=text]:focus,select:focus{border-color:#3b82f6;background:var(--surfac
 .btn-print:hover{background:var(--accent-hover)}
 .btn-reset{background:var(--btn2);color:var(--btn2-text)}
 .btn-reset:hover{background:var(--btn2-hover);color:var(--text)}
-.btn-csv{background:#059669;color:#fff}
-.btn-csv:hover{background:#10b981}
+/* Reset button: a frame draws itself around the label on hover — adapted from "bitter-impala-54" by Cornerstone-04 on Uiverse.io (MIT) */
+.btn-clear{--line:#262626;background:transparent;border:none;padding:0;cursor:pointer;color:var(--text);font-family:'Prompt',sans-serif;outline:none}
+.btn-clear .box{position:relative;display:block;overflow:hidden;padding:8px 18px;font-size:14px;font-weight:800;transition:box-shadow .5s linear;border-radius:2px}
+.btn-clear .box::before,.btn-clear .box::after{position:absolute;content:'';left:0;width:100%;height:3px;box-sizing:border-box;border:0 solid transparent}
+.btn-clear .box::before{bottom:0;border-bottom-width:3px;border-left-width:3px;transform:translateX(100%)}
+.btn-clear .box::after{top:0;border-top-width:3px;border-right-width:3px;transform:translateX(-100%)}
+.btn-clear:hover .box{box-shadow:0 5px 15px rgba(0,0,0,.25)}
+.btn-clear:hover .box::before{border-color:var(--line);height:100%;transform:translateX(0);transition:.3s transform linear,.3s height linear .3s}
+.btn-clear:hover .box::after{border-color:var(--line);height:100%;transform:translateX(0);transition:.3s transform linear,.3s height linear .5s}
+.btn-clear:focus-visible .box{outline:2px solid #3b82f6;outline-offset:2px}
+:root[data-theme="dark"] .btn-clear{--line:#e2e8f0}
+:root[data-theme="dark"] .btn-clear:hover .box{box-shadow:0 5px 15px rgba(0,0,0,.6)}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .btn-clear{--line:#e2e8f0} }
+/* Excel button: green ridge frame whose top/bottom edges open up on hover, with an inner glow —
+   adapted from "loud-bird-67" by Navarog21 on Uiverse.io (MIT). The two covers use the bar's own background colour. */
+.btn-csv{position:relative;background:transparent;color:#107c41;border:3px ridge #16a34a;border-radius:.3em;padding:9px 20px;font-weight:700;transition:box-shadow 1s,color .3s}
+.btn-csv>*,.btn-csv .lbl{position:relative;z-index:1}
+.btn-csv::before,.btn-csv::after{content:'';position:absolute;left:3%;width:95%;height:40%;background:var(--surface);transition:transform .5s;transform-origin:center;z-index:0}
+.btn-csv::after{top:-10px}
+.btn-csv::before{top:80%}
+.btn-csv:hover::before,.btn-csv:hover::after{transform:scale(0)}
+.btn-csv:hover{box-shadow:inset 0 0 22px rgba(22,163,74,.55)!important;transform:none!important;color:#0b5e30}
+:root[data-theme="dark"] .btn-csv{color:#4ade80}
+:root[data-theme="dark"] .btn-csv:hover{color:#86efac}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .btn-csv{color:#4ade80} :root:not([data-theme="light"]) .btn-csv:hover{color:#86efac} }
+.btn-csv:disabled{opacity:.75;cursor:progress}
 .btn-icon{padding:7px 11px}
 .result-count{font-size:13px;color:var(--faint);margin-left:auto}
 /* MAIN */
@@ -117,6 +141,11 @@ main{padding:20px 24px}
 .chart-row-1{grid-template-columns:1fr}
 .chart-row-2{grid-template-columns:1fr 1fr}
 .chart-row-3{grid-template-columns:1fr 1fr 1fr}
+/* model card on the left, location + trend stacked on the right (heights line up, no empty space) */
+.chart-row-split{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
+.split-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.trend-card{flex:1;display:flex;flex-direction:column}
+.trend-box{position:relative;width:100%;flex:1;min-height:240px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
 .card-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
 .card-note{font-size:12px;color:var(--faint);margin-top:8px}
@@ -131,8 +160,39 @@ main{padding:20px 24px}
 .bl-unit{font-size:11px;color:var(--faint);margin-left:2px}
 .bl-track{height:8px;background:var(--track);border-radius:99px;overflow:hidden}
 .bl-fill{height:100%;border-radius:99px;transition:width .4s ease}
+/* รุ่นที่หายมากสุด: highlight box for #1 + thick bars with the number inside */
+.mc-hero{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#fee2e2,#fff7ed);border:1px solid #fecaca;border-radius:12px;padding:14px;margin-bottom:14px}
+.mc-ring{width:64px;height:64px;border-radius:50%;background:conic-gradient(#ef4444 calc(var(--p)*1%),rgba(239,68,68,.15) 0);display:grid;place-items:center;flex-shrink:0}
+.mc-ring i{width:48px;height:48px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:13px;color:#ef4444}
+.mc-hero-lbl{font-size:13px;color:#7f1d1d}
+.mc-hero-main{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.mc-hero-num{font-size:36px;font-weight:700;color:#ef4444;line-height:1.1}
+.mc-hero-name{font-weight:700;font-size:17px;color:var(--text)}
+.mc-hero-vs{font-size:12px;color:#991b1b}
+:root[data-theme="dark"] .mc-hero{background:linear-gradient(135deg,rgba(239,68,68,.16),rgba(249,115,22,.08));border-color:rgba(239,68,68,.35)}
+:root[data-theme="dark"] .mc-hero-lbl,:root[data-theme="dark"] .mc-hero-vs{color:#fca5a5}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .mc-hero{background:linear-gradient(135deg,rgba(239,68,68,.16),rgba(249,115,22,.08));border-color:rgba(239,68,68,.35)} :root:not([data-theme="light"]) .mc-hero-lbl,:root:not([data-theme="light"]) .mc-hero-vs{color:#fca5a5} }
+.mc-track{position:relative;height:24px;background:var(--track);border-radius:7px;overflow:hidden}
+.mc-track .mc-fill{border-radius:7px}
+.mc-lab{position:absolute;left:9px;top:0;bottom:0;display:flex;align-items:center;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);white-space:nowrap;pointer-events:none}
+.mc-lab.out{color:var(--text);text-shadow:none}
+.loc-row{align-items:flex-start}
+.loc-rank{width:30px;height:30px;border-radius:50%;color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center;flex-shrink:0;margin-top:2px;box-shadow:0 2px 6px -2px rgba(0,0,0,.35)}
+.loc-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:4px}
+@media print{ .mc-hero{background:#fff!important} .mc-lab{color:#000!important;text-shadow:none!important} .mc-lab:not(.out){left:auto!important;right:8px} }
 /* TABLE */
 .table-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:14px;box-shadow:var(--shadow)}
+/* Cards: green-to-blue gradient rim and soft green glow on hover, adapted from "cuddly-catfish-6" by Tiagoadag on Uiverse.io (MIT) */
+.kpi,.card,.table-card{position:relative;transition:box-shadow .3s ease}
+.kpi::after,.card::after,.table-card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;z-index:2;
+  background:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:0;transition:opacity .3s ease}
+.kpi:hover,.card:hover,.table-card:hover{box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
+.kpi:hover::after,.card:hover::after,.table-card:hover::after{opacity:1}
+.fs-card:fullscreen::after,.fs-card.pseudo-full::after{display:none}
+.fs-card:fullscreen:hover,.fs-card.pseudo-full:hover{box-shadow:none}
+@media print{ .kpi::after,.card::after,.table-card::after{display:none} .kpi,.card,.table-card{box-shadow:none!important} }
 .table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px}
 .table-header h3{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
 .tbl-wrap{overflow-x:auto;max-height:360px;overflow-y:auto}
@@ -198,21 +258,35 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 .tl-play{min-width:78px}
 .fs-card:fullscreen .tl-label,.fs-card.pseudo-full .tl-label{font-size:20px}
 /* PAGE TABS */
-/* Page tabs: white pill that lifts, with a fading ring on hover — adapted from "friendly-dragon-76" by cssbuttons-io on Uiverse.io (MIT) */
+/* Page tabs: moving gradient + soft glow halo on hover — adapted from "selfish-kangaroo-64" by kirzin on Uiverse.io (MIT),
+   kept in the page's own colours: blue for the open tab, white for the other */
 .tabbar{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0 22px}
 .tab{
-  position:relative;z-index:0;display:inline-flex;align-items:center;gap:8px;cursor:pointer;
-  font-family:'Prompt',sans-serif;font-size:16px;font-weight:600;padding:.8em 2.3em;border:none;border-radius:6em;
-  color:#111;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08);transition:all .2s
+  /* the first third of each gradient is the plain button colour, so at rest it looks exactly as before */
+  --g:linear-gradient(90deg,#ffffff 0%,#ffffff 34%,#dbeafe 50%,#ffffff 66%,#e0e7ff 83%,#ffffff 100%);
+  --halo:linear-gradient(90deg,#e2e8f0,#bfdbfe,#e0e7ff,#cbd5e1,#e2e8f0);
+  position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  font-family:'Prompt',sans-serif;font-size:16px;font-weight:600;padding:.8em 2.3em;border:none;border-radius:30px;
+  color:#111;background:transparent;transition:color .2s
 }
-.tab::after{content:'';position:absolute;inset:0;border-radius:100px;z-index:-1;background:#fff;transition:all .4s}
-.tab:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(0,0,0,.2)}
-.tab:active{transform:translateY(-1px);box-shadow:0 5px 10px rgba(0,0,0,.2)}
-.tab:hover::after{transform:scaleX(1.4) scaleY(1.6);opacity:0}
-.tab.on{color:#fff;background:var(--accent-hover)}
-.tab.on::after{background:var(--accent-hover)}
-.tab:focus-visible{outline:3px solid #3b82f6;outline-offset:3px}
+/* the button face is drawn on ::after so it sits above the glow (::before) */
+.tab::after{content:'';position:absolute;inset:0;z-index:-1;border-radius:30px;background:var(--g);background-size:300%}
+.tab::before{content:'';position:absolute;inset:-3px;z-index:-2;border-radius:33px;background:var(--halo);background-size:400%;transition:filter 1s,opacity 1s;opacity:.55}
+.tab:hover::before,.tab.on::before{opacity:.9}
+.tab:hover::after{animation:tabFlow 8s linear infinite}
+.tab:hover::before{filter:blur(16px);animation:tabFlow 8s linear infinite}
+@keyframes tabFlow{0%{background-position:0%}100%{background-position:400%}}
+.tab:active::after{background:linear-gradient(32deg,#ffffff,#e0e7ff,#f8fafc,#ffffff)}
+.tab.on{--g:linear-gradient(90deg,#2563eb 0%,#2563eb 34%,#60a5fa 50%,#1d4ed8 66%,#3b82f6 83%,#2563eb 100%);--halo:linear-gradient(90deg,#2563eb,#60a5fa,#1d4ed8,#93c5fd,#2563eb);color:#fff}
+.tab.on:active::after{background:linear-gradient(32deg,#2563eb,#60a5fa,#1d4ed8,#2563eb)}
+.tab:focus-visible{outline:3px solid #3b82f6;outline-offset:5px}
 @media (max-width:480px){ .tabbar{gap:10px} .tab{flex:1;justify-content:center;font-size:15px;padding:.75em 1em} }
+/* tabs live in the sticky header: always reachable while scrolling */
+nav .tabbar{margin:0;gap:14px;flex-wrap:nowrap}
+nav .tab{font-size:15px;padding:.55em 1.7em}
+@media (max-width:900px){ nav .tabbar{order:3;flex-basis:100%} nav .tab{flex:1;justify-content:center} }
+/* on phones the header is tall (title, buttons, tabs): let it scroll away instead of covering a third of the screen */
+@media (max-width:700px){ nav{position:static} }
 .tab-panel[hidden]{display:none}
 @media print{ .tabbar{display:none} }
 /* card header with title + small controls on the right */
@@ -297,12 +371,13 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
 /* RESPONSIVE */
 @media (max-width:1100px){
   .chart-row-3{grid-template-columns:1fr 1fr}
+  .chart-row-split{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
   .kpi-row{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:700px){
   nav,.controls{padding:12px 14px}
   main{padding:14px}
-  .chart-row-2,.chart-row-3{grid-template-columns:1fr}
+  .chart-row-2,.chart-row-3,.chart-row-split{grid-template-columns:1fr}
   .ctrl-group{flex:1 1 100%}
   input[type=text]{width:100%}
   .form-control{width:100%}
@@ -323,6 +398,7 @@ td:first-child{color:var(--faint);font-size:14px;width:36px}
   table{font-size:11px}
   tbody tr:hover{background:none}
   .chart-row-3{grid-template-columns:1fr 1fr 1fr}
+  .chart-row-split{grid-template-columns:1fr 2fr}
   .chart-row-2{grid-template-columns:1fr 1fr}
   .kpi-row{grid-template-columns:repeat(4,1fr)}
   .print-header{display:block !important}
@@ -607,6 +683,10 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
       <div class="nav-sub">สถานีตำรวจภูธรบางบ่อ · เม.ย. 2567 – พ.ค. 2569</div>
     </div>
   </div>
+  <div class="tabbar" role="tablist">
+    <button class="tab on" role="tab" data-tab="overview" aria-selected="true">📊 ภาพรวม</button>
+    <button class="tab" role="tab" data-tab="heat" aria-selected="false">🔥 Heat Map</button>
+  </div>
   <div class="nav-right">
     <span id="syncStatus" style="font-size:12px;color:var(--faint)"><span class="live-dot busy"></span>กำลังโหลดข้อมูล...</span>
     <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
@@ -662,8 +742,8 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
       <option value="">ทุกวัน</option>
     </select>
   </div>
-  <button class="btn btn-reset" onclick="resetFilters()">✕ รีเซ็ต</button>
-  <button class="btn btn-csv" onclick="exportCSV()" title="ดาวน์โหลดข้อมูลตามตัวกรองปัจจุบัน เปิดได้ใน Excel"><span class="arr">⬇️</span> ส่งออก CSV</button>
+  <button class="btn-clear" onclick="resetFilters()" title="ล้างตัวกรองทั้งหมด"><span class="box">✕ รีเซ็ต</span></button>
+  <button class="btn btn-csv" onclick="exportExcel(this)" title="ดาวน์โหลดไฟล์ Excel ตามตัวกรองปัจจุบัน (แผ่นข้อมูล + แผ่นสรุป)"><span class="arr">⬇️</span><span class="lbl">ดาวน์โหลด Excel</span></button>
   <span class="result-count" id="resultCount">แสดง 0 รายการ</span>
   <div class="chips" id="chips" style="flex-basis:100%"></div>
 </div>
@@ -673,10 +753,6 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
     <p id="printDate">สถานีตำรวจภูธรบางบ่อ</p>
   </div>
   <!-- Tabs -->
-  <div class="tabbar" role="tablist">
-    <button class="tab on" role="tab" data-tab="overview" aria-selected="true">📊 ภาพรวม</button>
-    <button class="tab" role="tab" data-tab="heat" aria-selected="false">🔥 Heat Map</button>
-  </div>
   <!-- KPI -->
   <div class="kpi-row">
     <div class="kpi">
@@ -702,18 +778,21 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
   </div>
   <div class="tab-panel" id="panel-overview">
   <!-- Model + Location + Trend -->
-  <div class="chart-row chart-row-3">
+  <div class="chart-row chart-row-split">
     <div class="card">
       <div class="card-title">รุ่นที่หายมากสุด</div>
       <div id="modelChart"></div>
     </div>
-    <div class="card">
-      <div class="card-title">สถานที่เกิดเหตุ (Top 6)</div>
-      <div id="locChart"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">แนวโน้มรายเดือน</div>
-      <div style="position:relative;width:100%;height:220px"><canvas id="trendChart"></canvas></div>
+    <div class="split-col">
+      <div class="card">
+        <div class="card-title">สถานที่เกิดเหตุ (Top 6)</div>
+        <div id="locChart"></div>
+      </div>
+      <div class="card trend-card">
+        <div class="card-title">แนวโน้มรายเดือน</div>
+        <div class="trend-box"><canvas id="trendChart"></canvas></div>
+        <div class="card-note" id="trendNote"></div>
+      </div>
     </div>
   </div>
   <!-- Time + Tambon + Brand -->
@@ -1219,6 +1298,68 @@ function barOptions(tooltipUnit, xFont){
     scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:xFont||10,family:'Prompt'},maxRotation:45,autoSkip:false}},
             y:{grid:{color:gc},ticks:{color:tc,font:{size:10},precision:0},min:0}}};
 }
+// Same look for every bar chart: rounded bars that fade from a light tint to full colour,
+// and the number on the busiest bar (trendDecor; year bands only when months are given)
+function fancyBars(id, labels, vals, colorOf, unit, opts){
+  opts = opts || {};
+  const max = Math.max(1, ...vals), avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+  const o = barOptions(unit, opts.xFont || 10);
+  if(wantMotion()) o.animation = {duration:600, easing:'easeOutCubic', delay:c=>c.type==='data' ? c.dataIndex*(opts.stagger||22) : 0};
+  o.layout = {padding:{top: opts.months ? 20 : 14}};
+  o.scales.y.grace = '8%';
+  if(opts.tooltipTitle) o.plugins.tooltip.callbacks.title = opts.tooltipTitle;
+  mkChart(id, {
+    type:'bar',
+    data:{ labels, datasets:[{ data: vals, borderRadius:6, borderSkipped:false, maxBarThickness: opts.maxBar || 34,
+      backgroundColor:c=>{
+        const {chart, dataIndex} = c, area = chart.chartArea, col = colorOf(vals[dataIndex]||0, dataIndex, max);
+        if(!area) return col;
+        const g = chart.ctx.createLinearGradient(0, area.bottom, 0, area.top);
+        g.addColorStop(0, col+'55'); g.addColorStop(1, col); return g;
+      }}] },
+    options:o,
+    plugins:[trendDecor(opts.months || null, vals, avg, max, colorOf)]
+  });
+  return {avg, max};
+}
+// Trend chart extras: shaded year bands (2567 / 2568 / ...) and the number on the busiest bar(s)
+function trendDecor(months, vals, avg, max, colorOf){
+  return {id:'trendDecor',
+    beforeDatasetsDraw(chart){
+      const {ctx, chartArea:a, scales:{x}} = chart; if(!a || !months || !months.length) return;
+      const half = (x.getPixelForValue(1) - x.getPixelForValue(0))/2 || 10;
+      let start = 0;
+      ctx.save();
+      for(let i=1;i<=months.length;i++){
+        if(i===months.length || months[i].slice(0,4)!==months[start].slice(0,4)){
+          const x0 = Math.max(a.left, x.getPixelForValue(start)-half), x1 = Math.min(a.right, x.getPixelForValue(i-1)+half);
+          const odd = (parseInt(months[start].slice(0,4),10)%2)===1;
+          ctx.fillStyle = isDark() ? (odd?'rgba(255,255,255,.035)':'rgba(255,255,255,0)') : (odd?'rgba(15,23,42,.035)':'rgba(15,23,42,0)');
+          ctx.fillRect(x0, a.top, x1-x0, a.bottom-a.top);
+          ctx.fillStyle = isDark() ? 'rgba(148,163,184,.55)' : 'rgba(100,116,139,.6)';
+          // year name above the plot, centred on its band (clear of the numbers on tall bars)
+          ctx.font = '600 10px Prompt, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+          if(x1-x0 > 26) ctx.fillText(String(parseInt(months[start].slice(0,4),10)+543), (x0+x1)/2, a.top-4);
+          if(i<months.length){ ctx.strokeStyle = isDark()?'rgba(255,255,255,.12)':'rgba(15,23,42,.1)'; ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(x1, a.top); ctx.lineTo(x1, a.bottom); ctx.stroke(); }
+          start = i;
+        }
+      }
+      ctx.restore();
+    },
+    afterDatasetsDraw(chart){
+      const {ctx, chartArea:a, scales:{y}} = chart; if(!a || !vals.length) return;
+      ctx.save();
+      // number on the busiest bar(s)
+      const meta = chart.getDatasetMeta(0);
+      ctx.font = '700 11px Prompt, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      meta.data.forEach((bar, i)=>{
+        if(vals[i] !== max || !vals[i]) return;   // only the busiest bar(s): the rest read off the axis
+        ctx.fillStyle = colorOf ? colorOf(vals[i], i, max) : '#ef4444';
+        ctx.fillText(vals[i], bar.x, bar.y-3);
+      });
+      ctx.restore();
+    }};
+}
 function count(arr, key){
   const c={};
   arr.forEach(r=>{ c[r[key]]=(c[r[key]]||0)+1; });
@@ -1258,20 +1399,15 @@ function modelBadge(m){
 }
 // One row of the custom HTML bar lists. Icon tile background is the bar color at low alpha
 // so it reads well in both light and dark mode.
-function barRow({icon, name, sub, title, val, unit, pct, barW, color, nameStyle}){
+function barRow({icon, name, sub, title, val, unit, pct, barW, color}){
+  const w = Math.max(4, barW), outside = w < 30;
+  const lab = `${val}${unit?' '+unit:''}${pct!=null?` · ${pct}%`:''}`;
   return `<div class="bl-row">
     <div class="bl-icon" style="background:${color}22">${icon}</div>
     <div class="bl-body">
-      <div class="bl-head">
-        <div style="min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis"${title?` title="${esc(title)}"`:''}>
-          <span class="bl-name" style="${nameStyle||''}">${esc(name)}</span>${sub?`<span class="bl-sub">${esc(sub)}</span>`:''}
-        </div>
-        <div style="flex-shrink:0;margin-left:8px">
-          <span class="bl-val" style="color:${color}">${val}</span>
-          <span class="bl-unit">${unit}${pct!=null?` (${pct}%)`:''}</span>
-        </div>
-      </div>
-      <div class="bl-track"><div class="bl-fill" style="width:${barW}%;background:${color}"></div></div>
+      <div class="loc-name"${title?` title="${esc(title)}"`:''}>${esc(name)}${sub?`<span class="bl-sub">${esc(sub)}</span>`:''}</div>
+      <div class="mc-track"><div class="bl-fill mc-fill" style="width:${w}%;background:linear-gradient(90deg,${color}88,${color})"></div>
+        <div class="mc-lab${outside?' out':''}" style="${outside?`left:calc(${w}% + 7px)`:''}">${lab}</div></div>
     </div>
   </div>`;
 }
@@ -1312,23 +1448,50 @@ function render(data){
   document.getElementById('tableCount').textContent = `${n} รายการ`;
   // Trend chart — colors scale with the busiest month in view instead of fixed 5/9 cut-offs
   const trendMax = Math.max(1, ...monthsInRange.map(m=>monthC[m]));
-  const trendOpts = barOptions('เหตุ', 9);
-  mkChart('trendChart',{
-    type:'bar',
-    data:{
-      labels: monthsInRange.map(m=>MONTH_LABELS[m]),
-      datasets:[{data:monthsInRange.map(m=>monthC[m]),backgroundColor:monthsInRange.map(m=>{const r=monthC[m]/trendMax;return r>=0.75?'#ef4444':r>=0.45?'#f97316':'#3b82f6';}),borderRadius:4,borderSkipped:false}]
-    },
-    options:trendOpts
-  });
+  const trendVals = monthsInRange.map(m=>monthC[m]);
+  const trendAvg = trendVals.length ? trendVals.reduce((a,b)=>a+b,0)/trendVals.length : 0;
+  fancyBars('trendChart', monthsInRange.map(m=>MONTH_LABELS[m]), trendVals,
+    v=>{ const r = v/trendMax; return r>=0.75?'#ef4444':r>=0.45?'#f97316':'#3b82f6'; }, 'เหตุ', {months:monthsInRange, xFont:9, maxBar:28});
+  const above = trendVals.filter(v=>v>trendAvg).length;
+  document.getElementById('trendNote').textContent = trendVals.length
+    ? `เฉลี่ย ${trendAvg.toFixed(1)} เหตุ/เดือน · สูงกว่าค่าเฉลี่ย ${above} จาก ${trendVals.length} เดือน` : '';
   // Model chart — custom HTML
   const topModels = topN(modelC, 12);
   const MODEL_COLORS = ['#ef4444','#f97316','#3b82f6','#8b5cf6','#10b981','#f59e0b','#06b6d4','#ec4899','#84cc16','#6366f1','#14b8a6','#64748b'];
-  const modelMax = topModels[0]?topModels[0][1]:1;
-  document.getElementById('modelChart').innerHTML = topModels.map(([name,val],i)=>barRow({
-    icon: i===0?'🥇':i===1?'🥈':i===2?'🥉':'🏍️', name, val, unit:'คัน',
-    pct: Math.round(val/n*100), barW: Math.round(val/modelMax*100), color: MODEL_COLORS[i]||MODEL_COLORS[11]
-  })).join('');
+  // #1 model gets a highlight box (it is usually far ahead: Wave ~80%), the rest are thick bars
+  // scaled to the #2 model so the differences between them stay visible
+  let modelHTML = '';
+  if(topModels.length){
+    const [hName, hVal] = topModels[0], hPct = n ? Math.round(hVal/n*100) : 0;
+    const second = topModels[1];
+    const ratio = second ? hVal/second[1] : 0;
+    const vs = !second ? 'มีรุ่นเดียวในช่วงนี้'
+      : ratio >= 1.5 ? `มากกว่ารุ่นที่ 2 ถึง ${ratio>=10 ? Math.round(ratio) : ratio.toFixed(1)} เท่า`
+      : `อันดับ 2: ${esc(second[0])} ${second[1]} คัน`;
+    modelHTML += `<div class="mc-hero">
+      <div class="mc-ring" style="--p:${hPct}"><i>${hPct}%</i></div>
+      <div style="min-width:0">
+        <div class="mc-hero-lbl">🥇 อันดับ 1</div>
+        <div class="mc-hero-main"><span class="mc-hero-num">${hVal}</span><span class="mc-hero-name">คัน · ${esc(hName)}</span></div>
+        <div class="mc-hero-vs">${vs}</div>
+      </div>
+    </div>`;
+    const rest = topModels.slice(1), restMax = rest.length ? rest[0][1] : 1;
+    modelHTML += rest.map(([name,val],j)=>{
+      const i = j+1, color = MODEL_COLORS[i]||MODEL_COLORS[11];
+      const w = Math.max(4, Math.round(val/restMax*100)), pct = n ? Math.round(val/n*100) : 0;
+      const outside = w < 30;   // short bar: the number sits just after it instead of inside
+      return `<div class="bl-row">
+        <div class="bl-icon" style="background:${color}22">${i===1?'🥈':i===2?'🥉':'🏍️'}</div>
+        <div class="bl-body">
+          <div class="bl-name" style="display:block;margin-bottom:3px">${esc(name)}</div>
+          <div class="mc-track"><div class="bl-fill mc-fill" style="width:${w}%;background:linear-gradient(90deg,${color}88,${color})"></div>
+            <div class="mc-lab${outside?' out':''}" style="${outside?`left:calc(${w}% + 7px)`:''}">${val} คัน · ${pct}%</div></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('modelChart').innerHTML = modelHTML;
   // Location chart — custom HTML
   // Prefer the curated "ข้อมูลรถหาย" summary tab (locations already merged/normalized by hand).
   // Only fall back to grouping raw records live once the user narrows the view with a filter,
@@ -1339,12 +1502,20 @@ function render(data){
   const topLoc = (noFiltersActive && TOP_LOCATIONS.length)
     ? TOP_LOCATIONS.slice(0,6).map(r=>[r.location, r.count])
     : topN(count(data,'location'), 6);
-  const LOC_COLORS = ['#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'];
+  // rank badge + full name (wraps, no "…") + thick bar with the count inside, same style as the model list
+  const LOC_COLORS = ['#ef4444','#f97316','#f59e0b','#3b82f6','#3b82f6','#3b82f6'];
   const locMax = topLoc[0]?topLoc[0][1]:1;
-  document.getElementById('locChart').innerHTML = topLoc.map(([name,val],i)=>barRow({
-    icon:'📍', name: name.length>35 ? name.substring(0,34)+'…' : name, title:name,
-    val, unit:'ครั้ง', barW: Math.round(val/locMax*100), color: LOC_COLORS[i], nameStyle:'font-size:12px'
-  })).join('');
+  document.getElementById('locChart').innerHTML = topLoc.map(([name,val],i)=>{
+    const color = LOC_COLORS[i]||'#3b82f6', w = Math.max(4, Math.round(val/locMax*100)), outside = w < 30;
+    return `<div class="bl-row loc-row">
+      <div class="loc-rank" style="background:${color}">${i+1}</div>
+      <div class="bl-body">
+        <div class="loc-name">${esc(name)}</div>
+        <div class="mc-track"><div class="bl-fill mc-fill" style="width:${w}%;background:linear-gradient(90deg,${color}88,${color})"></div>
+          <div class="mc-lab${outside?' out':''}" style="${outside?`left:calc(${w}% + 7px)`:''}">${val} ครั้ง</div></div>
+      </div>
+    </div>`;
+  }).join('');
   // Time chart — custom HTML bars
   const ORDER = ['เย็น-ดึก (18-24น.)','กลางคืน (00-06น.)','เช้า (06-12น.)','บ่าย (12-18น.)','ไม่ระบุ'];
   const TIME_META = [
@@ -1359,7 +1530,7 @@ function render(data){
   const timeMax    = Math.max(...timeCounts)||1;
   document.getElementById('timeChart').innerHTML = TIME_META.map((m,i)=>{
     const v = timeCounts[i]; if(!v) return '';
-    return barRow({icon:m.icon, name:m.label, sub:m.sub, val:v, unit:'', pct:Math.round(v/timeTotal*100), barW:Math.round(v/timeMax*100), color:m.color});
+    return barRow({icon:m.icon, name:m.label, sub:m.sub, val:v, unit:'เหตุ', pct:Math.round(v/timeTotal*100), barW:Math.round(v/timeMax*100), color:m.color});
   }).join('');
   // Tambon chart — custom HTML
   const topTambons = topN(tambonC,5);
@@ -1389,13 +1560,8 @@ function render(data){
   let dowUnknown = 0;
   data.forEach(r=>{ if(r.dow===null) dowUnknown++; else dowC[r.dow]++; });
   const dowMax = Math.max(1, ...dowC);
-  mkChart('dowChart',{
-    type:'bar',
-    data:{ labels: DOW_LABELS, datasets:[{ data: dowC,
-      backgroundColor: dowC.map((v,i)=> v===dowMax && v>0 ? '#ef4444' : (i>=5 ? '#8b5cf6' : '#3b82f6')),
-      borderRadius:4, borderSkipped:false }] },
-    options: barOptions('เหตุ', 11)
-  });
+  fancyBars('dowChart', DOW_LABELS, dowC,
+    (v,i)=> v===dowMax && v>0 ? '#ef4444' : (i>=5 ? '#8b5cf6' : '#3b82f6'), 'เหตุ', {xFont:11, stagger:50, maxBar:70});
   const topDow = dowC.indexOf(dowMax);
   document.getElementById('dowNote').textContent = n
     ? `เกิดบ่อยสุดวัน${DOW_LABELS[topDow]} (${dowC[topDow]} เหตุ)` + (dowUnknown?` · ไม่ระบุวันที่ ${dowUnknown} เหตุ`:'') + ' · นับจากวันที่เริ่มเกิดเหตุ'
@@ -1405,12 +1571,8 @@ function render(data){
   let hourUnknown = 0;
   data.forEach(r=>{ if(r.hour===null) hourUnknown++; else hourC[r.hour]++; });
   const slotColor = h => h<6 ? '#8b5cf6' : h<12 ? '#f97316' : h<18 ? '#10b981' : '#ef4444';
-  mkChart('hourChart',{
-    type:'bar',
-    data:{ labels: hourC.map((_,h)=>String(h).padStart(2,'0')), datasets:[{ data: hourC,
-      backgroundColor: hourC.map((_,h)=>slotColor(h)), borderRadius:3, borderSkipped:false }] },
-    options: (()=>{ const o = barOptions('เหตุ', 9); o.plugins.tooltip.callbacks.title = c=>`${c[0].label}.00 – ${c[0].label}.59 น.`; return o; })()
-  });
+  fancyBars('hourChart', hourC.map((_,h)=>String(h).padStart(2,'0')), hourC,
+    (v,h)=>slotColor(h), 'เหตุ', {xFont:9, stagger:18, maxBar:30, tooltipTitle:c=>`${c[0].label}.00 – ${c[0].label}.59 น.`});
   const hourMax = Math.max(...hourC);
   const peakHours = hourMax ? hourC.map((v,h)=>v===hourMax?h:-1).filter(h=>h>=0) : [];
   document.getElementById('hourNote').textContent = n
@@ -2023,24 +2185,101 @@ document.querySelectorAll('thead th[data-sort]').forEach(th=>{
 });
 
 // ===== CSV export (filtered data, UTF-8 with BOM so Excel shows Thai correctly) =====
-function exportCSV(){
-  const data = sortData(getFiltered());
-  const header = ['ลำดับ','เดือน','วันที่เริ่มเหตุ','วัน','วัน/เวลาเกิดเหตุ (ตามชีท)','รุ่นรถ','กลุ่มรุ่น','ทะเบียน','สถานที่เกิดเหตุ','ตำบล','ผู้เสียหาย','ช่วงเวลา','พิกัด','ความแม่นยำพิกัด','เขตตรวจ'];
-  const pad = x=>String(x).padStart(2,'0');
-  const rows = data.map(r=>[
-    r.id, r.month_th,
-    r.start ? `${r.start.getFullYear()}-${pad(r.start.getMonth()+1)}-${pad(r.start.getDate())}` : '',
-    r.dow!==null ? DOW_LABELS[r.dow] : '',
-    r.date_raw, r.model, bucketModel(r.model), r.plate, r.location, r.tambon, r.victim, r.timeslot, r.coordRaw, r.coordConf, r.zone
-  ]);
-  const csvCell = v => { const s = String(v==null?'':v); return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; };
-  const csv = '﻿' + [header, ...rows].map(row=>row.map(csvCell).join(',')).join('\r\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `รถหาย-บางบ่อ_${fromSel.value}_ถึง_${toSel.value}.csv`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+// Excel export: a formatted "ข้อมูล" sheet (styled header, frozen top row, filter buttons, wrapped text)
+// plus a "สรุป" sheet counted by month / model / tambon / zone. ExcelJS (~1 MB) is loaded on the first click only.
+const EXCELJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+function loadExcelJS(){
+  if(window.ExcelJS) return Promise.resolve(window.ExcelJS);
+  if(loadExcelJS._p) return loadExcelJS._p;
+  loadExcelJS._p = new Promise((res, rej)=>{
+    const sc = document.createElement('script'); sc.src = EXCELJS_URL; sc.async = true;
+    sc.onload = ()=> window.ExcelJS ? res(window.ExcelJS) : rej(new Error('ExcelJS missing'));
+    sc.onerror = ()=>{ loadExcelJS._p = null; rej(new Error('โหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ')); };
+    document.head.appendChild(sc);
+  });
+  return loadExcelJS._p;
+}
+async function exportExcel(btn){
+  const label = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างไฟล์...'; }
+  try{
+    const ExcelJS = await loadExcelJS();
+    const data = sortData(getFiltered());
+    const pad = x=>String(x).padStart(2,'0');
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'สภ.บางบ่อ Dashboard'; wb.created = new Date();
+    const HEAD_FILL = {type:'pattern', pattern:'solid', fgColor:{argb:'FF1D4ED8'}};
+    const styleHeader = row=>{
+      row.font = {bold:true, color:{argb:'FFFFFFFF'}, name:'Tahoma', size:11};
+      row.fill = HEAD_FILL; row.alignment = {vertical:'middle', horizontal:'center', wrapText:true}; row.height = 24;
+    };
+    // --- sheet 1: records
+    const ws = wb.addWorksheet('ข้อมูล', {views:[{state:'frozen', ySplit:1}]});
+    ws.columns = [
+      {header:'ลำดับ', key:'id', width:7}, {header:'เดือน', key:'month', width:10},
+      {header:'วันที่เริ่มเหตุ', key:'start', width:13, style:{numFmt:'dd/mm/yyyy'}}, {header:'วัน', key:'dow', width:10},
+      {header:'วัน/เวลาเกิดเหตุ (ตามชีท)', key:'raw', width:30}, {header:'รุ่นรถ', key:'model', width:30},
+      {header:'กลุ่มรุ่น', key:'group', width:11}, {header:'ทะเบียน', key:'plate', width:16},
+      {header:'สถานที่เกิดเหตุ', key:'loc', width:40}, {header:'ตำบล', key:'tambon', width:13},
+      {header:'ผู้เสียหาย', key:'victim', width:26}, {header:'ช่วงเวลา', key:'slot', width:17},
+      {header:'พิกัด', key:'coord', width:22}, {header:'ความแม่นยำพิกัด', key:'conf', width:15}, {header:'เขตตรวจ', key:'zone', width:13}
+    ];
+    data.forEach(r=>ws.addRow({
+      id:r.id, month:r.month_th,
+      start: r.start ? new Date(Date.UTC(r.start.getFullYear(), r.start.getMonth(), r.start.getDate())) : '',
+      dow: r.dow!==null ? DOW_LABELS[r.dow] : '', raw:r.date_raw, model:r.model, group:bucketModel(r.model), plate:r.plate,
+      loc:r.location, tambon:r.tambon, victim:r.victim, slot:r.timeslot, coord:r.coordRaw, conf:r.coordConf, zone:r.zone
+    }));
+    styleHeader(ws.getRow(1));
+    ws.eachRow((row, i)=>{ if(i===1) return;
+      row.alignment = {vertical:'top', wrapText:true};
+      row.font = {name:'Tahoma', size:10};
+      if(i%2===0) row.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFF1F5F9'}};
+    });
+    ws.autoFilter = {from:'A1', to:{row:1, column:ws.columns.length}};
+    // --- sheet 2: summary tables side by side
+    const sm = wb.addWorksheet('สรุป');
+    const title = sm.getCell('A1');
+    title.value = `สรุปเหตุรถจักรยานยนต์หาย สภ.บางบ่อ · ${MONTH_LABELS[fromSel.value]||''} – ${MONTH_LABELS[toSel.value]||''} · รวม ${data.length} เหตุ`;
+    title.font = {bold:true, size:14, name:'Tahoma'};
+    sm.getCell('A2').value = `ส่งออกเมื่อ ${new Date().toLocaleString('th-TH')}`; sm.getCell('A2').font = {italic:true, color:{argb:'FF64748B'}, name:'Tahoma', size:10};
+    const block = (col, head, pairs)=>{
+      const c = col;
+      sm.getRow(4).getCell(c).value = head; sm.getRow(4).getCell(c+1).value = 'จำนวน'; sm.getRow(4).getCell(c+2).value = '%';
+      [c,c+1,c+2].forEach(k=>{ const cell = sm.getRow(4).getCell(k); cell.font = {bold:true, color:{argb:'FFFFFFFF'}, name:'Tahoma'}; cell.fill = HEAD_FILL; cell.alignment = {horizontal:'center'}; });
+      const tot = pairs.reduce((a,p)=>a+p[1],0) || 1;
+      pairs.forEach(([k,v],i)=>{
+        const row = sm.getRow(5+i);
+        row.getCell(c).value = k; row.getCell(c+1).value = v;
+        row.getCell(c+2).value = v/tot; row.getCell(c+2).numFmt = '0%';
+        [c,c+1,c+2].forEach(x=>{ row.getCell(x).font = {name:'Tahoma', size:10}; });
+      });
+      const end = sm.getRow(5+pairs.length);
+      end.getCell(c).value = 'รวม'; end.getCell(c+1).value = pairs.reduce((a,p)=>a+p[1],0);
+      [c,c+1].forEach(x=>{ end.getCell(x).font = {bold:true, name:'Tahoma'}; });
+      sm.getColumn(c).width = head==='เดือน' ? 12 : 18; sm.getColumn(c+1).width = 9; sm.getColumn(c+2).width = 7; sm.getColumn(c+3).width = 3;
+    };
+    const monthC = {}; data.forEach(r=>{ monthC[r.month] = (monthC[r.month]||0)+1; });
+    block(1, 'เดือน', Object.keys(monthC).sort().map(m=>[MONTH_LABELS[m]||m, monthC[m]]));
+    block(5, 'กลุ่มรุ่น', topN(countBy(data, r=>bucketModel(r.model)), 50));
+    block(9, 'ตำบล', topN(count(data,'tambon'), 50));
+    block(13, 'เขตตรวจ', topN(count(data,'zone'), 50));
+    block(17, 'ช่วงเวลา', topN(count(data,'timeslot'), 50));
+    sm.views = [{state:'frozen', ySplit:4}];
+    // download
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `รถหาย-บางบ่อ_${fromSel.value}_ถึง_${toSel.value}.xlsx`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+  }catch(err){
+    console.error(err);
+    alert('สร้างไฟล์ Excel ไม่สำเร็จ: ' + err.message + '\nลองใหม่อีกครั้ง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+  }finally{
+    if(btn){ btn.disabled = false; btn.innerHTML = label; }
+  }
 }
 
 function getFiltered(opts){
