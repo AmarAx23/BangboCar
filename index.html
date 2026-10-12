@@ -45,16 +45,18 @@ html.no-motion .nav-coin{animation:none}
 #homeChooser{position:fixed;inset:0;z-index:6000;background:var(--bg);overflow:auto;display:flex;align-items:center;justify-content:center;padding:24px 16px;transition:opacity .35s ease}
 #homeChooser[hidden]{display:none}
 #homeChooser.leaving{opacity:0;pointer-events:none}
-.hc-inner{max-width:880px;width:100%;text-align:center}
+.hc-inner{max-width:1180px;width:100%;text-align:center}
 .hc-logo{display:flex;justify-content:center;perspective:700px;margin-bottom:10px}
 .hc-title{font-size:26px;color:var(--text-strong);margin:6px 0 2px}
 .hc-sub{color:var(--muted);margin:0 0 26px;font-size:15px}
-.hc-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.hc-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media (max-width:980px){ .hc-cards{grid-template-columns:1fr 1fr} .hc-cards .hc-card:last-child{grid-column:1 / -1} }
 @media (max-width:640px){ .hc-cards{grid-template-columns:1fr} }
 .hc-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 22px;border-radius:18px;border:1px solid var(--border);
   background:var(--surface);color:var(--text);text-decoration:none;cursor:pointer;font-family:'Prompt',sans-serif;box-shadow:var(--shadow);
   transition:transform .25s ease,box-shadow .3s ease;animation:fadeUp .5s cubic-bezier(.2,.7,.2,1) both}
 .hc-card:nth-child(2){animation-delay:.08s}
+.hc-card:nth-child(3){animation-delay:.16s}
 .hc-card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;background:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .3s}
 .hc-card:hover{transform:translateY(-4px);box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
@@ -65,6 +67,28 @@ html.no-motion .nav-coin{animation:none}
 .hc-desc{font-size:13px;color:var(--muted)}
 .hc-stat{font-size:13px;font-weight:600;color:var(--accent-hover);min-height:1.2em}
 @media print{ #homeChooser{display:none!important} }
+#leaveGate{position:fixed;inset:0;z-index:7000;background:rgba(2,6,23,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:lgFade .25s ease}
+#leaveGate[hidden]{display:none}
+@keyframes lgFade{from{opacity:0}to{opacity:1}}
+.login-box{position:relative;width:400px;max-width:100%;padding:40px;background:rgba(24,20,20,.987);box-sizing:border-box;box-shadow:0 15px 25px rgba(0,0,0,.6);border-radius:10px;text-align:left;font-family:'Prompt',sans-serif;animation:fadeUp .35s cubic-bezier(.2,.7,.2,1) both}
+.login-box .lg-title{color:#fff;font-size:20px;font-weight:700;margin-bottom:4px}
+.login-box .lg-sub{color:#bdb8b8;font-size:13px;margin-bottom:34px}
+.login-box .lg-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#9ca3af;font-size:18px;cursor:pointer}
+.login-box .lg-close:hover{color:#fff}
+.login-box .user-box{position:relative}
+.login-box .user-box input{width:100%;padding:10px 0;font-size:16px;color:#fff;margin-bottom:24px;border:none;border-bottom:1px solid #fff;outline:none;background:transparent;font-family:inherit;letter-spacing:3px}
+.login-box .user-box label{position:absolute;top:0;left:0;padding:10px 0;font-size:16px;color:#fff;pointer-events:none;transition:.5s}
+.login-box .user-box input:focus~label,.login-box .user-box input:valid~label{top:-20px;left:0;color:#bdb8b8;font-size:12px}
+.login-box .lg-err{min-height:20px;color:#f87171;font-size:13px}
+.login-box .lg-send{position:relative;display:inline-block;padding:10px 22px;color:#fff;font-size:16px;font-family:inherit;background:transparent;border:none;cursor:pointer;overflow:hidden;transition:.5s;margin-top:18px;letter-spacing:1px;font-weight:600}
+.login-box .lg-send:hover,.login-box .lg-send:focus-visible{background:#03f40f;color:#fff;border-radius:5px;outline:none;box-shadow:0 0 5px #03f40f,0 0 25px #03f40f,0 0 50px #03f40f,0 0 100px #03f40f}
+.login-box .lg-send:disabled{opacity:.6;cursor:progress}
+.login-box .lg-send span{position:absolute;display:block;bottom:2px;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,#03f40f);animation:btn-anim1 2s linear infinite}
+@keyframes btn-anim1{0%{left:-100%}50%,100%{left:100%}}
+.login-box.shake{animation:lgShake .4s}
+@keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@media print{ #leaveGate{display:none!important} }
+
 /* ===== Loading screen ===== */
 #bootLoader{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .5s ease,visibility .5s}
 #bootLoader.done{opacity:0;visibility:hidden;pointer-events:none}
@@ -720,7 +744,31 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
         <span class="hc-desc">เจ้าหน้าที่แต่ละนายตรวจตู้แดงกี่ครั้ง แยกรายเดือน</span>
         <span class="hc-stat" id="hcRedboxStat"></span>
       </a>
+      <a class="hc-card" id="hcLeave" href="https://amarax23.github.io/kuamkumla-bangbo/">
+        <span class="hc-ico">🗓️</span>
+        <span class="hc-name">ระบบควบคุมการลา</span>
+        <span class="hc-desc">ปฏิทินวันลา รายการลา สรุปรายบุคคล และยื่นใบลา</span>
+        <span class="hc-stat" id="hcLeaveStat">งานป้องกันปราบปราม</span>
+      </a>
     </div>
+  </div>
+</div>
+<!-- Password before opening the leave system — login box adapted from "warm-mule-6" by guilhermeyohan on Uiverse.io (MIT) -->
+<div id="leaveGate" hidden>
+  <div class="login-box" role="dialog" aria-modal="true" aria-labelledby="lgTitle">
+    <button type="button" class="lg-close" id="lgClose" aria-label="ปิด">✕</button>
+    <div class="lg-title" id="lgTitle">🔒 ระบบควบคุมการลา</div>
+    <div class="lg-sub">ใส่รหัสผู้อนุมัติเพื่อเข้าใช้งาน</div>
+    <form id="lgForm" autocomplete="off">
+      <div class="user-box">
+        <input type="password" id="lgPin" required autocomplete="off">
+        <label for="lgPin">รหัสผ่าน</label>
+      </div>
+      <div class="lg-err" id="lgErr" role="alert"></div>
+      <div style="text-align:center">
+        <button type="submit" class="lg-send" id="lgSend">เข้าสู่ระบบ<span></span></button>
+      </div>
+    </form>
   </div>
 </div>
 <script>
@@ -1317,6 +1365,47 @@ function setChooserStat(){
   const sc = document.createElement('script'); sc.src = 'redbox-data.js';
   sc.onload = ()=>{ const D = window.REDBOX; if(D) document.getElementById('hcRedboxStat').textContent = `${D.total.toLocaleString('th-TH')} ครั้ง · ${D.officers.length} นาย`; };
   document.head.appendChild(sc);
+  // leave system: how many requests are waiting for approval (same Apps Script the leave site reads)
+  const LEAVE_API = 'https://script.google.com/macros/s/AKfycbyvA77uO7cWUb0Z_Q2sEXd2McXqDoR2Zd0675n2kVjHGIIAq5OHEC2h9nfyMNeNeVry/exec';
+  const ctl = window.AbortController ? new AbortController() : null;
+  if(ctl) setTimeout(()=>ctl.abort(), 12000);
+  fetch(LEAVE_API + '?year=', ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
+    if(!j || !j.ok || !Array.isArray(j.rows)) return;
+    const wait = j.rows.filter(r=>r.status==='รออนุมัติ').length;
+    document.getElementById('hcLeaveStat').textContent = `ปีงบฯ ${j.year||''} · ${j.rows.length} รายการ` + (wait ? ` · รออนุมัติ ${wait}` : '');
+  }).catch(()=>{});
+  // leave system card asks for the approver code first; the code is checked by the leave system's own
+  // Apps Script (action 'login'), so it never sits in this page. Passing once is remembered for this tab.
+  const gate = document.getElementById('leaveGate'), leaveCard = document.getElementById('hcLeave');
+  const LEAVE_URL = leaveCard.href;
+  const openGate = ()=>{ gate.hidden = false; document.getElementById('lgErr').textContent = ''; const i = document.getElementById('lgPin'); i.value = ''; setTimeout(()=>i.focus(), 50); };
+  const closeGate = ()=>{ gate.hidden = true; };
+  leaveCard.addEventListener('click', e=>{
+    let ok = false; try{ ok = sessionStorage.getItem('leaveGateOk') === '1'; }catch(_){}
+    if(ok) return;                 // already passed in this tab: follow the link
+    e.preventDefault(); openGate();
+  });
+  document.getElementById('lgClose').addEventListener('click', closeGate);
+  gate.addEventListener('click', e=>{ if(e.target === gate) closeGate(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !gate.hidden) closeGate(); });
+  document.getElementById('lgForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const pin = document.getElementById('lgPin').value, btn = document.getElementById('lgSend'), err = document.getElementById('lgErr');
+    if(!pin) return;
+    btn.disabled = true; err.textContent = 'กำลังตรวจสอบรหัส...';
+    try{
+      // text/plain body: no CORS preflight with Apps Script (same as the leave site does)
+      const r = await fetch(LEAVE_API, {method:'POST', body: JSON.stringify({action:'login', pin})});
+      const j = await r.json();
+      if(!j.ok) throw new Error(j.error || 'รหัสไม่ถูกต้อง');
+      try{ sessionStorage.setItem('leaveGateOk', '1'); }catch(_){}
+      err.textContent = ''; location.href = LEAVE_URL;
+    }catch(ex){
+      err.textContent = /fetch|network/i.test(ex.message) ? 'เชื่อมต่อระบบลาไม่ได้ ลองใหม่อีกครั้ง' : 'รหัสไม่ถูกต้อง';
+      const box = gate.querySelector('.login-box'); box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+      document.getElementById('lgPin').select();
+    }finally{ btn.disabled = false; }
+  });
 })();
 async function loadData(isAutoRefresh){
   const statusEl = document.getElementById('syncStatus');
