@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>กลุ่มเสี่ยง – สภ.บางบ่อ</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="logo.webp">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>(function(){ try{ if(localStorage.getItem('bangbo-theme')==='dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){} })();</script>
+<style>
+:root{--bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;--text:#1e293b;--text-strong:#0f172a;--muted:#64748b;--faint:#94a3b8;--accent:#2563eb;--shadow:0 1px 3px rgba(0,0,0,.04)}
+:root[data-theme="dark"]{--bg:#0b1220;--surface:#111a2e;--border:#1e293b;--text:#e2e8f0;--text-strong:#f8fafc;--muted:#94a3b8;--faint:#64748b;--accent:#3b82f6;--shadow:none}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;display:flex;flex-direction:column}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+nav a{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+nav img{width:44px;height:51px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.nav-title{font-size:17px;font-weight:700;color:var(--text-strong)}
+.nav-sub{font-size:13px;color:var(--muted);margin-top:2px}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 16px}
+.soon{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:44px 34px;text-align:center;max-width:460px;width:100%;box-shadow:var(--shadow);animation:up .5s cubic-bezier(.2,.7,.2,1) both}
+.soon .ico{font-size:64px;line-height:1;margin-bottom:12px}
+.soon h1{font-size:22px;color:var(--text-strong);margin-bottom:6px}
+.soon p{color:var(--muted);line-height:1.6}
+.badge{display:inline-block;margin-top:18px;font-size:13px;font-weight:700;color:#b45309;background:#fef3c7;border-radius:99px;padding:5px 14px}
+:root[data-theme="dark"] .badge{background:#3a2f12;color:#f0c55a}
+.back{display:inline-block;margin-top:22px;color:var(--accent);font-weight:600;text-decoration:none}
+.back:hover{text-decoration:underline}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.soon{animation:none}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" title="กลับหน้าแรก"><img src="logo.webp" alt="ตราสถานีตำรวจภูธรบางบ่อ" width="44" height="51">
+    <div><div class="nav-title">กลุ่มเสี่ยง</div><div class="nav-sub">สถานีตำรวจภูธรบางบ่อ</div></div></a>
+</nav>
+<main>
+  <div class="soon">
+    <div class="ico">⚠️</div>
+    <h1>กลุ่มเสี่ยง</h1>
+    <p>ข้อมูลบุคคลและกลุ่มเสี่ยงในพื้นที่</p>
+    <span class="badge">🚧 กำลังจัดทำ</span><br>
+    <a class="back" href="index.html">← กลับหน้าแรก</a>
+  </div>
+</main>
+</body>
+</html>
