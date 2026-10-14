@@ -105,7 +105,6 @@ input[type=text]:focus,select:focus{border-color:#3b82f6;background:var(--surfac
 .btn-clear:focus-visible .box{outline:2px solid #3b82f6;outline-offset:2px}
 :root[data-theme="dark"] .btn-clear{--line:#e2e8f0}
 :root[data-theme="dark"] .btn-clear:hover .box{box-shadow:0 5px 15px rgba(0,0,0,.6)}
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .btn-clear{--line:#e2e8f0} }
 /* Excel button: green ridge frame whose top/bottom edges open up on hover, with an inner glow —
    adapted from "loud-bird-67" by Navarog21 on Uiverse.io (MIT). The two covers use the bar's own background colour. */
 .btn-csv{position:relative;background:transparent;color:#107c41;border:3px ridge #16a34a;border-radius:.3em;padding:9px 20px;font-weight:700;transition:box-shadow 1s,color .3s}
@@ -117,7 +116,6 @@ input[type=text]:focus,select:focus{border-color:#3b82f6;background:var(--surfac
 .btn-csv:hover{box-shadow:inset 0 0 22px rgba(22,163,74,.55)!important;transform:none!important;color:#0b5e30}
 :root[data-theme="dark"] .btn-csv{color:#4ade80}
 :root[data-theme="dark"] .btn-csv:hover{color:#86efac}
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .btn-csv{color:#4ade80} :root:not([data-theme="light"]) .btn-csv:hover{color:#86efac} }
 .btn-csv:disabled{opacity:.75;cursor:progress}
 .btn-icon{padding:7px 11px}
 .result-count{font-size:13px;color:var(--faint);margin-left:auto}
@@ -167,7 +165,6 @@ main{padding:20px 24px}
 .mc-hero-vs{font-size:12px;color:#991b1b}
 :root[data-theme="dark"] .mc-hero{background:linear-gradient(135deg,rgba(239,68,68,.16),rgba(249,115,22,.08));border-color:rgba(239,68,68,.35)}
 :root[data-theme="dark"] .mc-hero-lbl,:root[data-theme="dark"] .mc-hero-vs{color:#fca5a5}
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .mc-hero{background:linear-gradient(135deg,rgba(239,68,68,.16),rgba(249,115,22,.08));border-color:rgba(239,68,68,.35)} :root:not([data-theme="light"]) .mc-hero-lbl,:root:not([data-theme="light"]) .mc-hero-vs{color:#fca5a5} }
 .mc-track{position:relative;height:24px;background:var(--track);border-radius:7px;overflow:hidden}
 .mc-track .mc-fill{border-radius:7px}
 .mc-lab{position:absolute;left:9px;top:0;bottom:0;display:flex;align-items:center;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);white-space:nowrap;pointer-events:none}
@@ -337,8 +334,6 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   transition:left .3s cubic-bezier(.65,0,.35,1),width .3s cubic-bezier(.65,0,.35,1)}
 :root[data-theme="dark"] .cbox-group.sliding{background:rgba(255,255,255,.08)}
 :root[data-theme="dark"] .cbox-group.sliding .cbox:not(.on):hover{color:#fff}
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .cbox-group.sliding{background:rgba(255,255,255,.08)} :root:not([data-theme="light"]) .cbox-group.sliding .cbox:not(.on):hover{color:#fff} }
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .cbox:not(.on):not(:hover){background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)} }
 .cluster-label{background:transparent;border:none;box-shadow:none;color:#fff;font-weight:700;font-size:12px;text-shadow:0 0 3px rgba(0,0,0,.6)}
 .cl-pop{transform-box:fill-box;transform-origin:center;animation:clPop .45s cubic-bezier(.34,1.56,.64,1) both}
 .cl-out{transform-box:fill-box;transform-origin:center;animation:clOut .5s cubic-bezier(.4,0,.2,1) both}
