@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>รายงานรถจักรยานยนต์หาย – สภ.บางบ่อ</title>
 <link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="logo.webp">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="สภ.บางบ่อ">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -42,10 +48,10 @@ html.no-motion .nav-coin{animation:none}
 @media print{ .nav-coin{animation:none} }
 @media (max-width:700px){ .nav-logo{width:36px;height:42px} }
 /* ===== Home chooser ===== */
-#homeChooser{position:fixed;inset:0;z-index:6000;background:var(--bg);overflow:auto;display:flex;align-items:center;justify-content:center;padding:24px 16px;transition:opacity .35s ease}
+#homeChooser{position:fixed;inset:0;z-index:6000;background:var(--bg);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;transition:opacity .35s ease}
 #homeChooser[hidden]{display:none}
 #homeChooser.leaving{opacity:0;pointer-events:none}
-.hc-inner{max-width:1180px;width:100%;text-align:center}
+.hc-inner{max-width:1180px;width:100%;text-align:center;margin:auto 0}
 .hc-logo{display:flex;justify-content:center;perspective:700px;margin-bottom:10px}
 .hc-title{font-size:26px;color:var(--text-strong);margin:6px 0 2px}
 .hc-sub{color:var(--muted);margin:0 0 26px;font-size:15px}
@@ -695,6 +701,24 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
 }
+
+/* ===== ปุ่มเพิ่มลงหน้าจอโฮม (iPhone: บอกขั้นตอน · Android/Chrome: ติดตั้งได้ทันที) ===== */
+.a2hs-btn{margin:-8px 0 22px;font-family:'Prompt',sans-serif;font-size:15px;font-weight:600;color:#fff;background:#2563eb;border:none;border-radius:99px;padding:11px 26px;cursor:pointer;box-shadow:0 6px 16px -6px rgba(37,99,235,.6);transition:transform .15s,background .2s}
+.a2hs-btn:hover{background:#1d4ed8;transform:translateY(-1px)}
+.a2hs-btn[hidden]{display:none}
+#a2hsDlg{margin:auto;border:none;padding:0;background:transparent;width:min(380px,92vw);overflow:visible}
+#a2hsDlg::backdrop{background:rgba(15,23,42,.45);backdrop-filter:blur(3px)}
+.a2hs-box{position:relative;background:#fff;color:#0f172a;border-radius:18px;padding:28px 24px 22px;text-align:center;box-shadow:0 20px 45px rgba(15,23,42,.25);font-family:'Prompt',sans-serif}
+.a2hs-x{position:absolute;top:10px;right:12px;background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer}
+.a2hs-ico{border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.15);margin-bottom:10px}
+.a2hs-title{font-size:18px;font-weight:700;margin-bottom:14px}
+.a2hs-steps{list-style:none;padding:0;margin:0;text-align:left;display:grid;gap:10px}
+.a2hs-steps li{display:flex;align-items:center;gap:12px;background:#f1f5f9;border-radius:12px;padding:10px 12px;font-size:14.5px;line-height:1.45}
+.a2hs-steps b{font-weight:700}
+.a2hs-n{flex:none;width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
+.a2hs-share{display:inline-block;vertical-align:-4px;width:18px;height:18px}
+.a2hs-note{font-size:12.5px;color:#64748b;margin-top:12px;line-height:1.5}
+@media print{ .a2hs-btn{display:none!important} }
 </style>
 </head>
 <body>
@@ -716,6 +740,7 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
     <div class="hc-logo"><div class="logo-spin" style="width:96px;height:111px"><div class="coin-face"></div><div class="coin-face back"></div></div></div>
     <h1 class="hc-title">สถานีตำรวจภูธรบางบ่อ</h1>
     <p class="hc-sub">เลือกรายงานที่ต้องการดู</p>
+    <button type="button" class="a2hs-btn" id="a2hsBtn" hidden>📲 เพิ่มลงหน้าจอโฮม</button>
     <div class="hc-cards">
       <button class="hc-card" id="hcTheft" type="button">
         <span class="hc-ico">🏍️</span>
@@ -768,6 +793,14 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
     </div>
   </div>
 </div>
+<dialog id="a2hsDlg" aria-labelledby="a2hsTitle">
+  <div class="a2hs-box">
+    <button type="button" class="a2hs-x" id="a2hsClose" aria-label="ปิด">✕</button>
+    <img src="apple-touch-icon.png" alt="" width="64" height="64" class="a2hs-ico">
+    <div class="a2hs-title" id="a2hsTitle">เพิ่ม สภ.บางบ่อ ลงหน้าจอโฮม</div>
+    <div id="a2hsBody"></div>
+  </div>
+</dialog>
 <script>
 // show the chooser on a plain visit; links that point into the dashboard go straight there
 if(!/[?&](from|to)=/.test(location.search) && !location.hash) document.getElementById('homeChooser').hidden = false;
@@ -2548,6 +2581,38 @@ window.addEventListener('beforeprint', ()=>{
 // Initial load + auto-refresh so edits made in the Google Sheet show up here automatically
 loadData(false);
 setInterval(()=>loadData(true), REFRESH_MS);
+
+/* ===== เพิ่มลงหน้าจอโฮม ===== */
+(function(){
+  const btn = document.getElementById('a2hsBtn'), dlg = document.getElementById('a2hsDlg'), body = document.getElementById('a2hsBody');
+  if(!btn || !dlg) return;
+  const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  if(standalone) return;                                   // เปิดจากไอคอนบนหน้าจอโฮมอยู่แล้ว
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const inApp = /Line\/|FBAN|FBAV|Instagram|MicroMessenger/i.test(ua);
+  const isSafari = isIOS && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua) && !inApp;
+  let deferred = null;
+  const SHARE = '<svg class="a2hs-share" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>';
+  const step = (n, html) => `<li><span class="a2hs-n">${n}</span><span>${html}</span></li>`;
+  function iosSteps(){
+    if(!isSafari) return `<ol class="a2hs-steps">${step(1,'คัดลอกลิงก์หน้านี้')}${step(2,'เปิดด้วยแอป <b>Safari</b>')}${step(3,'แล้วกดปุ่มนี้อีกครั้ง')}</ol><div class="a2hs-note">บน iPhone เพิ่มลงหน้าจอโฮมได้จาก Safari เท่านั้น${inApp ? ' (ตอนนี้เปิดอยู่ในแอปอื่น เช่น LINE)' : ''}</div>`;
+    return `<ol class="a2hs-steps">${step(1,`กดปุ่ม <b>แชร์</b> ${SHARE} ที่แถบล่างของ Safari`)}${step(2,'เลื่อนลงแล้วเลือก <b>เพิ่มไปยังหน้าจอโฮม</b>')}${step(3,'กด <b>เพิ่ม</b> มุมขวาบน')}</ol><div class="a2hs-note">ไอคอนตราสถานีจะอยู่บนหน้าจอโฮม เปิดแล้วเต็มจอเหมือนแอป</div>`;
+  }
+  function genericSteps(){
+    return `<ol class="a2hs-steps">${step(1,'กดเมนู <b>⋮</b> มุมขวาบนของ Chrome')}${step(2,'เลือก <b>ติดตั้งแอป</b> หรือ <b>เพิ่มลงในหน้าจอหลัก</b>')}</ol>`;
+  }
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; btn.hidden = false; });
+  window.addEventListener('appinstalled', () => { btn.hidden = true; deferred = null; });
+  if(isIOS || /Android/i.test(ua)) btn.hidden = false;     // คอมพิวเตอร์: โชว์เฉพาะเมื่อเบราว์เซอร์รองรับการติดตั้ง
+  btn.addEventListener('click', async () => {
+    if(deferred){ deferred.prompt(); try{ await deferred.userChoice; }catch(e){} deferred = null; return; }
+    body.innerHTML = isIOS ? iosSteps() : genericSteps();
+    dlg.showModal();
+  });
+  document.getElementById('a2hsClose').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', e => { if(e.target === dlg) dlg.close(); });
+})();
 </script>
 </body>
 </html>
