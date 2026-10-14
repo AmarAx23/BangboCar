@@ -58,6 +58,12 @@ html.no-motion .nav-coin{animation:none}
 .hc-card:nth-child(2){animation-delay:.08s}
 .hc-card:nth-child(3){animation-delay:.16s}
 .hc-card:nth-child(4){animation-delay:.24s}
+.hc-card:nth-child(5){animation-delay:.32s}
+.hc-card:nth-child(6){animation-delay:.40s}
+.hc-card:nth-child(7){animation-delay:.48s}
+.hc-card:nth-child(8){animation-delay:.56s}
+.hc-soon .hc-stat{color:#b45309}
+:root[data-theme="dark"] .hc-soon .hc-stat{color:#f0c55a}
 .hc-card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;background:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .3s}
 .hc-card:hover{transform:translateY(-4px);box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
@@ -734,6 +740,30 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
         <span class="hc-name">ข้อมูลท้องถิ่น</span>
         <span class="hc-desc">ร้านทอง ธนาคาร ร้านสะดวกซื้อ ปั๊มน้ำมัน โรงเรียน วัด โรงแรม</span>
         <span class="hc-stat" id="hcLocalStat">สถานที่สำคัญในพื้นที่</span>
+      </a>
+      <a class="hc-card hc-soon" href="crime.html">
+        <span class="hc-ico">📊</span>
+        <span class="hc-name">วิเคราะห์อาชญากรรม</span>
+        <span class="hc-desc">สถิติคดี แนวโน้ม และพื้นที่เกิดเหตุ</span>
+        <span class="hc-stat">🚧 กำลังจัดทำ</span>
+      </a>
+      <a class="hc-card hc-soon" href="arrest.html">
+        <span class="hc-ico">🚔</span>
+        <span class="hc-name">ผลการจับกุม</span>
+        <span class="hc-desc">ผลการจับกุมแยกตามประเภทคดีและรายเดือน</span>
+        <span class="hc-stat">🚧 กำลังจัดทำ</span>
+      </a>
+      <a class="hc-card hc-soon" href="risk.html">
+        <span class="hc-ico">⚠️</span>
+        <span class="hc-name">กลุ่มเสี่ยง</span>
+        <span class="hc-desc">ข้อมูลบุคคลและกลุ่มเสี่ยงในพื้นที่</span>
+        <span class="hc-stat">🚧 กำลังจัดทำ</span>
+      </a>
+      <a class="hc-card hc-soon" href="personnel.html">
+        <span class="hc-ico">👮</span>
+        <span class="hc-name">สถานภาพกำลังพล</span>
+        <span class="hc-desc">จำนวนกำลังพล ตำแหน่ง และสถานะปฏิบัติหน้าที่</span>
+        <span class="hc-stat">🚧 กำลังจัดทำ</span>
       </a>
     </div>
   </div>
