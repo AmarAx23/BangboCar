@@ -2600,6 +2600,7 @@ setInterval(()=>loadData(true), REFRESH_MS);
     return `<ol class="a2hs-steps">${step(1,`กดปุ่ม <b>แชร์</b> ${SHARE} ที่แถบล่างของ Safari`)}${step(2,'เลื่อนลงแล้วเลือก <b>เพิ่มไปยังหน้าจอโฮม</b>')}${step(3,'กด <b>เพิ่ม</b> มุมขวาบน')}</ol><div class="a2hs-note">ไอคอนตราสถานีจะอยู่บนหน้าจอโฮม เปิดแล้วเต็มจอเหมือนแอป</div>`;
   }
   function genericSteps(){
+    if(inApp) return `<ol class="a2hs-steps">${step(1,'กดเมนู <b>⋮</b> หรือ <b>…</b> มุมขวาบนของแอปนี้ (เช่น LINE)')}${step(2,'เลือก <b>เปิดในเบราว์เซอร์</b> หรือ <b>เปิดใน Chrome</b>')}${step(3,'กดปุ่ม 📲 อีกครั้งใน Chrome')}</ol><div class="a2hs-note">ตอนนี้เปิดอยู่ในแอปอื่น ซึ่งเพิ่มลงหน้าจอหลักไม่ได้</div>`;
     return `<ol class="a2hs-steps">${step(1,'กดเมนู <b>⋮</b> มุมขวาบนของ Chrome')}${step(2,'เลือก <b>ติดตั้งแอป</b> หรือ <b>เพิ่มลงในหน้าจอหลัก</b>')}</ol>`;
   }
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; btn.hidden = false; });
