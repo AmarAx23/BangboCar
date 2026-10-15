@@ -777,8 +777,20 @@ main{max-width:none}
 .ck .ch{font-size:11.5px;font-weight:700;margin-top:2px}
 .ch.up{color:#dc2626}.ch.dn{color:#16a34a}.ch.eq{color:var(--faint)}
 /* ผังหลัก */
-.cr-main{display:grid;grid-template-columns:minmax(0,2.5fr) minmax(0,1fr);gap:14px;align-items:start}
-@media (max-width:1050px){ .cr-main{grid-template-columns:1fr} }
+.cr-main{display:grid;grid-template-columns:minmax(0,2.5fr) minmax(0,1fr);gap:14px;align-items:stretch}
+/* กรอบรายการเหตุล่าสุดสูงเท่ากรอบแผนที่พอดี · รายการเลื่อนดูในกรอบ */
+.lt-card{display:flex;flex-direction:column;height:0;min-height:100%}
+.lt-card .lt-scroll{flex:1 1 auto;min-height:0;overflow:auto}
+.lt-card .lt thead th{position:sticky;top:0;z-index:1;background:var(--surface)}
+.lt-card .pg{flex:none}
+@media (max-width:1050px){ .cr-main{grid-template-columns:1fr} .lt-card{height:auto;min-height:0;max-height:640px} }
+.layer-btn{width:84px;height:84px;padding:0;border:3px solid #fff;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.35);position:relative;overflow:hidden;font-family:'Prompt',sans-serif;transition:transform .15s ease,box-shadow .15s ease}
+.layer-btn span{position:absolute;left:0;right:0;bottom:0;padding:16px 6px 5px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;font-size:12px;font-weight:600;text-align:left;white-space:nowrap}
+.layer-btn:hover{box-shadow:0 2px 10px rgba(0,0,0,.5);transform:translateY(-2px)}
+.layer-btn:focus-visible{outline:3px solid #3b82f6;outline-offset:1px}
+@media (max-width:700px){ .layer-btn{width:66px;height:66px} }
+:root[data-theme="dark"] #crMap.sat .leaflet-tile-pane{filter:none}
+@media print{ .layer-btn{display:none} }
 .cr-row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:14px}
 @media (max-width:900px){ .cr-row2{grid-template-columns:1fr} }
 .c-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
@@ -1002,9 +1014,9 @@ body.staff #lockBtn{background:#dc2626;color:#fff}
           <div class="m-heat"><b>ความหนาแน่นเหตุ</b><div class="bar"></div><div class="sc"><span>น้อย</span><span>มาก</span></div></div>
           <div class="m-legend" id="mLegend"></div></div>
       </div>
-      <div class="card">
+      <div class="card lt-card">
         <div class="c-head"><div class="card-title">🚨 รายการเหตุล่าสุด</div><span class="c-note" id="ltCount"></span></div>
-        <div style="overflow-x:auto"><table class="lt" id="lt"></table></div>
+        <div class="lt-scroll"><table class="lt" id="lt"></table></div>
         <div class="pg" id="ltPg"></div>
       </div>
     </div>
@@ -1340,10 +1352,38 @@ let map,heat,pins,zoneLayer,zoneLbl={},markerById={};
 function pinIcon(g,d){ const G=GBY[g]||{c:'#64748b',ic:'📌'}; return L.divIcon({className:'',html:`<div class="pin-wrap${d!=null?' drop':''}" style="--d:${d||0}ms"><div class="cpin" style="background:${G.c}"><span>${G.ic}</span></div></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]}); }
 function sensHtml(r){ const x=STAFF&&SENS[r.row]; if(!x) return ''; return `<div class="pp-s">${x.victim?`<div>👤 ผู้เสียหาย: <b>${esc(x.victim)}</b></div>`:''}${x.suspect?`<div>🕵️ ผู้ก่อเหตุ: <b>${esc(x.suspect)}</b></div>`:''}${x.detail?`<div>📝 ${esc(x.detail)}</div>`:''}</div>`; }
 function popupHtml(r){ return `<div class="pp-t">${GBY[r.g].ic} ${esc(r.what||GBY[r.g].name)}${r.major?'<span class="mj">🔥 อุกฉกรรจ์/น่าสนใจ</span>':''}</div><div class="pp-a">${esc(GBY[r.g].name)}</div><div class="pp-a">${thDate(r.t)} ${r.nt?'· ไม่ระบุเวลา':hm(r.t)+' น.'} · ${esc(r.zone)}</div>${srcTag(r)?`<div class="pp-a">${srcTag(r)}</div>`:''}<div class="pp-a">📍 ${esc(r.place)}${r.weapon?` · <span class="wp">${esc(r.weapon)}</span>`:''}</div>${sensHtml(r)}`; }
+
+/* ---------- ปุ่มสลับแผนที่ / ดาวเทียม (แบบเดียวกับหน้ารถหาย · จำค่าร่วมกันผ่าน 'bangbo-basemap') ---------- */
+const BASEMAPS={
+  street:{label:'แผนที่',thumb:'https://tile.openstreetmap.org/14/12782/7568.png',
+    make:()=>L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'})},
+  sat:{label:'ดาวเทียม',thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/14/7568/12782',
+    make:()=>L.layerGroup([
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Imagery &copy; Esri, Maxar, Earthstar Geographics'}),
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,opacity:.8}),
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:18})])}
+};
+let baseMode='street', tileLayer=null, layerBtn=null;
+try{ if(localStorage.getItem('bangbo-basemap')==='sat') baseMode='sat'; }catch(_){}
+function setBaseMap(mode){
+  baseMode=mode; try{ localStorage.setItem('bangbo-basemap',mode); }catch(_){}
+  if(!map) return;
+  if(tileLayer) map.removeLayer(tileLayer);
+  tileLayer=BASEMAPS[mode].make().addTo(map);
+  $('crMap').classList.toggle('sat',mode==='sat');
+  if(!layerBtn){
+    const Ctl=L.Control.extend({options:{position:'bottomright'},onAdd(){ const b=L.DomUtil.create('button','layer-btn'); b.type='button'; L.DomEvent.disableClickPropagation(b); L.DomEvent.on(b,'click',()=>setBaseMap(baseMode==='sat'?'street':'sat')); return b; }});
+    layerBtn=new Ctl().addTo(map).getContainer();
+  }
+  const other=mode==='sat'?'street':'sat';
+  layerBtn.style.backgroundImage=`url("${BASEMAPS[other].thumb}")`;
+  layerBtn.title='เปลี่ยนเป็น'+BASEMAPS[other].label; layerBtn.setAttribute('aria-label',layerBtn.title);
+  layerBtn.innerHTML=`<span><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><path d="M12 2 1 8l11 6 11-6-11-6zm0 15.2L3.2 12.4 1 13.6 12 19.6l11-6-2.2-1.2L12 17.2zm0 4L3.2 16.4 1 17.6l11 6 11-6-2.2-1.2L12 21.2z"/></svg>${BASEMAPS[other].label}</span>`;
+}
 function initMap(){
   if(map||!window.L) return;
   map=L.map('crMap',{maxZoom:18,minZoom:10,zoomSnap:.25,scrollWheelZoom:false});
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+  setBaseMap(baseMode);
   map.createPane('zoneLabels').style.zIndex=450;
   zoneLayer=L.featureGroup(AREA.map(z=>{ const c=ZCOL[z.name]; const p=L.polygon(z.c.map(([x,y])=>[y,x]),{color:c,weight:3,opacity:.95,fillColor:c,fillOpacity:.12,interactive:false});
     p.bindTooltip(z.name,{permanent:true,direction:'center',className:'zone-label zc',pane:'zoneLabels'}); zoneLbl[z.name]=p; return p; })).addTo(map);
