@@ -893,6 +893,24 @@ body.staff #lockBtn{background:#dc2626;color:#fff}
 .f-major input{accent-color:#ea580c}
 .mj{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 7px;background:#ffedd5;color:#c2410c;white-space:nowrap;margin-left:4px}
 :root[data-theme="dark"] .mj{background:#431407;color:#fdba74}
+.fbar{position:relative;z-index:30}
+.fbar .csel-selected{min-height:38px;min-width:130px}
+.fbar .csel:has(#fGroup) .csel-selected{min-width:190px}
+.csel-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+/* motion: นาฬิกา / โดนัท / หมุด / แถวตาราง */
+@keyframes segIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:none}}
+@keyframes pinDrop{0%{transform:translateY(-18px) scale(.4);opacity:0}100%{transform:none;opacity:1}}
+.anim-on .clock .seg,.anim-on .cmp-side path{transform-box:view-box;transform-origin:50% 50%;animation:segIn .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
+.pin-wrap.drop{animation:pinDrop .45s cubic-bezier(.34,1.56,.64,1) both;animation-delay:var(--d,0ms)}
+.anim-on .lt tbody tr,.anim-on .rp tbody tr{animation:fadeUp .4s ease-out both;animation-delay:var(--d,0ms)}
+.anim-on .cmp-res .big{animation:fadeUp .5s cubic-bezier(.2,.7,.2,1) .3s both}
+.hb .t i{transform-origin:left center}
+.ck{transition:transform .2s ease,box-shadow .2s ease,border-color .2s}
+.ck:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.ck:active{transform:scale(.97)}
+.lt tbody tr td{transition:background-color .15s}
+@media (prefers-reduced-motion:reduce){ .anim-on *{animation:none!important} .pin-wrap.drop{animation:none} }
+@media print{ .anim-on *{animation:none!important} }
 .wp{display:inline-block;font-size:11.5px;font-weight:600;border-radius:6px;padding:2px 8px;background:#fee2e2;color:#b91c1c;white-space:nowrap}
 :root[data-theme="dark"] .wp{background:#450a0a;color:#fca5a5}
 #pickMap{height:420px;border-radius:10px;overflow:hidden;background:var(--track);z-index:0;cursor:crosshair}
@@ -917,6 +935,13 @@ body.staff #lockBtn{background:#dc2626;color:#fff}
 </style>
 </head>
 <body>
+<div id="bootLoader" role="status" aria-live="polite">
+  <div class="logo-loader" aria-hidden="true">
+    <div class="logo-spin"><div class="coin-face"></div><div class="coin-face back"></div></div>
+    <div class="logo-floor"></div>
+  </div>
+  <div class="boot-text" id="bootText">กำลังโหลดข้อมูล...</div>
+</div>
 <nav>
   <div class="nav-brand">
     <a href="index.html" title="กลับหน้าแรก" style="text-decoration:none">
@@ -964,7 +989,7 @@ body.staff #lockBtn{background:#dc2626;color:#fff}
     <div class="f">ด่วน<div class="quick" id="quick"><button data-d="1">24 ชม.</button><button data-d="7">7 วัน</button><button data-d="30" class="on">30 วัน</button><button data-d="90">90 วัน</button></div></div>
     <label class="f-major"><input type="checkbox" id="fMajor"> 🔥 เฉพาะคดีอุกฉกรรจ์/น่าสนใจ</label>
     <div class="grow"></div>
-    <button class="btn btn-reset" id="fReset" type="button">↺ รีเซ็ต</button>
+    <button class="btn-clear" id="fReset" type="button" title="ล้างตัวกรองทั้งหมด"><span class="box">✕ รีเซ็ต</span></button>
   </div>
   <div class="fsum" id="fsum"></div>
 
@@ -1046,7 +1071,7 @@ body.staff #lockBtn{background:#dc2626;color:#fff}
     </div>
     <div class="card">
       <div class="rp-tools"><div class="card-title" style="margin:0">📑 รายการเหตุตามตัวกรอง</div><span class="c-note" id="rpCount"></span><div style="flex:1"></div>
-        <button class="btn btn-reset" id="csvBtn" type="button">⬇️ Export CSV</button><button class="btn btn-print" id="pdfBtn" type="button">🖨️ พิมพ์ / PDF</button></div>
+        <button class="btn btn-csv" id="csvBtn" type="button" title="ดาวน์โหลดไฟล์ CSV ตามตัวกรองปัจจุบัน"><span class="arr">⬇️</span><span class="lbl">Export CSV</span></button><button class="btn btn-print" id="pdfBtn" type="button">🖨️ พิมพ์ / PDF</button></div>
       <div class="rp-wrap"><table class="rp" id="rp"></table></div>
     </div>
   </section>
@@ -1072,6 +1097,29 @@ const CRIME_API = 'https://script.google.com/macros/s/AKfycbwlYw-y_bEU9wdDz8BM91
 const $=id=>document.getElementById(id), fmt=n=>n.toLocaleString('th-TH');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function isDark(){ return document.documentElement.getAttribute('data-theme')==='dark'; }
+/* ---------- motion (แบบเดียวกับหน้ารถหาย): การ์ดเลื่อนขึ้นทีละใบ · ตัวเลขนับขึ้น · แท่งกราฟยืดออก ---------- */
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let MOTION=true;           // ปิดชั่วคราวเมื่อวาดใหม่เงียบ ๆ (เช่น resize)
+const wantMotion=()=>MOTION && !reduceMotion;
+function revealVisible(){
+  if(!wantMotion()) return;
+  const cards=[...document.querySelectorAll('#srcNote, #staffBar:not([hidden]), .fbar, #ckRow .ck, .view:not([hidden]) .card')].filter(c=>c.offsetParent);
+  cards.forEach((c,i)=>{ c.classList.remove('reveal'); c.style.setProperty('--d', Math.min(i,14)*45+'ms'); void c.offsetWidth; c.classList.add('reveal'); });
+}
+function playAnim(){
+  if(!wantMotion()) return;
+  const m=document.querySelector('main');
+  m.classList.remove('anim-on','anim-bars'); void m.offsetWidth; m.classList.add('anim-on','anim-bars');
+  clearTimeout(playAnim._t); playAnim._t=setTimeout(()=>m.classList.remove('anim-on','anim-bars'),1800);
+}
+function countTo(el,to){
+  const from=parseInt(el.dataset.v||'0',10)||0; el.dataset.v=to;
+  if(!wantMotion()||from===to){ el.textContent=fmt(to); return; }
+  const t0=performance.now(), dur=700; cancelAnimationFrame(el._raf);
+  const step=now=>{ const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3); el.textContent=fmt(Math.round(from+(to-from)*e)); if(p<1) el._raf=requestAnimationFrame(step); };
+  el._raf=requestAnimationFrame(step);
+}
+function hideBootLoader(){ const b=$('bootLoader'); if(b){ b.classList.add('done'); setTimeout(()=>b.remove(),600); } }
 $('themeBtn').checked=isDark();
 $('themeBtn').addEventListener('change',e=>{ if(e.target.checked) document.documentElement.setAttribute('data-theme','dark'); else document.documentElement.removeAttribute('data-theme'); try{localStorage.setItem('bangbo-theme',e.target.checked?'dark':'light');}catch(_){} if(READY){ renderClock(); renderCompare(); } });
 $('printBtn').onclick=()=>print(); $('pdfBtn').onclick=()=>print();
@@ -1123,10 +1171,70 @@ function demoData(){
   return out;
 }
 
+/* ---------- dropdown สีขาวแบบเดียวกับหน้ารถหาย (select จริงซ่อนอยู่และยังเป็นตัวกรอง) ---------- */
+const CSEL_ARROW = '<svg class="csel-arrow" viewBox="0 0 512 512" aria-hidden="true"><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>';
+let openCsel = null;
+function closeCsel(w){ if(!w) return; w.classList.remove('open'); w.querySelector('.csel-selected').setAttribute('aria-expanded','false'); if(openCsel===w) openCsel = null; }
+function enhanceSelect(sel){
+  const wrap = document.createElement('div'); wrap.className = 'csel';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'csel-selected';
+  btn.setAttribute('aria-haspopup','listbox'); btn.setAttribute('aria-expanded','false');
+  const lab = sel.previousElementSibling && sel.previousElementSibling.classList.contains('ctrl-label') ? sel.previousElementSibling.textContent.replace(/[^\u0E00-\u0E7Fa-zA-Z ]/g,'').trim() : '';
+  if(lab) btn.setAttribute('aria-label', lab);
+  btn.innerHTML = '<span class="csel-txt"></span>' + CSEL_ARROW;
+  const list = document.createElement('div'); list.className = 'csel-options'; list.setAttribute('role','listbox');
+  sel.parentNode.insertBefore(wrap, sel);
+  wrap.append(sel, btn, list);
+  sel.classList.add('csel-native'); sel.tabIndex = -1; sel.setAttribute('aria-hidden','true');
+  const build = ()=>{
+    list.textContent = '';
+    [...sel.options].forEach((o,i)=>{
+      const d = document.createElement('div');
+      d.className = 'csel-option' + (i===sel.selectedIndex ? ' is-sel' : '');
+      d.setAttribute('role','option'); d.dataset.i = i; d.textContent = o.textContent;
+      list.appendChild(d);
+    });
+    const cur = sel.options[sel.selectedIndex];
+    btn.querySelector('.csel-txt').textContent = cur ? cur.textContent : '';
+  };
+  const pick = i=>{
+    if(i<0 || i>=sel.options.length || i===sel.selectedIndex) return;
+    sel.selectedIndex = i;
+    sel.dispatchEvent(new Event('change', {bubbles:true}));
+  };
+  // keep the face in step when code changes the select (filters reset, URL range, data refresh)
+  ['value','selectedIndex'].forEach(k=>{
+    const d = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, k);
+    Object.defineProperty(sel, k, {configurable:true, get(){ return d.get.call(sel); }, set(v){ d.set.call(sel, v); build(); }});
+  });
+  sel.addEventListener('change', build);
+  new MutationObserver(build).observe(sel, {childList:true, subtree:true, characterData:true});
+  btn.addEventListener('click', ()=>{
+    const willOpen = !wrap.classList.contains('open');
+    if(openCsel && openCsel!==wrap) closeCsel(openCsel);
+    wrap.classList.toggle('open', willOpen); btn.setAttribute('aria-expanded', String(willOpen));
+    if(willOpen){ openCsel = wrap; wrap.classList.remove('picked'); }
+  });
+  btn.addEventListener('keydown', e=>{
+    if(e.key==='ArrowDown'){ e.preventDefault(); pick(sel.selectedIndex+1); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); pick(sel.selectedIndex-1); }
+    else if(e.key==='Escape') closeCsel(wrap);
+  });
+  list.addEventListener('click', e=>{
+    const o = e.target.closest('.csel-option'); if(!o) return;
+    pick(+o.dataset.i);
+    closeCsel(wrap); wrap.classList.add('picked');   // close even while the mouse is still over it
+  });
+  wrap.addEventListener('mouseleave', ()=>wrap.classList.remove('picked'));
+  build();
+}
+document.addEventListener('click', e=>{ if(openCsel && !openCsel.contains(e.target)) closeCsel(openCsel); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && openCsel) closeCsel(openCsel); });
+
 /* ---------- โหลดข้อมูล ---------- */
 async function loadData(){
   if(!CRIME_API){ buildGroups(DEFAULT_TYPES); INC=demoData(); return; }
-  $('srcNote').className='live-note'; $('srcNote').innerHTML='⏳ <span>กำลังโหลดข้อมูลจากชีต…</span>';
+  $('srcNote').className='live-note'; $('srcNote').innerHTML='<span class="live-dot busy"></span><span>กำลังโหลดข้อมูลจากชีต…</span>';
   try{
     const j=await fetch(CRIME_API+'?t='+Date.now()).then(r=>r.json());
     if(!j.ok) throw new Error(j.error||'โหลดไม่สำเร็จ');
@@ -1134,7 +1242,7 @@ async function loadData(){
     if(j.weapons&&j.weapons.length) WEAPONS=j.weapons;
     INC=(j.rows||[]).map(r=>({t:new Date(r.t),g:groupOf(r.type),type:r.type,lat:r.lat,lng:r.lng,zone:r.zone||(r.lat!=null?zoneOf(r.lat,r.lng):'ไม่ระบุ'),place:r.place||'—',what:r.what||'',weapon:r.weapon||'',major:!!r.major,row:r.row})).filter(r=>!isNaN(r.t));
     LIVE=true;
-    $('srcNote').innerHTML=`🟢 <span><b>ข้อมูลจริงจากชีต "วิเคราะห์อาชญากรรม"</b> · ${fmt(INC.length)} เหตุ · อัปเดต ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. · ไม่แสดงชื่อผู้เสียหาย/ผู้ก่อเหตุ</span>`;
+    $('srcNote').innerHTML=`<span class="live-dot"></span><span><b>ข้อมูลจริงจากชีต "วิเคราะห์อาชญากรรม"</b> · ${fmt(INC.length)} เหตุ · อัปเดต ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. · ไม่แสดงชื่อผู้เสียหาย/ผู้ก่อเหตุ</span>`;
   }catch(e){
     buildGroups(DEFAULT_TYPES); INC=[];
     $('srcNote').className='live-note err'; $('srcNote').innerHTML=`⚠️ <span>โหลดข้อมูลจากชีตไม่สำเร็จ (${esc(e.message)}) · ลองรีเฟรชอีกครั้ง</span>`;
@@ -1173,15 +1281,17 @@ function renderKpi(){
   const cur=INC.filter(r=>inRange(r,F.from,F.to) && match(r,true)), prev=INC.filter(r=>inRange(r,pFrom,pTo) && match(r,true));
   const cards=[{no:0,short:'เหตุทั้งหมด',ic:'🚨',c:'#dc2626'},...GROUPS];
   $('ckRow').style.gridTemplateColumns=innerWidth>1200?`repeat(${cards.length},minmax(0,1fr))`:'';
+  const prevV={}; document.querySelectorAll('#ckRow .ck').forEach(b=>prevV[b.dataset.g]=b.querySelector('.v').dataset.v);
   $('ckRow').innerHTML=cards.map(g=>{ const a=g.no?cur.filter(r=>r.g===g.no).length:cur.length, b=g.no?prev.filter(r=>r.g===g.no).length:prev.length, p=pct(a,b);
-    return `<button type="button" class="ck${F.g===g.no?' on':''}" data-g="${g.no}" style="--c:${g.c}" title="${esc(g.name||'ทุกประเภท')}"><span class="ic">${g.ic}</span><span class="bd"><span class="v">${fmt(a)}</span><span class="l">${esc(g.short)}</span><span class="ch ${p.c}" title="เทียบช่วงก่อนหน้าที่ยาวเท่ากัน">${p.t} <span style="font-weight:500;color:var(--faint)">จากช่วงก่อน</span></span></span></button>`; }).join('');
+    return `<button type="button" class="ck${F.g===g.no?' on':''}" data-g="${g.no}" style="--c:${g.c}" title="${esc(g.name||'ทุกประเภท')}"><span class="ic">${g.ic}</span><span class="bd"><span class="v" data-to="${a}">${fmt(a)}</span><span class="l">${esc(g.short)}</span><span class="ch ${p.c}" title="เทียบช่วงก่อนหน้าที่ยาวเท่ากัน">${p.t} <span style="font-weight:500;color:var(--faint)">จากช่วงก่อน</span></span></span></button>`; }).join('');
+  document.querySelectorAll('#ckRow .ck').forEach(b=>{ const v=b.querySelector('.v'); v.dataset.v=prevV[b.dataset.g]||0; countTo(v,+v.dataset.to); });
 }
 $('ckRow').addEventListener('click',e=>{ const b=e.target.closest('.ck'); if(!b) return; F.g=+b.dataset.g===F.g?0:+b.dataset.g; $('fGroup').value=F.g; renderAll(); });
-addEventListener('resize',()=>READY&&renderKpi());
+addEventListener('resize',()=>{ if(!READY) return; MOTION=false; renderKpi(); MOTION=true; });
 
 /* ---------- แผนที่ ---------- */
 let map,heat,pins,zoneLayer,zoneLbl={},markerById={};
-function pinIcon(g){ const G=GBY[g]||{c:'#64748b',ic:'📌'}; return L.divIcon({className:'',html:`<div class="cpin" style="background:${G.c}"><span>${G.ic}</span></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]}); }
+function pinIcon(g,d){ const G=GBY[g]||{c:'#64748b',ic:'📌'}; return L.divIcon({className:'',html:`<div class="pin-wrap${d!=null?' drop':''}" style="--d:${d||0}ms"><div class="cpin" style="background:${G.c}"><span>${G.ic}</span></div></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]}); }
 function sensHtml(r){ const x=STAFF&&SENS[r.row]; if(!x) return ''; return `<div class="pp-s">${x.victim?`<div>👤 ผู้เสียหาย: <b>${esc(x.victim)}</b></div>`:''}${x.suspect?`<div>🕵️ ผู้ก่อเหตุ: <b>${esc(x.suspect)}</b></div>`:''}${x.detail?`<div>📝 ${esc(x.detail)}</div>`:''}</div>`; }
 function popupHtml(r){ return `<div class="pp-t">${GBY[r.g].ic} ${esc(r.what||GBY[r.g].name)}${r.major?'<span class="mj">🔥 อุกฉกรรจ์/น่าสนใจ</span>':''}</div><div class="pp-a">${esc(GBY[r.g].name)}</div><div class="pp-a">${thDate(r.t)} ${hm(r.t)} น. · ${esc(r.zone)}</div><div class="pp-a">📍 ${esc(r.place)}${r.weapon?` · <span class="wp">${esc(r.weapon)}</span>`:''}</div>${sensHtml(r)}`; }
 function initMap(){
@@ -1206,7 +1316,7 @@ function renderMap(list){
   mapDirty=false; initMap(); if(!map) return;
   pins.clearLayers(); markerById={};
   const pos=list.filter(r=>r.lat!=null&&r.lng!=null);
-  pos.slice(0,400).forEach(r=>{ markerById[INC.indexOf(r)]=L.marker([r.lat,r.lng],{icon:pinIcon(r.g),title:r.what||GBY[r.g].name}).bindPopup(popupHtml(r)).addTo(pins); });
+  pos.slice(0,400).forEach((r,i)=>{ markerById[INC.indexOf(r)]=L.marker([r.lat,r.lng],{icon:pinIcon(r.g,wantMotion()?Math.min(i,60)*12:null),title:r.what||GBY[r.g].name}).bindPopup(popupHtml(r)).addTo(pins); });
   if(heat) heat.setLatLngs(pos.map(r=>[r.lat,r.lng,.6]));
   AREA.forEach(z=>{ const n=list.filter(r=>r.zone===z.name).length; zoneLbl[z.name].setTooltipContent(`${z.name}<small>${fmt(n)} เหตุ</small>`); });
   const cnt={}; list.forEach(r=>cnt[r.g]=(cnt[r.g]||0)+1);
@@ -1220,7 +1330,7 @@ function renderLatest(list){
   const rows=list.slice((ltPage-1)*PER,ltPage*PER);
   $('ltCount').textContent=`${fmt(list.length)} รายการ`;
   $('lt').innerHTML='<thead><tr><th>เวลา</th><th>ประเภท</th><th>รายการ / พื้นที่</th><th>เขต</th></tr></thead><tbody>'+
-    (rows.length?rows.map(r=>`<tr data-id="${INC.indexOf(r)}"><td class="tm">${hm(r.t)}<small>${thDate(r.t)}</small></td><td><span class="gb" style="--c:${GBY[r.g].c}"><i>${GBY[r.g].ic}</i>${esc(GBY[r.g].short)}</span></td><td>${esc(r.what)}${r.weapon?` <span class="wp">${esc(r.weapon)}</span>`:''}${r.major?'<span class="mj">🔥 อุกฉกรรจ์/น่าสนใจ</span>':''}<div class="c-note">${esc(r.place)}</div>${STAFF&&SENS[r.row]&&SENS[r.row].detail?`<div class="sx-line">📝 ${esc(SENS[r.row].detail)}</div>`:''}</td><td style="white-space:nowrap">${esc(r.zone.replace('เขตตรวจที่ ','เขต '))}</td></tr>`).join('')
+    (rows.length?rows.map((r,ri)=>`<tr data-id="${INC.indexOf(r)}" style="--d:${ri*35}ms"><td class="tm">${hm(r.t)}<small>${thDate(r.t)}</small></td><td><span class="gb" style="--c:${GBY[r.g].c}"><i>${GBY[r.g].ic}</i>${esc(GBY[r.g].short)}</span></td><td>${esc(r.what)}${r.weapon?` <span class="wp">${esc(r.weapon)}</span>`:''}${r.major?'<span class="mj">🔥 อุกฉกรรจ์/น่าสนใจ</span>':''}<div class="c-note">${esc(r.place)}</div>${STAFF&&SENS[r.row]&&SENS[r.row].detail?`<div class="sx-line">📝 ${esc(SENS[r.row].detail)}</div>`:''}</td><td style="white-space:nowrap">${esc(r.zone.replace('เขตตรวจที่ ','เขต '))}</td></tr>`).join('')
       :'<tr><td colspan="4" class="c-note" style="text-align:center;padding:20px">ไม่มีเหตุในช่วงที่เลือก</td></tr>')+'</tbody>';
   const btn=(p,l,dis,on)=>`<button type="button" data-p="${p}"${dis?' disabled':''}${on?' class="on"':''}>${l}</button>`;
   let h=btn(ltPage-1,'‹',ltPage===1); const s=Math.max(1,Math.min(ltPage-2,pages-4));
@@ -1240,7 +1350,7 @@ function renderClock(){
   let svg=`<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="นาฬิกาอาชญากรรม จำนวนเหตุแยกตามชั่วโมงและประเภท">`;
   GROUPS.forEach((g,gi)=>{ if(F.g&&F.g!==g.no) return; const mx=Math.max(1,...M[gi]); const r1=r0+gi*ring+1,r2=r0+(gi+1)*ring-1;
     for(let h=0;h<24;h++){ const v=M[gi][h], a1=h/24*2*Math.PI+.012, a2=(h+1)/24*2*Math.PI-.012; const op=v?(.18+.82*v/mx):.06;
-      svg+=`<path class="seg" d="${arc(r1,r2,a1,a2)}" fill="${g.c}" fill-opacity="${op.toFixed(2)}"><title>${String(h).padStart(2,'0')}:00–${String(h+1).padStart(2,'0')}:00 · ${esc(g.short)}: ${v} เหตุ</title></path>`; } });
+      svg+=`<path class="seg" style="--d:${h*18+gi*40}ms" d="${arc(r1,r2,a1,a2)}" fill="${g.c}" fill-opacity="${op.toFixed(2)}"><title>${String(h).padStart(2,'0')}:00–${String(h+1).padStart(2,'0')}:00 · ${esc(g.short)}: ${v} เหตุ</title></path>`; } });
   const rOut=r0+GROUPS.length*ring+14;
   for(let h=0;h<24;h+=1){ const a=h/24*2*Math.PI; svg+=`<text x="${cx+rOut*Math.sin(a)}" y="${cy-rOut*Math.cos(a)+4}" text-anchor="middle" font-size="${h%3?10:12}" font-weight="${h%3?400:700}" fill="${txt}">${String(h).padStart(2,'0')}</text>`; }
   svg+=`<circle cx="${cx}" cy="${cy}" r="${r0-6}" fill="${dark?'#0f172a':'#f8fafc'}" stroke="${dark?'#1e293b':'#e2e8f0'}"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="30" font-weight="700" fill="${dark?'#f8fafc':'#0f172a'}">${fmt(list.length)}</text><text x="${cx}" y="${cy+24}" text-anchor="middle" font-size="12" fill="${txt}">เหตุ</text></svg>`;
@@ -1276,7 +1386,7 @@ function renderCompare(){
 
 /* ---------- รายงาน ---------- */
 let sortK='t',sortD=-1;
-function bars(el,pairs,colors){ const mx=Math.max(1,...pairs.map(p=>p[1])); $(el).innerHTML=pairs.map(([l,v],i)=>`<div class="hb"><span>${esc(l)}</span><div class="t"><i style="width:${v/mx*100}%;--c:${colors?colors[i]:'#2563eb'}"></i></div><b>${fmt(v)}</b></div>`).join(''); }
+function bars(el,pairs,colors){ const mx=Math.max(1,...pairs.map(p=>p[1])); $(el).innerHTML=pairs.map(([l,v],i)=>`<div class="hb"><span>${esc(l)}</span><div class="t"><i class="bl-fill" style="width:${v/mx*100}%;--c:${colors?colors[i]:'#2563eb'}"></i></div><b>${fmt(v)}</b></div>`).join(''); }
 function renderReport(list){
   bars('sumGroup',GROUPS.map(g=>[g.short,list.filter(r=>r.g===g.no).length]),GROUPS.map(g=>g.c));
   bars('sumZone',AREA.map(z=>z.name).sort().map(z=>[z,list.filter(r=>r.zone===z).length]),['#eab308','#334155','#ec4899']);
@@ -1381,6 +1491,7 @@ function showView(v,push){
   if(v==='form'){ initPick(); setTimeout(()=>pmap&&pmap.invalidateSize(),30); }
   if(push) history.replaceState(null,'',v==='dash'?location.pathname:'#'+v);
   window.scrollTo({top:0});
+  if(READY){ revealVisible(); playAnim(); }
 }
 document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click',()=>showView(t.dataset.view,true)));
 
@@ -1390,6 +1501,7 @@ function renderAll(){
   const g=F.g?GBY[F.g].name:'ทุกประเภท';
   $('fsum').textContent=`แสดง ${thDate(F.from)} – ${thDate(F.to)} · ${g} · ${F.zone||'ทุกเขต'}${F.major?' · เฉพาะคดีอุกฉกรรจ์/น่าสนใจ':''} · ${fmt(list.length)} เหตุ`;
   renderKpi(); renderMap(list); renderLatest(list); renderClock(); renderCompare(); renderReport(list);
+  playAnim();
 }
 let DEF_DAYS=30;
 (async function boot(){
@@ -1400,6 +1512,8 @@ let DEF_DAYS=30;
   if(LIVE && INC.filter(r=>r.t>TODAY-30*DAY).length<20) DEF_DAYS=90;
   document.querySelectorAll('#quick button').forEach(x=>x.classList.toggle('on',x.dataset.d===String(DEF_DAYS)));
   fillSelects(); setRange(DEF_DAYS); defaultCompare(); READY=true; renderAll();
+  ['fGroup','fZone'].forEach(id=>enhanceSelect($(id)));
+  hideBootLoader(); revealVisible();
   let wasStaff=false; try{ wasStaff=sessionStorage.getItem('crime-staff')==='1'; }catch(_){}
   if(LIVE && PIN && wasStaff) enterStaff();
 })();
