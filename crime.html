@@ -935,13 +935,6 @@ body.staff #lockBtn{background:#dc2626;color:#fff}
 </style>
 </head>
 <body>
-<div id="bootLoader" role="status" aria-live="polite">
-  <div class="logo-loader" aria-hidden="true">
-    <div class="logo-spin"><div class="coin-face"></div><div class="coin-face back"></div></div>
-    <div class="logo-floor"></div>
-  </div>
-  <div class="boot-text" id="bootText">กำลังโหลดข้อมูล...</div>
-</div>
 <nav>
   <div class="nav-brand">
     <a href="index.html" title="กลับหน้าแรก" style="text-decoration:none">
@@ -1513,7 +1506,7 @@ let DEF_DAYS=30;
   document.querySelectorAll('#quick button').forEach(x=>x.classList.toggle('on',x.dataset.d===String(DEF_DAYS)));
   fillSelects(); setRange(DEF_DAYS); defaultCompare(); READY=true; renderAll();
   ['fGroup','fZone'].forEach(id=>enhanceSelect($(id)));
-  hideBootLoader(); revealVisible();
+  revealVisible();
   let wasStaff=false; try{ wasStaff=sessionStorage.getItem('crime-staff')==='1'; }catch(_){}
   if(LIVE && PIN && wasStaff) enterStaff();
 })();
