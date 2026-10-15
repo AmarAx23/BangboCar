@@ -816,6 +816,13 @@ main{max-width:none}
 .cpin{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .cpin span{transform:rotate(45deg);font-size:12px;line-height:1}
 .cpin.hl{outline:3px solid #facc15;outline-offset:2px}
+.pin-wrap{position:relative}
+.cpin-n{position:absolute;top:-8px;right:-10px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#dc2626;color:#fff;font:700 11px/18px 'Prompt',sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.pp-multi{max-height:260px;overflow:auto;margin-top:6px;padding-right:4px}
+.pp-it{padding:6px 0;border-top:1px solid #e2e8f0}
+.pp-it:first-child{border-top:0}
+.pp-it .pp-t{font-size:13px}
+.pp-hd{font-weight:700;font-size:14px;color:#0f172a}.pp-hd b{color:#dc2626}
 .zone-label.zc{font-size:12px;padding:4px 9px}
 .zone-label.zc small{display:block;font-weight:600;font-size:11px;color:#dc2626}
 .leaflet-popup-content{font-family:'Prompt',sans-serif;font-size:13px;margin:10px 12px}
@@ -1349,7 +1356,7 @@ addEventListener('resize',()=>{ if(!READY) return; MOTION=false; renderKpi(); MO
 
 /* ---------- แผนที่ ---------- */
 let map,heat,pins,zoneLayer,zoneLbl={},markerById={};
-function pinIcon(g,d){ const G=GBY[g]||{c:'#64748b',ic:'📌'}; return L.divIcon({className:'',html:`<div class="pin-wrap${d!=null?' drop':''}" style="--d:${d||0}ms"><div class="cpin" style="background:${G.c}"><span>${G.ic}</span></div></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]}); }
+function pinIcon(g,d,n){ const G=GBY[g]||{c:'#64748b',ic:'📌'}; return L.divIcon({className:'',html:`<div class="pin-wrap${d!=null?' drop':''}" style="--d:${d||0}ms"><div class="cpin" style="background:${G.c}"><span>${G.ic}</span></div>${n>1?`<b class="cpin-n">${n}</b>`:''}</div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]}); }
 function sensHtml(r){ const x=STAFF&&SENS[r.row]; if(!x) return ''; return `<div class="pp-s">${x.victim?`<div>👤 ผู้เสียหาย: <b>${esc(x.victim)}</b></div>`:''}${x.suspect?`<div>🕵️ ผู้ก่อเหตุ: <b>${esc(x.suspect)}</b></div>`:''}${x.detail?`<div>📝 ${esc(x.detail)}</div>`:''}</div>`; }
 function popupHtml(r){ return `<div class="pp-t">${GBY[r.g].ic} ${esc(r.what||GBY[r.g].name)}${r.major?'<span class="mj">🔥 อุกฉกรรจ์/น่าสนใจ</span>':''}</div><div class="pp-a">${esc(GBY[r.g].name)}</div><div class="pp-a">${thDate(r.t)} ${r.nt?'· ไม่ระบุเวลา':hm(r.t)+' น.'} · ${esc(r.zone)}</div>${srcTag(r)?`<div class="pp-a">${srcTag(r)}</div>`:''}<div class="pp-a">📍 ${esc(r.place)}${r.weapon?` · <span class="wp">${esc(r.weapon)}</span>`:''}</div>${sensHtml(r)}`; }
 
@@ -1379,6 +1386,11 @@ function setBaseMap(mode){
   layerBtn.style.backgroundImage=`url("${BASEMAPS[other].thumb}")`;
   layerBtn.title='เปลี่ยนเป็น'+BASEMAPS[other].label; layerBtn.setAttribute('aria-label',layerBtn.title);
   layerBtn.innerHTML=`<span><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><path d="M12 2 1 8l11 6 11-6-11-6zm0 15.2L3.2 12.4 1 13.6 12 19.6l11-6-2.2-1.2L12 17.2zm0 4L3.2 16.4 1 17.6l11 6 11-6-2.2-1.2L12 21.2z"/></svg>${BASEMAPS[other].label}</span>`;
+}
+function multiPopupHtml(rs){
+  const places=[...new Set(rs.map(r=>r.place))];
+  return `<div class="pp-hd">📍 ${esc(places[0])}${places.length>1?` <span style="font-weight:400;color:#64748b">(+${places.length-1} ชื่อเรียก)</span>`:''}</div><div class="pp-a">เกิดเหตุที่จุดนี้ <b style="color:#dc2626">${rs.length} ครั้ง</b> ในช่วงที่เลือก · ${esc(rs[0].zone)}</div>`+
+    `<div class="pp-multi">${[...rs].sort((a,b)=>b.t-a.t).map(r=>`<div class="pp-it"><div class="pp-t">${GBY[r.g].ic} ${esc(r.what||GBY[r.g].name)}${r.major?'<span class="mj">🔥 อุกฉกรรจ์/น่าสนใจ</span>':''}</div><div class="pp-a">${thDate(r.t)} ${r.nt?'· ไม่ระบุเวลา':hm(r.t)+' น.'}${srcTag(r)}${r.weapon?` · <span class="wp">${esc(r.weapon)}</span>`:''}</div>${places.length>1?`<div class="pp-a">${esc(r.place)}</div>`:''}${sensHtml(r)}</div>`).join('')}</div>`;
 }
 function initMap(){
   if(map||!window.L) return;
@@ -1438,7 +1450,12 @@ function renderMap(list){
   mapDirty=false; initMap(); if(!map) return;
   pins.clearLayers(); markerById={};
   const pos=list.filter(r=>r.lat!=null&&r.lng!=null);
-  pos.slice(0,400).forEach((r,i)=>{ markerById[INC.indexOf(r)]=L.marker([r.lat,r.lng],{icon:pinIcon(r.g,wantMotion()?Math.min(i,60)*12:null),title:r.what||GBY[r.g].name}).bindPopup(popupHtml(r)).addTo(pins); });
+  // เหตุที่พิกัดเดียวกัน (หายที่เดิมหลายครั้ง) รวมเป็นหมุดเดียว มีตัวเลขบอกจำนวน · กดดูได้ทุกเคส
+  const spots=new Map();
+  pos.slice(0,400).forEach(r=>{ const k=r.lat.toFixed(5)+','+r.lng.toFixed(5); if(!spots.has(k)) spots.set(k,[]); spots.get(k).push(r); });
+  [...spots.values()].forEach((rs,i)=>{ const r=rs[0], cnt={}; rs.forEach(x=>cnt[x.g]=(cnt[x.g]||0)+1); const g=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
+    const m=L.marker([r.lat,r.lng],{icon:pinIcon(g,wantMotion()?Math.min(i,60)*12:null,rs.length),title:rs.length>1?`${rs.length} เหตุที่จุดเดียวกัน`:(r.what||GBY[r.g].name),zIndexOffset:rs.length*10}).bindPopup(rs.length>1?multiPopupHtml(rs):popupHtml(r),{maxWidth:320}).addTo(pins);
+    rs.forEach(x=>markerById[INC.indexOf(x)]=m); });
   if(heat) heat.setLatLngs(pos.map(r=>[r.lat,r.lng,.6]));
   AREA.forEach(z=>{ const n=list.filter(r=>r.zone===z.name).length; zoneLbl[z.name].setTooltipContent(`${z.name}<small>${fmt(n)} เหตุ</small>`); });
   const cnt={}; list.forEach(r=>cnt[r.g]=(cnt[r.g]||0)+1);
