@@ -861,7 +861,16 @@ main{max-width:1500px}
 .ff label .req{color:#dc2626}
 .ff textarea{min-height:80px;resize:vertical}
 .ff input,.ff select,.ff textarea{width:100%;box-sizing:border-box;margin:0}
-.ff .acts{display:flex;gap:10px;grid-column:1/-1;margin-top:4px}
+.ff .acts{display:flex;gap:10px;grid-column:1/-1;margin-top:4px;flex-wrap:wrap}
+.ff .priv{font-size:12px;color:#92400e;background:#fef3c7;border-radius:8px;padding:6px 10px}
+:root[data-theme="dark"] .ff .priv{background:#3a2f12;color:#f0c55a}
+.ff button[disabled]{opacity:.6;cursor:progress}
+.live-note{display:flex;align-items:center;gap:10px;background:#dcfce7;border:1px solid #bbf7d0;color:#166534;border-radius:12px;padding:9px 14px;font-size:13.5px;margin-bottom:14px}
+:root[data-theme="dark"] .live-note{background:#052e16;border-color:#14532d;color:#86efac}
+.live-note.err{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+:root[data-theme="dark"] .live-note.err{background:#450a0a;border-color:#7f1d1d;color:#fca5a5}
+.wp{display:inline-block;font-size:11.5px;font-weight:600;border-radius:6px;padding:2px 8px;background:#fee2e2;color:#b91c1c;white-space:nowrap}
+:root[data-theme="dark"] .wp{background:#450a0a;color:#fca5a5}
 #pickMap{height:420px;border-radius:10px;overflow:hidden;background:var(--track);z-index:0;cursor:crosshair}
 .pick-tip{font-size:12.5px;color:var(--muted);margin-top:8px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
@@ -920,11 +929,11 @@ main{max-width:1500px}
   </div>
 </nav>
 <main>
-  <div class="demo-note">🧪 <span><b>ต้นแบบหน้าตา</b> — เหตุทั้งหมดเป็นข้อมูลสมมติที่สุ่มขึ้นในพื้นที่ สภ.บางบ่อ ใช้ดูการจัดวางเท่านั้น · บันทึกเหตุยังไม่ส่งไปที่ใด</span></div>
+  <div class="demo-note" id="srcNote">🧪 <span><b>โหมดตัวอย่าง</b> — ยังไม่ได้เชื่อมชีต เหตุทั้งหมดเป็นข้อมูลสมมติ</span></div>
 
   <div class="fbar" id="fbar">
     <div class="f">ช่วงวันที่<div style="display:flex;gap:6px;align-items:center"><input type="date" id="fFrom" aria-label="ตั้งแต่วันที่"> – <input type="date" id="fTo" aria-label="ถึงวันที่"></div></div>
-    <div class="f">กลุ่มเหตุ<select id="fGroup"></select></div>
+    <div class="f">ประเภทเหตุ<select id="fGroup"></select></div>
     <div class="f">เขตตรวจ<select id="fZone"><option value="">ทุกเขต</option><option>เขตตรวจที่ 1</option><option>เขตตรวจที่ 2</option><option>เขตตรวจที่ 3</option></select></div>
     <div class="f">ด่วน<div class="quick" id="quick"><button data-d="1">24 ชม.</button><button data-d="7">7 วัน</button><button data-d="30" class="on">30 วัน</button><button data-d="90">90 วัน</button></div></div>
     <div class="grow"></div>
@@ -977,11 +986,16 @@ main{max-width:1500px}
       <div class="card">
         <div class="card-title">📝 บันทึกเหตุ (แบบฟอร์มใหม่)</div>
         <form class="ff" id="incForm" autocomplete="off">
-          <label><span>วันที่ / เวลา <span class="req">*</span></span><input type="datetime-local" id="iWhen" required></label>
-          <label><span>ระดับ</span><select id="iLevel"><option>ทั่วไป</option><option>เฝ้าระวัง</option><option>สำคัญ</option><option>วิกฤต</option></select></label>
-          <label class="full"><span>กลุ่มเหตุ <span class="req">*</span></span><select id="iGroup" required></select></label>
-          <label class="full"><span>รายละเอียดเหตุ <span class="req">*</span></span><textarea id="iDetail" required placeholder="สรุปเหตุการณ์โดยย่อ (ไม่ต้องใส่ชื่อ-นามสกุลผู้เสียหาย)"></textarea></label>
-          <label class="full"><span>สถานที่ / จุดสังเกต</span><input type="text" id="iPlace" placeholder="เช่น หน้าตลาดบางบ่อ ถ.รัตนราช"></label>
+          <label><span>วัน/เวลา ที่เกิดเหตุ <span class="req">*</span></span><input type="datetime-local" id="iWhen" required></label>
+          <label><span>ประเภทเหตุ <span class="req">*</span></span><select id="iGroup" required></select></label>
+          <label class="full"><span>รายการรับแจ้งเหตุ <span class="req">*</span></span><input type="text" id="iWhat" list="whatList" required placeholder="เช่น ทะเลาะวิวาท, ลักทรัพย์, รถจักรยานยนต์หาย"><datalist id="whatList"></datalist></label>
+          <label class="full"><span>สถานที่เกิดเหตุ <span class="req">*</span></span><input type="text" id="iPlace" required placeholder="เช่น หน้าตลาดบางบ่อ ถ.รัตนราช (ไม่ต้องใส่บ้านเลขที่)"></label>
+          <label><span>ผู้เสียหาย</span><input type="text" id="iVictim" placeholder="ชื่อ-สกุล (ถ้ามี)"></label>
+          <label><span>ผู้ก่อเหตุ</span><input type="text" id="iSuspect" placeholder="ชื่อ-สกุล / รูปพรรณ (ถ้ามี)"></label>
+          <div class="full priv">🔒 ชื่อผู้เสียหาย ผู้ก่อเหตุ และรายละเอียด บันทึกลงชีตเท่านั้น ไม่แสดงบนหน้าเว็บ</div>
+          <label class="full"><span>รายละเอียด <span class="req">*</span></span><textarea id="iDetail" required placeholder="สรุปเหตุการณ์โดยย่อ"></textarea></label>
+          <label><span>สิ่งของที่ใช้ในการก่อเหตุ</span><select id="iWeapon"></select></label>
+          <label><span>เขตตรวจที่ <span class="req">*</span></span><select id="iZone" required><option value="">— ปักหมุดแล้วเลือกให้เอง —</option><option>เขตตรวจที่ 1</option><option>เขตตรวจที่ 2</option><option>เขตตรวจที่ 3</option></select></label>
           <label><span>ละติจูด (Lat) <span class="req">*</span></span><input type="text" id="iLat" inputmode="decimal" required placeholder="คลิกบนแผนที่"></label>
           <label><span>ลองจิจูด (Lng) <span class="req">*</span></span><input type="text" id="iLng" inputmode="decimal" required placeholder="คลิกบนแผนที่"></label>
           <div class="acts"><button class="btn btn-print" type="submit">💾 บันทึกเหตุ</button><button class="btn btn-reset" type="reset" id="iReset">ยกเลิก</button><button class="btn btn-reset" type="button" id="iGeo">📍 ใช้ตำแหน่งปัจจุบัน</button></div>
@@ -1008,63 +1022,92 @@ main{max-width:1500px}
       <div class="rp-wrap"><table class="rp" id="rp"></table></div>
     </div>
   </section>
-  <p class="c-note" style="text-align:center;margin-top:16px">ต้นแบบ · ข้อมูลสมมติ · ของจริงจะดึงจาก Google Sheet ผ่าน Apps Script และตัดชื่อ/บ้านเลขที่ออกก่อนแสดง</p>
+  <p class="c-note" style="text-align:center;margin-top:16px">ข้อมูลจากชีต "วิเคราะห์อาชญากรรม" ผ่าน Apps Script · หน้าเว็บไม่แสดงชื่อผู้เสียหาย ผู้ก่อเหตุ และรายละเอียด</p>
 </main>
 <div class="toast" id="toast" role="status"></div>
+<dialog id="pinDlg">
+  <form class="login-box" id="pinForm" method="dialog" autocomplete="off">
+    <button type="button" class="lg-close" id="pinClose" aria-label="ปิด">✕</button>
+    <div class="lg-title">🔒 ยืนยันเจ้าหน้าที่</div>
+    <div class="lg-sub">ใส่รหัสเพื่อบันทึกเหตุลงชีต<br>(ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์)</div>
+    <div class="user-box">
+      <input type="password" id="pinInput" required inputmode="numeric" autocomplete="off">
+      <label for="pinInput">รหัสผ่าน</label>
+    </div>
+    <div class="lg-err" id="pinErr"></div>
+    <button type="submit" class="lg-send" id="pinOk"><span></span>บันทึกเหตุ</button>
+  </form>
+</dialog>
 <script>
+/* ===== วิเคราะห์อาชญากรรม · อ่าน/บันทึกเหตุผ่าน Apps Script ของชีต "วิเคราะห์อาชญากรรม" ===== */
+const CRIME_API = 'https://script.google.com/macros/s/AKfycbwlYw-y_bEU9wdDz8BM911CjHxfCEmnWpFwy_tpeWeJag5I0zwZw_Re9z9w0T3iwCdTZA/exec';   // ← URL เว็บแอป Apps Script ของชีตวิเคราะห์อาชญากรรม (ลงท้าย /exec) · ว่างไว้ = ใช้ข้อมูลสมมติ
 const $=id=>document.getElementById(id), fmt=n=>n.toLocaleString('th-TH');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function isDark(){ return document.documentElement.getAttribute('data-theme')==='dark'; }
 $('themeBtn').checked=isDark();
-$('themeBtn').addEventListener('change',e=>{ if(e.target.checked) document.documentElement.setAttribute('data-theme','dark'); else document.documentElement.removeAttribute('data-theme'); try{localStorage.setItem('bangbo-theme',e.target.checked?'dark':'light');}catch(_){} renderClock(); renderCompare(); });
+$('themeBtn').addEventListener('change',e=>{ if(e.target.checked) document.documentElement.setAttribute('data-theme','dark'); else document.documentElement.removeAttribute('data-theme'); try{localStorage.setItem('bangbo-theme',e.target.checked?'dark':'light');}catch(_){} if(READY){ renderClock(); renderCompare(); } });
 $('printBtn').onclick=()=>print(); $('pdfBtn').onclick=()=>print();
 
-/* ---------- กลุ่มเหตุ (แก้ชื่อ/สีได้ที่นี่) ---------- */
-const GROUPS=[
-  {no:1,name:'ลัก / จี้ / ปล้น / ชิงทรัพย์',short:'ลัก/ชิงทรัพย์',ic:'💰',c:'#ef4444'},
-  {no:2,name:'เด็กแว้น 5 คันขึ้นไป',short:'แว้น 5 คัน+',ic:'🏍️',c:'#f59e0b'},
-  {no:3,name:'เด็กแว้น เสียงดัง',short:'แว้นเสียงดัง',ic:'🔊',c:'#3b82f6'},
-  {no:4,name:'อาวุธปืน / ทำร้าย / อุกฉกรรจ์',short:'อาวุธ/ทำร้าย',ic:'⚠️',c:'#8b5cf6'},
-  {no:5,name:'วัยรุ่นรวมกลุ่ม / ส่งเสียงดัง',short:'วัยรุ่นรวมกลุ่ม',ic:'👥',c:'#10b981'},
-  {no:6,name:'เหตุอื่นๆ',short:'อื่นๆ',ic:'📌',c:'#64748b'}];
-const GBY=Object.fromEntries(GROUPS.map(g=>[g.no,g]));
+/* ---------- ประเภทเหตุ: ชื่อมาจาก dropdown ในชีต (คอลัมน์ "ประเภทเหตุ") · สี/ไอคอนกำหนดตามคำในชื่อ ---------- */
+const DEFAULT_TYPES=['เหตุเกี่ยวกับทรัพย์','ชีวิต ร่างกาย','วัยรุ่นมั่วสุม','วงสุรา/มั่วสุม/ก่อความเดือดร้อนรำคาญ','แข่งขันรถในทาง'];
+const DEFAULT_WEAPONS=['ปืน','มีด','ระเบิด'];
+const STYLE=[[/ทรัพย์/,'💰','#ef4444','ทรัพย์'],[/ชีวิต|ร่างกาย|ทำร้าย/,'⚠️','#8b5cf6','ชีวิต/ร่างกาย'],[/วัยรุ่น/,'👥','#10b981','วัยรุ่นมั่วสุม'],[/สุรา|รำคาญ/,'🍺','#f59e0b','วงสุรา/รำคาญ'],[/แข่ง|รถ/,'🏍️','#3b82f6','แข่งรถในทาง'],[/ยาเสพติด/,'💊','#ec4899','ยาเสพติด']];
+const SPARE=['#0ea5e9','#84cc16','#f97316','#a855f7','#14b8a6'];
+let GROUPS=[], GBY={};
+function buildGroups(types){
+  GROUPS=types.map((name,i)=>{ const s=STYLE.find(([re])=>re.test(name)); return {no:i+1,name,short:s?s[3]:(name.length>14?name.slice(0,13)+'…':name),ic:s?s[1]:'📌',c:s?s[2]:SPARE[i%SPARE.length]}; });
+  GROUPS.push({no:GROUPS.length+1,name:'อื่นๆ / ไม่ระบุ',short:'อื่นๆ',ic:'📌',c:'#64748b'});
+  GBY=Object.fromEntries(GROUPS.map(g=>[g.no,g]));
+}
+const groupOf=type=>{ const g=GROUPS.find(g=>g.name===String(type||'').trim()); return g?g.no:GROUPS.length; };
 const ZCOL={'เขตตรวจที่ 1':'#FFD600','เขตตรวจที่ 2':'#000000','เขตตรวจที่ 3':'#F48FB1'};
-const LEVELS=['ทั่วไป','เฝ้าระวัง','สำคัญ','วิกฤต'];
 const TH_M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const TH_D=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
 const AREA = [{"name":"เขตตรวจที่ 1","c":[[100.833897,13.539078],[100.834452,13.542554],[100.834645,13.543625],[100.838904,13.541991],[100.839488,13.543197],[100.843042,13.544301],[100.844003,13.545531],[100.845585,13.544002],[100.849165,13.542717],[100.851706,13.542178],[100.854758,13.543307],[100.855103,13.543516],[100.855479,13.544299],[100.856371,13.54504],[100.857326,13.546156],[100.858104,13.546463],[100.859222,13.546513],[100.86065,13.546995],[100.861213,13.547194],[100.862461,13.546814],[100.863514,13.5475],[100.865232,13.55023],[100.865254,13.550816],[100.86254,13.551965],[100.857723,13.553989],[100.857723,13.555095],[100.859998,13.5613],[100.860121,13.568463],[100.861568,13.569868],[100.861627,13.570737],[100.862221,13.570224],[100.863397,13.569947],[100.864222,13.570705],[100.865685,13.57048],[100.865666,13.571368],[100.865914,13.571812],[100.866673,13.571621],[100.867289,13.572005],[100.868112,13.571946],[100.868652,13.572105],[100.868836,13.572873],[100.860525,13.57579],[100.859993,13.577374],[100.859134,13.578239],[100.859483,13.580502],[100.858412,13.580659],[100.859396,13.583257],[100.857995,13.583523],[100.855351,13.584093],[100.852755,13.584659],[100.851306,13.584982],[100.849923,13.585269],[100.847283,13.585832],[100.845684,13.586191],[100.84408,13.586545],[100.841064,13.587169],[100.839317,13.587529],[100.837548,13.587911],[100.834006,13.588642],[100.833358,13.586781],[100.832281,13.584128],[100.832219,13.580678],[100.832359,13.579015],[100.831257,13.578934],[100.830219,13.577913],[100.829729,13.577331],[100.829548,13.576977],[100.827539,13.575647],[100.825655,13.574941],[100.823168,13.575401],[100.822621,13.575047],[100.822289,13.574588],[100.822065,13.574067],[100.82179,13.573282],[100.821944,13.572122],[100.823454,13.57147],[100.825209,13.571377],[100.826356,13.571671],[100.827588,13.571945],[100.827693,13.571241],[100.827826,13.569769],[100.827895,13.568818],[100.827768,13.568358],[100.827254,13.568358],[100.82719,13.56792],[100.826965,13.567899],[100.826574,13.566637],[100.826139,13.565375],[100.824831,13.561338],[100.824339,13.560055],[100.824105,13.559428],[100.824155,13.559278],[100.824056,13.558849],[100.824022,13.558567],[100.823956,13.558318],[100.823794,13.557981],[100.823826,13.558198],[100.823665,13.557648],[100.823497,13.557506],[100.82328,13.557219],[100.822947,13.556833],[100.8227,13.556572],[100.822479,13.556331],[100.822259,13.556133],[100.821706,13.555538],[100.820016,13.553358],[100.818839,13.55074],[100.821818,13.549259],[100.823832,13.548112],[100.823483,13.54732],[100.823472,13.54632],[100.823834,13.54578],[100.824603,13.544617],[100.824595,13.544085],[100.824359,13.543345],[100.824101,13.542802],[100.823672,13.542489],[100.824584,13.541248],[100.833897,13.539078]]},{"name":"เขตตรวจที่ 3","c":[[100.879163,13.659452],[100.872555,13.663497],[100.871181,13.661579],[100.866289,13.664081],[100.865431,13.656741],[100.865645,13.655449],[100.864584,13.656216],[100.864583,13.655313],[100.864642,13.65426],[100.864638,13.653974],[100.864596,13.653809],[100.864551,13.65365],[100.864396,13.653142],[100.86405,13.652445],[100.863582,13.651613],[100.863367,13.651179],[100.86305,13.650645],[100.862769,13.650082],[100.862553,13.649686],[100.862074,13.648761],[100.861616,13.647904],[100.861483,13.647666],[100.861371,13.647211],[100.861235,13.646832],[100.861269,13.646109],[100.861297,13.645724],[100.861368,13.64534],[100.861609,13.643244],[100.861756,13.641798],[100.861795,13.641331],[100.86179,13.641196],[100.861677,13.641029],[100.861506,13.640747],[100.860858,13.639983],[100.860482,13.639549],[100.860149,13.639105],[100.859978,13.638556],[100.859889,13.637996],[100.859719,13.636531],[100.859374,13.635055],[100.858488,13.632497],[100.858177,13.63146],[100.857834,13.630418],[100.857476,13.629264],[100.857124,13.628147],[100.857005,13.627311],[100.856839,13.626162],[100.856687,13.625035],[100.856504,13.623919],[100.856343,13.622445],[100.856033,13.621628],[100.855677,13.621194],[100.855145,13.620912],[100.853825,13.620267],[100.853168,13.619878],[100.852714,13.619458],[100.852527,13.619086],[100.852345,13.618558],[100.85181,13.617079],[100.851563,13.616378],[100.851087,13.615034],[100.85068,13.613864],[100.850614,13.61346],[100.850612,13.612492],[100.850619,13.610894],[100.850492,13.608651],[100.85035,13.606867],[100.850257,13.606137],[100.850234,13.605428],[100.85029,13.60484],[100.850405,13.604267],[100.850851,13.603509],[100.85139,13.602742],[100.852441,13.601201],[100.852518,13.60101],[100.852567,13.60074],[100.852568,13.600551],[100.852529,13.600163],[100.852096,13.598371],[100.851882,13.597691],[100.851663,13.596991],[100.851198,13.595569],[100.850788,13.59451],[100.850743,13.594233],[100.850758,13.593967],[100.85085,13.593604],[100.851057,13.593281],[100.851616,13.592369],[100.85227,13.591258],[100.852544,13.590639],[100.852611,13.590457],[100.852694,13.589907],[100.852768,13.589134],[100.852852,13.588302],[100.852925,13.587473],[100.852913,13.587187],[100.852371,13.586343],[100.852228,13.586111],[100.852134,13.585877],[100.851931,13.585395],[100.851758,13.584891],[100.857454,13.583687],[100.859396,13.583257],[100.858466,13.58067],[100.859536,13.580512],[100.859188,13.57825],[100.860047,13.577384],[100.860579,13.5758],[100.865528,13.574323],[100.868996,13.572982],[100.868765,13.57201],[100.868046,13.571819],[100.867381,13.571938],[100.866736,13.571423],[100.866048,13.571647],[100.865786,13.571092],[100.865865,13.570316],[100.864992,13.570349],[100.864277,13.570583],[100.863447,13.5698],[100.8621,13.570002],[100.861724,13.570574],[100.861744,13.569881],[100.860239,13.56858],[100.860109,13.561291],[100.858863,13.557632],[100.857916,13.555195],[100.857953,13.554034],[100.861675,13.55242],[100.865427,13.550946],[100.86538,13.550167],[100.86374,13.547523],[100.862434,13.546658],[100.86125,13.547032],[100.860518,13.546818],[100.859141,13.546353],[100.858237,13.546348],[100.857333,13.546008],[100.856333,13.544902],[100.855407,13.544065],[100.855125,13.543395],[100.85906,13.542552],[100.863755,13.541866],[100.865505,13.544501],[100.86892,13.547182],[100.869532,13.548314],[100.874877,13.547989],[100.875781,13.54759],[100.879135,13.546876],[100.87932,13.548369],[100.880892,13.549518],[100.883778,13.552151],[100.884657,13.554246],[100.8859,13.557183],[100.886927,13.557801],[100.888462,13.557852],[100.889214,13.558122],[100.889516,13.558913],[100.889004,13.56308],[100.889612,13.564656],[100.88748,13.56664],[100.88599,13.567986],[100.888331,13.570843],[100.890954,13.573971],[100.891392,13.576974],[100.892718,13.581226],[100.894298,13.583806],[100.89574,13.585545],[100.896392,13.587355],[100.897096,13.588556],[100.901593,13.584951],[100.900374,13.589838],[100.901111,13.593521],[100.900698,13.59388],[100.900385,13.595515],[100.900706,13.600954],[100.90023,13.601405],[100.8991,13.604374],[100.897698,13.606309],[100.893521,13.610428],[100.89229,13.613162],[100.892776,13.614335],[100.893834,13.614846],[100.895092,13.616203],[100.896834,13.616914],[100.898688,13.61892],[100.898877,13.619678],[100.899084,13.621278],[100.905661,13.628761],[100.906027,13.629381],[100.906072,13.630955],[100.906505,13.631516],[100.908323,13.633011],[100.908869,13.634416],[100.910734,13.636559],[100.90983,13.637509],[100.907247,13.638907],[100.905602,13.639117],[100.903171,13.638287],[100.901311,13.638461],[100.897134,13.639744],[100.897192,13.640807],[100.891928,13.644476],[100.892419,13.645138],[100.8928,13.646128],[100.892789,13.647525],[100.892424,13.649402],[100.890836,13.653906],[100.881996,13.657742],[100.879163,13.659452]]},{"name":"เขตตรวจที่ 2","c":[[100.86233,13.657878],[100.86115,13.656647],[100.859905,13.655772],[100.859751,13.655385],[100.858982,13.655229],[100.857203,13.651515],[100.853895,13.651099],[100.851738,13.638964],[100.846873,13.640259],[100.843608,13.632261],[100.842286,13.632358],[100.841532,13.632218],[100.841225,13.630604],[100.840598,13.630069],[100.839679,13.630962],[100.839104,13.630812],[100.838808,13.627024],[100.837737,13.625911],[100.838429,13.624187],[100.836021,13.622244],[100.836403,13.620468],[100.838026,13.617666],[100.840498,13.617234],[100.842491,13.614924],[100.839906,13.610772],[100.842079,13.605284],[100.841828,13.601919],[100.841063,13.60105],[100.840211,13.600195],[100.838736,13.597414],[100.836559,13.595772],[100.835466,13.594074],[100.834006,13.588642],[100.842823,13.586802],[100.847283,13.585832],[100.849521,13.585339],[100.851758,13.584891],[100.851854,13.585203],[100.85202,13.58558],[100.852228,13.586111],[100.852913,13.587187],[100.852925,13.587473],[100.852765,13.5892],[100.852611,13.590457],[100.852454,13.59085],[100.85227,13.591258],[100.851915,13.591851],[100.851564,13.592435],[100.85085,13.593604],[100.850758,13.593967],[100.850743,13.594233],[100.850788,13.59451],[100.851102,13.5953],[100.851373,13.596111],[100.852152,13.598565],[100.852454,13.599867],[100.852522,13.600183],[100.852568,13.600551],[100.852567,13.60074],[100.852518,13.60101],[100.852441,13.601201],[100.851639,13.602351],[100.850851,13.603509],[100.850405,13.604267],[100.850294,13.604707],[100.850226,13.60537],[100.850257,13.606137],[100.85035,13.606867],[100.850418,13.607638],[100.850524,13.609004],[100.850648,13.611369],[100.850612,13.612492],[100.850614,13.61346],[100.85068,13.613864],[100.850962,13.614699],[100.851229,13.615461],[100.851391,13.615906],[100.851563,13.616378],[100.851886,13.617279],[100.852527,13.619086],[100.852714,13.619458],[100.852948,13.61969],[100.853168,13.619878],[100.853719,13.620212],[100.854457,13.620568],[100.855198,13.620942],[100.855666,13.621226],[100.855932,13.621472],[100.856059,13.621673],[100.856154,13.621885],[100.856313,13.622355],[100.856404,13.622889],[100.856463,13.623424],[100.856586,13.624493],[100.857005,13.627311],[100.857139,13.628102],[100.857343,13.628872],[100.857479,13.629318],[100.857628,13.629763],[100.857911,13.630665],[100.858477,13.632442],[100.858652,13.632926],[100.858816,13.633409],[100.859128,13.634354],[100.859388,13.635146],[100.859567,13.635829],[100.859719,13.636531],[100.859844,13.637538],[100.859978,13.638556],[100.860149,13.639105],[100.860292,13.639335],[100.860513,13.639597],[100.861079,13.640253],[100.861554,13.640817],[100.861757,13.641195],[100.861795,13.641331],[100.861635,13.643117],[100.861533,13.644016],[100.861405,13.644842],[100.861266,13.645858],[100.861235,13.646832],[100.861483,13.647666],[100.863163,13.650838],[100.86405,13.652445],[100.864396,13.653142],[100.864638,13.653974],[100.864584,13.656216],[100.86233,13.657878]]}];
 function inPoly(lat,lng,c){ let ins=false; for(let i=0,j=c.length-1;i<c.length;j=i++){ const [xi,yi]=c[i],[xj,yj]=c[j]; if(((yi>lat)!==(yj>lat)) && (lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)) ins=!ins; } return ins; }
 function zoneOf(lat,lng){ const z=AREA.find(z=>inPoly(lat,lng,z.c)); return z?z.name:'นอกเขต'; }
-
-/* ---------- ข้อมูลสมมติ (สุ่มแบบคงที่ ให้ทุกครั้งที่เปิดได้ภาพเดิม) ---------- */
-let seed=20261015; const rnd=()=>{ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; };
-const pick=(arr,w)=>{ let r=rnd()*w.reduce((a,b)=>a+b,0); for(let i=0;i<arr.length;i++){ r-=w[i]; if(r<=0) return arr[i]; } return arr[arr.length-1]; };
-const SPOTS=[ // จุดอ้างอิงสาธารณะ (ไม่ใช่บ้านเลขที่)
-  ['ตลาดบางบ่อ / ถ.รัตนราช',13.5785,100.8362,9],['ตลาดเตียกุ่ยฮวด',13.5870,100.8376,6],['ถ.บางนา-ตราด กม.27',13.5862,100.8420,6],
-  ['หน้า ม.อัสสัมชัญ (ABAC)',13.6110,100.8480,8],['ซ.นวมินทร์ 3',13.6150,100.8478,5],['ถ.วัดบางบ่อ',13.5760,100.8500,5],
-  ['บ้านเอื้ออาทรบางบ่อ',13.5915,100.8725,5],['ถ.รัตนโกสินทร์ 200 ปี',13.6250,100.8634,4],['บ้านระกาศ / บางพลีน้อย',13.5760,100.8880,4],
-  ['หมู่บ้านวโรชา',13.5600,100.8246,4],['วัดสุคันธาวาส',13.6300,100.8590,3],['ถ.ปานวิถี',13.5698,100.8384,4],['คลองกันยา',13.5545,100.8482,2]];
-const DETAIL={1:['ลักทรัพย์ในร้านค้า','กระชากสร้อย','ลักรถจักรยานยนต์','งัดร้านค้ากลางคืน','ชิงทรัพย์ผู้สัญจร'],2:['กลุ่มรถจักรยานยนต์ประมาณ 6-8 คัน','รวมกลุ่มแข่งรถบนถนน','ขับขี่ผาดโผนเป็นขบวน'],3:['ท่อเสียงดังรบกวน','บิดเร่งเครื่องยามดึก','ร้องเรียนเสียงรถดัง'],4:['ทะเลาะวิวาทใช้อาวุธ','ยิงปืนขึ้นฟ้า','ทำร้ายร่างกาย'],5:['วัยรุ่นมั่วสุมดื่มสุรา','รวมกลุ่มส่งเสียงดังยามวิกาล','มั่วสุมในสวนสาธารณะ'],6:['พบวัตถุต้องสงสัย','อุบัติเหตุจราจร','ร้องเรียนทั่วไป','คนเมาก่อความวุ่นวาย']};
-const HOURW=[5,4,3,2,1,1,1,2,3,3,3,3,4,3,3,4,5,6,8,9,10,10,9,7];
 const TODAY=new Date(); TODAY.setHours(23,59,59,0);
 const DAY=864e5;
-let INC=[];
-(function gen(){
-  const N=640, start=TODAY-200*DAY;
-  for(let k=0;k<N;k++){
-    const g=pick([1,2,3,4,5,6],[30,14,16,8,18,14]);
-    const sp=pick(SPOTS,SPOTS.map(s=>s[3]));
+let INC=[], READY=false, LIVE=false, WEAPONS=DEFAULT_WEAPONS;
+
+/* ---------- ข้อมูลสมมติ (ใช้เมื่อยังไม่ได้ใส่ CRIME_API) ---------- */
+function demoData(){
+  let seed=20261015; const rnd=()=>{ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; };
+  const pick=(arr,w)=>{ let r=rnd()*w.reduce((a,b)=>a+b,0); for(let i=0;i<arr.length;i++){ r-=w[i]; if(r<=0) return arr[i]; } return arr[arr.length-1]; };
+  const SPOTS=[['ตลาดบางบ่อ / ถ.รัตนราช',13.5785,100.8362,9],['ตลาดเตียกุ่ยฮวด',13.5870,100.8376,6],['ถ.บางนา-ตราด กม.27',13.5862,100.8420,6],['หน้า ม.อัสสัมชัญ (ABAC)',13.6110,100.8480,8],['ซ.นวมินทร์ 3',13.6150,100.8478,5],['ถ.วัดบางบ่อ',13.5760,100.8500,5],['บ้านเอื้ออาทรบางบ่อ',13.5915,100.8725,5],['ถ.รัตนโกสินทร์ 200 ปี',13.6250,100.8634,4],['บ้านระกาศ / บางพลีน้อย',13.5760,100.8880,4],['หมู่บ้านวโรชา',13.5600,100.8246,4],['วัดสุคันธาวาส',13.6300,100.8590,3],['ถ.ปานวิถี',13.5698,100.8384,4],['คลองกันยา',13.5545,100.8482,2]];
+  const WHAT={1:['ลักทรัพย์','วิ่งราวทรัพย์','รถจักรยานยนต์หาย','งัดร้านค้า'],2:['ทะเลาะวิวาท','ทำร้ายร่างกาย','ยิงปืนขึ้นฟ้า'],3:['วัยรุ่นมั่วสุม','รวมกลุ่มยามวิกาล'],4:['วงสุราส่งเสียงดัง','ก่อความเดือดร้อนรำคาญ'],5:['แข่งรถในทาง','ขับขี่ผาดโผน'],6:['พบวัตถุต้องสงสัย','อุบัติเหตุจราจร']};
+  const HOURW=[5,4,3,2,1,1,1,2,3,3,3,3,4,3,3,4,5,6,8,9,10,10,9,7];
+  const out=[], start=TODAY-200*DAY;
+  for(let k=0;k<640;k++){
+    const g=pick([1,2,3,4,5,6],[30,12,16,18,16,8]); const sp=pick(SPOTS,SPOTS.map(s=>s[3]));
     let lat,lng,z,tries=0; do{ const r=Math.sqrt(rnd())*0.009, a=rnd()*Math.PI*2; lat=sp[1]+r*Math.sin(a); lng=sp[2]+r*Math.cos(a); z=zoneOf(lat,lng); }while(z==='นอกเขต' && ++tries<20);
     if(z==='นอกเขต') continue;
-    const h=g===2||g===3||g===5 ? pick([...Array(24).keys()],HOURW.map((w,i)=>i>=19||i<=2?w*2:w)) : pick([...Array(24).keys()],HOURW);
-    const day=Math.floor(start/DAY + rnd()*200 + (rnd()<.25?rnd()*30:0)); // เหตุถี่ขึ้นช่วงหลัง
-    const t=new Date(Math.min(day*DAY, TODAY-DAY*0)); t.setHours(h, Math.floor(rnd()*60), 0, 0);
-    if(t>TODAY) continue;
-    const lv=g===4?pick(LEVELS,[1,2,4,3]):g===1?pick(LEVELS,[3,3,3,1]):pick(LEVELS,[5,3,1,.3]);
-    INC.push({id:0,t,g,lat:+lat.toFixed(6),lng:+lng.toFixed(6),zone:z,place:sp[0],detail:DETAIL[g][Math.floor(rnd()*DETAIL[g].length)],level:lv,src:'สมมติ'});
+    const h=g>=3&&g<=5 ? pick([...Array(24).keys()],HOURW.map((w,i)=>i>=19||i<=2?w*2:w)) : pick([...Array(24).keys()],HOURW);
+    const day=Math.floor(start/DAY + rnd()*200 + (rnd()<.25?rnd()*30:0));
+    const t=new Date(day*DAY); t.setHours(h, Math.floor(rnd()*60), 0, 0); if(t>TODAY) continue;
+    const weapon=g===2?pick(['','ปืน','มีด'],[4,2,3]):g===1?pick(['','มีด'],[9,1]):'';
+    out.push({t,g,lat:+lat.toFixed(6),lng:+lng.toFixed(6),zone:z,place:sp[0],what:WHAT[g][Math.floor(rnd()*WHAT[g].length)],weapon});
   }
-  INC.sort((a,b)=>b.t-a.t); INC.forEach((r,i)=>r.id=INC.length-i);
-})();
+  return out;
+}
+
+/* ---------- โหลดข้อมูล ---------- */
+async function loadData(){
+  if(!CRIME_API){ buildGroups(DEFAULT_TYPES); INC=demoData(); return; }
+  $('srcNote').className='live-note'; $('srcNote').innerHTML='⏳ <span>กำลังโหลดข้อมูลจากชีต…</span>';
+  try{
+    const j=await fetch(CRIME_API+'?t='+Date.now()).then(r=>r.json());
+    if(!j.ok) throw new Error(j.error||'โหลดไม่สำเร็จ');
+    buildGroups(j.types&&j.types.length?j.types:DEFAULT_TYPES);
+    if(j.weapons&&j.weapons.length) WEAPONS=j.weapons;
+    INC=(j.rows||[]).map(r=>({t:new Date(r.t),g:groupOf(r.type),type:r.type,lat:r.lat,lng:r.lng,zone:r.zone||(r.lat!=null?zoneOf(r.lat,r.lng):'ไม่ระบุ'),place:r.place||'—',what:r.what||'',weapon:r.weapon||'',row:r.row})).filter(r=>!isNaN(r.t));
+    LIVE=true;
+    $('srcNote').innerHTML=`🟢 <span><b>ข้อมูลจริงจากชีต "วิเคราะห์อาชญากรรม"</b> · ${fmt(INC.length)} เหตุ · อัปเดต ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. · ไม่แสดงชื่อผู้เสียหาย/ผู้ก่อเหตุ</span>`;
+  }catch(e){
+    buildGroups(DEFAULT_TYPES); INC=[];
+    $('srcNote').className='live-note err'; $('srcNote').innerHTML=`⚠️ <span>โหลดข้อมูลจากชีตไม่สำเร็จ (${esc(e.message)}) · ลองรีเฟรชอีกครั้ง</span>`;
+  }
+}
 
 /* ---------- ตัวกรอง ---------- */
 const iso=d=>{ const x=new Date(d); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,10); };
@@ -1072,8 +1115,13 @@ const thDate=d=>`${d.getDate()} ${TH_M[d.getMonth()]} ${String(d.getFullYear()+5
 const hm=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 const F={from:null,to:null,g:0,zone:''};
 function setRange(days){ F.to=new Date(TODAY); F.from=new Date(TODAY-days*DAY+1000); F.from.setHours(0,0,0,0); if(days===1){ F.from=new Date(TODAY-DAY+1000);} $('fFrom').value=iso(F.from); $('fTo').value=iso(F.to); }
-$('fGroup').innerHTML='<option value="0">ทุกกลุ่ม</option>'+GROUPS.map(g=>`<option value="${g.no}">${g.no}. ${g.name}</option>`).join('');
-$('iGroup').innerHTML=GROUPS.map(g=>`<option value="${g.no}">${g.no}. ${g.name}</option>`).join('');
+function fillSelects(){
+  $('fGroup').innerHTML='<option value="0">ทุกประเภท</option>'+GROUPS.map(g=>`<option value="${g.no}">${g.no}. ${esc(g.name)}</option>`).join('');
+  $('iGroup').innerHTML='<option value="">— เลือกประเภทเหตุ —</option>'+GROUPS.slice(0,-1).map(g=>`<option value="${esc(g.name)}">${g.ic} ${esc(g.name)}</option>`).join('');
+  $('iWeapon').innerHTML='<option value="">— ไม่มี / ไม่ทราบ —</option>'+WEAPONS.map(w=>`<option>${esc(w)}</option>`).join('');
+  const whats=[...new Set(INC.map(r=>r.what).filter(Boolean).concat(['ทะเลาะวิวาท','ทำร้ายร่างกาย','ลักทรัพย์','วิ่งราวทรัพย์','รถจักรยานยนต์หาย','วัยรุ่นมั่วสุม','แข่งรถในทาง','ก่อความเดือดร้อนรำคาญ']))];
+  $('whatList').innerHTML=whats.map(w=>`<option value="${esc(w)}">`).join('');
+}
 function readDates(){ F.from=new Date($('fFrom').value+'T00:00:00'); F.to=new Date($('fTo').value+'T23:59:59'); }
 const inRange=(r,a,b)=>r.t>=a && r.t<=b;
 const match=(r,ignoreG)=>(ignoreG||!F.g||r.g===F.g) && (!F.zone||r.zone===F.zone);
@@ -1082,7 +1130,7 @@ $('quick').addEventListener('click',e=>{ const b=e.target.closest('button'); if(
 ['fFrom','fTo'].forEach(id=>$(id).addEventListener('change',()=>{ document.querySelectorAll('#quick button').forEach(x=>x.classList.remove('on')); readDates(); defaultCompare(); renderAll(); }));
 $('fGroup').addEventListener('change',e=>{ F.g=+e.target.value; renderAll(); });
 $('fZone').addEventListener('change',e=>{ F.zone=e.target.value; renderAll(); });
-$('fReset').onclick=()=>{ F.g=0; F.zone=''; $('fGroup').value='0'; $('fZone').value=''; document.querySelectorAll('#quick button').forEach(x=>x.classList.toggle('on',x.dataset.d==='30')); setRange(30); defaultCompare(); renderAll(); };
+$('fReset').onclick=()=>{ F.g=0; F.zone=''; $('fGroup').value='0'; $('fZone').value=''; document.querySelectorAll('#quick button').forEach(x=>x.classList.toggle('on',x.dataset.d===String(DEF_DAYS))); setRange(DEF_DAYS); defaultCompare(); renderAll(); };
 
 /* ---------- KPI ---------- */
 function pct(a,b){ if(!b) return a? {t:'ใหม่',c:'up'}:{t:'–',c:'eq'}; const p=Math.round((a-b)/b*100); return {t:(p>0?'▲ ':p<0?'▼ ':'')+Math.abs(p)+'%',c:p>0?'up':p<0?'dn':'eq'}; }
@@ -1090,15 +1138,17 @@ function renderKpi(){
   const len=F.to-F.from, pFrom=new Date(+F.from-len-1000), pTo=new Date(+F.from-1000);
   const cur=INC.filter(r=>inRange(r,F.from,F.to) && match(r,true)), prev=INC.filter(r=>inRange(r,pFrom,pTo) && match(r,true));
   const cards=[{no:0,short:'เหตุทั้งหมด',ic:'🚨',c:'#dc2626'},...GROUPS];
+  $('ckRow').style.gridTemplateColumns=innerWidth>1200?`repeat(${cards.length},minmax(0,1fr))`:'';
   $('ckRow').innerHTML=cards.map(g=>{ const a=g.no?cur.filter(r=>r.g===g.no).length:cur.length, b=g.no?prev.filter(r=>r.g===g.no).length:prev.length, p=pct(a,b);
-    return `<button type="button" class="ck${F.g===g.no?' on':''}" data-g="${g.no}" style="--c:${g.c}" title="${esc(g.name||'ทุกกลุ่ม')}"><span class="ic">${g.ic}</span><span class="bd"><span class="v">${fmt(a)}</span><span class="l">${g.no?g.no+'. ':''}${esc(g.short)}</span><span class="ch ${p.c}" title="เทียบช่วงก่อนหน้าที่ยาวเท่ากัน">${p.t} <span style="font-weight:500;color:var(--faint)">จากช่วงก่อน</span></span></span></button>`; }).join('');
+    return `<button type="button" class="ck${F.g===g.no?' on':''}" data-g="${g.no}" style="--c:${g.c}" title="${esc(g.name||'ทุกประเภท')}"><span class="ic">${g.ic}</span><span class="bd"><span class="v">${fmt(a)}</span><span class="l">${esc(g.short)}</span><span class="ch ${p.c}" title="เทียบช่วงก่อนหน้าที่ยาวเท่ากัน">${p.t} <span style="font-weight:500;color:var(--faint)">จากช่วงก่อน</span></span></span></button>`; }).join('');
 }
 $('ckRow').addEventListener('click',e=>{ const b=e.target.closest('.ck'); if(!b) return; F.g=+b.dataset.g===F.g?0:+b.dataset.g; $('fGroup').value=F.g; renderAll(); });
+addEventListener('resize',()=>READY&&renderKpi());
 
 /* ---------- แผนที่ ---------- */
 let map,heat,pins,zoneLayer,zoneLbl={},markerById={};
-function pinIcon(g,hl){ return L.divIcon({className:'',html:`<div class="cpin${hl?' hl':''}" style="background:${GBY[g].c}"><span>${GBY[g].ic}</span></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]}); }
-function popupHtml(r){ return `<div class="pp-t">${GBY[r.g].ic} ${esc(GBY[r.g].name)}</div><div class="pp-a">${thDate(r.t)} ${hm(r.t)} น. · ${esc(r.zone)}</div><div style="margin-top:4px">${esc(r.detail)}</div><div class="pp-a">${esc(r.place)} · <span class="lv lv-${r.level}">${r.level}</span></div>`; }
+function pinIcon(g){ const G=GBY[g]||{c:'#64748b',ic:'📌'}; return L.divIcon({className:'',html:`<div class="cpin" style="background:${G.c}"><span>${G.ic}</span></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]}); }
+function popupHtml(r){ return `<div class="pp-t">${GBY[r.g].ic} ${esc(r.what||GBY[r.g].name)}</div><div class="pp-a">${esc(GBY[r.g].name)}</div><div class="pp-a">${thDate(r.t)} ${hm(r.t)} น. · ${esc(r.zone)}</div><div class="pp-a">📍 ${esc(r.place)}${r.weapon?` · <span class="wp">${esc(r.weapon)}</span>`:''}</div>`; }
 function initMap(){
   if(map||!window.L) return;
   map=L.map('crMap',{maxZoom:18,minZoom:10,zoomSnap:.25,scrollWheelZoom:false});
@@ -1108,20 +1158,24 @@ function initMap(){
     p.bindTooltip(z.name,{permanent:true,direction:'center',className:'zone-label zc',pane:'zoneLabels'}); zoneLbl[z.name]=p; return p; })).addTo(map);
   map.fitBounds(zoneLayer.getBounds(),{padding:[10,10]});
   heat=L.heatLayer?L.heatLayer([],{radius:26,blur:20,maxZoom:15,minOpacity:.3,gradient:{.2:'#3b82f6',.4:'#22c55e',.6:'#facc15',.8:'#f97316',1:'#dc2626'}}).addTo(map):null;
+  if(heat){ const _r=heat._redraw; heat._redraw=function(){ if(this._map && this._map.getSize().x>0 && this._map.getSize().y>0) _r.call(this); }; }
   pins=L.layerGroup().addTo(map);
   map.on('focus',()=>map.scrollWheelZoom.enable()); map.on('blur',()=>map.scrollWheelZoom.disable());
   $('lyHeat').onchange=e=>heat&&(e.target.checked?heat.addTo(map):map.removeLayer(heat));
   $('lyPins').onchange=e=>e.target.checked?pins.addTo(map):map.removeLayer(pins);
   $('lyZone').onchange=e=>e.target.checked?zoneLayer.addTo(map):map.removeLayer(zoneLayer);
 }
+let mapDirty=false;
 function renderMap(list){
-  initMap(); if(!map) return;
+  if($('viewDash').hidden){ mapDirty=true; return; }   // แผนที่ซ่อนอยู่ (heat layer วาดไม่ได้) → วาดตอนกลับมาหน้าภาพรวม
+  mapDirty=false; initMap(); if(!map) return;
   pins.clearLayers(); markerById={};
-  list.slice(0,400).forEach(r=>{ markerById[r.id]=L.marker([r.lat,r.lng],{icon:pinIcon(r.g),title:GBY[r.g].name}).bindPopup(popupHtml(r)).addTo(pins); });
-  if(heat) heat.setLatLngs(list.map(r=>[r.lat,r.lng,.6]));
+  const pos=list.filter(r=>r.lat!=null&&r.lng!=null);
+  pos.slice(0,400).forEach(r=>{ markerById[INC.indexOf(r)]=L.marker([r.lat,r.lng],{icon:pinIcon(r.g),title:r.what||GBY[r.g].name}).bindPopup(popupHtml(r)).addTo(pins); });
+  if(heat) heat.setLatLngs(pos.map(r=>[r.lat,r.lng,.6]));
   AREA.forEach(z=>{ const n=list.filter(r=>r.zone===z.name).length; zoneLbl[z.name].setTooltipContent(`${z.name}<small>${fmt(n)} เหตุ</small>`); });
   const cnt={}; list.forEach(r=>cnt[r.g]=(cnt[r.g]||0)+1);
-  $('mLegend').innerHTML='<b>กลุ่มเหตุ</b>'+GROUPS.map(g=>`<div><i style="background:${g.c}"></i>${g.no}. ${esc(g.short)} <span style="margin-left:auto;font-weight:700">${cnt[g.no]||0}</span></div>`).join('')+(list.length>400?`<div style="color:#64748b">แสดงหมุด 400 จุดล่าสุด</div>`:'');
+  $('mLegend').innerHTML='<b>ประเภทเหตุ</b>'+GROUPS.map(g=>`<div><i style="background:${g.c}"></i>${esc(g.short)} <span style="margin-left:auto;font-weight:700;padding-left:8px">${cnt[g.no]||0}</span></div>`).join('')+(pos.length>400?`<div style="color:#64748b">แสดงหมุด 400 จุดล่าสุด</div>`:'')+(pos.length<list.length?`<div style="color:#64748b">ไม่มีพิกัด ${list.length-pos.length} เหตุ</div>`:'');
 }
 
 /* ---------- รายการล่าสุด ---------- */
@@ -1130,8 +1184,8 @@ function renderLatest(list){
   const pages=Math.max(1,Math.ceil(list.length/PER)); ltPage=Math.min(ltPage,pages);
   const rows=list.slice((ltPage-1)*PER,ltPage*PER);
   $('ltCount').textContent=`${fmt(list.length)} รายการ`;
-  $('lt').innerHTML='<thead><tr><th>เวลา</th><th>ประเภทเหตุ</th><th>พื้นที่</th><th>ระดับ</th></tr></thead><tbody>'+
-    (rows.length?rows.map(r=>`<tr data-id="${r.id}"><td class="tm">${hm(r.t)}<small>${thDate(r.t)}</small></td><td><span class="gb" style="--c:${GBY[r.g].c}"><i>${r.g}</i>${esc(GBY[r.g].short)}</span></td><td>${esc(r.zone.replace('เขตตรวจที่ ','เขต '))}<div class="c-note">${esc(r.place)}</div></td><td><span class="lv lv-${r.level}">${r.level}</span></td></tr>`).join('')
+  $('lt').innerHTML='<thead><tr><th>เวลา</th><th>ประเภท</th><th>รายการ / พื้นที่</th><th>เขต</th></tr></thead><tbody>'+
+    (rows.length?rows.map(r=>`<tr data-id="${INC.indexOf(r)}"><td class="tm">${hm(r.t)}<small>${thDate(r.t)}</small></td><td><span class="gb" style="--c:${GBY[r.g].c}"><i>${GBY[r.g].ic}</i>${esc(GBY[r.g].short)}</span></td><td>${esc(r.what)}${r.weapon?` <span class="wp">${esc(r.weapon)}</span>`:''}<div class="c-note">${esc(r.place)}</div></td><td style="white-space:nowrap">${esc(r.zone.replace('เขตตรวจที่ ','เขต '))}</td></tr>`).join('')
       :'<tr><td colspan="4" class="c-note" style="text-align:center;padding:20px">ไม่มีเหตุในช่วงที่เลือก</td></tr>')+'</tbody>';
   const btn=(p,l,dis,on)=>`<button type="button" data-p="${p}"${dis?' disabled':''}${on?' class="on"':''}>${l}</button>`;
   let h=btn(ltPage-1,'‹',ltPage===1); const s=Math.max(1,Math.min(ltPage-2,pages-4));
@@ -1140,23 +1194,23 @@ function renderLatest(list){
   $('ltPg').innerHTML=h;
 }
 $('ltPg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||b.disabled) return; ltPage=+b.dataset.p; renderLatest(filtered()); });
-$('lt').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-id]'); if(!tr) return; const m=markerById[tr.dataset.id]; if(m){ if(!map.hasLayer(pins)){ $('lyPins').checked=true; pins.addTo(map);} map.flyTo(m.getLatLng(),16,{duration:.6}); setTimeout(()=>m.openPopup(),650); $('crMap').scrollIntoView({behavior:'smooth',block:'center'}); } });
+$('lt').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-id]'); if(!tr) return; const m=markerById[tr.dataset.id]; if(m){ if(!map.hasLayer(pins)){ $('lyPins').checked=true; pins.addTo(map);} map.flyTo(m.getLatLng(),16,{duration:.6}); setTimeout(()=>m.openPopup(),650); $('crMap').scrollIntoView({behavior:'smooth',block:'center'}); } else toast('เหตุนี้ยังไม่มีพิกัดในชีต'); });
 
 /* ---------- นาฬิกาอาชญากรรม ---------- */
 function renderClock(){
   const list=filtered(true).filter(r=>!F.g||r.g===F.g);
   const M=GROUPS.map(()=>Array(24).fill(0)); list.forEach(r=>M[r.g-1][r.t.getHours()]++);
-  const S=420,cx=S/2,cy=S/2,r0=58,ring=22,dark=isDark(),txt=dark?'#94a3b8':'#64748b';
+  const S=420,cx=S/2,cy=S/2,r0=58,ring=Math.min(22,Math.floor(132/GROUPS.length)),dark=isDark(),txt=dark?'#94a3b8':'#64748b';
   const arc=(r1,r2,a1,a2)=>{ const p=(r,a)=>[cx+r*Math.sin(a),cy-r*Math.cos(a)]; const [x1,y1]=p(r2,a1),[x2,y2]=p(r2,a2),[x3,y3]=p(r1,a2),[x4,y4]=p(r1,a1); return `M${x1},${y1}A${r2},${r2} 0 0 1 ${x2},${y2}L${x3},${y3}A${r1},${r1} 0 0 0 ${x4},${y4}Z`; };
-  let svg=`<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="นาฬิกาอาชญากรรม จำนวนเหตุแยกตามชั่วโมงและกลุ่ม">`;
+  let svg=`<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="นาฬิกาอาชญากรรม จำนวนเหตุแยกตามชั่วโมงและประเภท">`;
   GROUPS.forEach((g,gi)=>{ if(F.g&&F.g!==g.no) return; const mx=Math.max(1,...M[gi]); const r1=r0+gi*ring+1,r2=r0+(gi+1)*ring-1;
     for(let h=0;h<24;h++){ const v=M[gi][h], a1=h/24*2*Math.PI+.012, a2=(h+1)/24*2*Math.PI-.012; const op=v?(.18+.82*v/mx):.06;
-      svg+=`<path class="seg" d="${arc(r1,r2,a1,a2)}" fill="${g.c}" fill-opacity="${op.toFixed(2)}"><title>${String(h).padStart(2,'0')}:00–${String(h+1).padStart(2,'0')}:00 · ${g.short}: ${v} เหตุ</title></path>`; } });
-  const rOut=r0+6*ring+14;
+      svg+=`<path class="seg" d="${arc(r1,r2,a1,a2)}" fill="${g.c}" fill-opacity="${op.toFixed(2)}"><title>${String(h).padStart(2,'0')}:00–${String(h+1).padStart(2,'0')}:00 · ${esc(g.short)}: ${v} เหตุ</title></path>`; } });
+  const rOut=r0+GROUPS.length*ring+14;
   for(let h=0;h<24;h+=1){ const a=h/24*2*Math.PI; svg+=`<text x="${cx+rOut*Math.sin(a)}" y="${cy-rOut*Math.cos(a)+4}" text-anchor="middle" font-size="${h%3?10:12}" font-weight="${h%3?400:700}" fill="${txt}">${String(h).padStart(2,'0')}</text>`; }
   svg+=`<circle cx="${cx}" cy="${cy}" r="${r0-6}" fill="${dark?'#0f172a':'#f8fafc'}" stroke="${dark?'#1e293b':'#e2e8f0'}"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="30" font-weight="700" fill="${dark?'#f8fafc':'#0f172a'}">${fmt(list.length)}</text><text x="${cx}" y="${cy+24}" text-anchor="middle" font-size="12" fill="${txt}">เหตุ</text></svg>`;
   $('clock').innerHTML=svg;
-  $('clockLeg').innerHTML=GROUPS.filter(g=>!F.g||g.no===F.g).map(g=>`<li><span class="gb" style="--c:${g.c}"><i>${g.no}</i></span>${esc(g.name)}<b>${fmt(M[g.no-1].reduce((a,b)=>a+b,0))}</b></li>`).join('');
+  $('clockLeg').innerHTML=GROUPS.filter(g=>!F.g||g.no===F.g).map(g=>`<li><span class="gb" style="--c:${g.c}"><i>${g.ic}</i></span>${esc(g.name)}<b>${fmt(M[g.no-1].reduce((a,b)=>a+b,0))}</b></li>`).join('');
   const byH=Array(24).fill(0); list.forEach(r=>byH[r.t.getHours()]++);
   let best=0,bs=0; for(let h=0;h<24;h++){ const s3=byH[h]+byH[(h+1)%24]+byH[(h+2)%24]; if(s3>bs){bs=s3;best=h;} }
   $('peak').innerHTML=list.length?`⏰ ช่วงเกิดเหตุมากสุด <b>${String(best).padStart(2,'0')}:00–${String((best+3)%24).padStart(2,'0')}:00 น.</b> (${fmt(bs)} เหตุ, ${Math.round(bs/list.length*100)}%) · ควรเพิ่มสายตรวจช่วงนี้`:'ไม่มีข้อมูล';
@@ -1170,7 +1224,7 @@ function donut(list,label){
   let a=0, svg=`<svg viewBox="0 0 200 200" role="img" aria-label="${label} ${tot} เหตุ">`;
   if(!tot) svg+=`<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none" stroke="${dark?'#1e293b':'#e2e8f0'}" stroke-width="${R-r}"/>`;
   cnt.forEach((v,i)=>{ if(!v) return; const a2=a+v/tot*2*Math.PI; const big=a2-a>Math.PI?1:0; const P=(rr,aa)=>`${cx+rr*Math.sin(aa)},${cy-rr*Math.cos(aa)}`;
-    svg+= v===tot? `<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none" stroke="${GROUPS[i].c}" stroke-width="${R-r}"/>` : `<path d="M${P(R,a)}A${R},${R} 0 ${big} 1 ${P(R,a2)}L${P(r,a2)}A${r},${r} 0 ${big} 0 ${P(r,a)}Z" fill="${GROUPS[i].c}" stroke="${dark?'#111a2e':'#fff'}" stroke-width="1.5"><title>${GROUPS[i].short}: ${v}</title></path>`; a=a2; });
+    svg+= v===tot? `<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none" stroke="${GROUPS[i].c}" stroke-width="${R-r}"/>` : `<path d="M${P(R,a)}A${R},${R} 0 ${big} 1 ${P(R,a2)}L${P(r,a2)}A${r},${r} 0 ${big} 0 ${P(r,a)}Z" fill="${GROUPS[i].c}" stroke="${dark?'#111a2e':'#fff'}" stroke-width="1.5"><title>${esc(GROUPS[i].short)}: ${v}</title></path>`; a=a2; });
   svg+=`<text x="${cx}" y="${cy+6}" text-anchor="middle" font-size="28" font-weight="700" fill="${dark?'#f8fafc':'#0f172a'}">${fmt(tot)}</text><text x="${cx}" y="${cy+24}" text-anchor="middle" font-size="11" fill="${dark?'#94a3b8':'#64748b'}">เหตุ</text></svg>`;
   return {svg,cnt,tot};
 }
@@ -1181,37 +1235,39 @@ function renderCompare(){
   const da=donut(A,'ช่วงก่อน'), db=donut(B,'ช่วงหลัง'); $('donutA').innerHTML=da.svg; $('donutB').innerHTML=db.svg;
   const p=pct(db.tot,da.tot), col=p.c==='up'?'#dc2626':p.c==='dn'?'#16a34a':'var(--muted)';
   const daysA=Math.max(1,Math.round((a2-a1)/DAY)), daysB=Math.max(1,Math.round((b2-b1)/DAY));
-  $('cmpRes').innerHTML=`<div class="big" style="color:${col}">${p.t}</div><div class="c-note">${p.c==='up'?'เหตุเพิ่มขึ้น':'เหตุลดลง'} ${fmt(Math.abs(db.tot-da.tot))} เหตุ · เฉลี่ย ${(da.tot/daysA).toFixed(1)} → ${(db.tot/daysB).toFixed(1)} เหตุ/วัน</div>`;
-  $('cmpTbl').innerHTML=GROUPS.map((g,i)=>{ const q=pct(db.cnt[i],da.cnt[i]); return `<tr><td><span class="gb" style="--c:${g.c}"><i>${g.no}</i>${esc(g.short)}</span></td><td class="n">${da.cnt[i]}</td><td class="n">→ ${db.cnt[i]}</td><td class="n"><span class="ch ${q.c}">${q.t}</span></td></tr>`; }).join('');
+  $('cmpRes').innerHTML=`<div class="big" style="color:${col}">${p.t}</div><div class="c-note">${p.c==='up'?'เหตุเพิ่มขึ้น':p.c==='dn'?'เหตุลดลง':'เท่าเดิม'} ${fmt(Math.abs(db.tot-da.tot))} เหตุ · เฉลี่ย ${(da.tot/daysA).toFixed(1)} → ${(db.tot/daysB).toFixed(1)} เหตุ/วัน</div>`;
+  $('cmpTbl').innerHTML=GROUPS.map((g,i)=>{ const q=pct(db.cnt[i],da.cnt[i]); return `<tr><td><span class="gb" style="--c:${g.c}"><i>${g.ic}</i>${esc(g.short)}</span></td><td class="n">${da.cnt[i]}</td><td class="n">→ ${db.cnt[i]}</td><td class="n"><span class="ch ${q.c}">${q.t}</span></td></tr>`; }).join('');
 }
 
 /* ---------- รายงาน ---------- */
 let sortK='t',sortD=-1;
 function bars(el,pairs,colors){ const mx=Math.max(1,...pairs.map(p=>p[1])); $(el).innerHTML=pairs.map(([l,v],i)=>`<div class="hb"><span>${esc(l)}</span><div class="t"><i style="width:${v/mx*100}%;--c:${colors?colors[i]:'#2563eb'}"></i></div><b>${fmt(v)}</b></div>`).join(''); }
 function renderReport(list){
-  bars('sumGroup',GROUPS.map(g=>[g.no+'. '+g.short,list.filter(r=>r.g===g.no).length]),GROUPS.map(g=>g.c));
+  bars('sumGroup',GROUPS.map(g=>[g.short,list.filter(r=>r.g===g.no).length]),GROUPS.map(g=>g.c));
   bars('sumZone',AREA.map(z=>z.name).sort().map(z=>[z,list.filter(r=>r.zone===z).length]),['#eab308','#334155','#ec4899']);
   bars('sumDay',[1,2,3,4,5,6,0].map(d=>[TH_D[d],list.filter(r=>r.t.getDay()===d).length]));
-  const key={t:r=>+r.t,g:r=>r.g,zone:r=>r.zone,level:r=>LEVELS.indexOf(r.level)}[sortK];
+  const key={t:r=>+r.t,g:r=>r.g,zone:r=>r.zone,what:r=>r.what}[sortK];
   const rows=[...list].sort((a,b)=>(key(a)>key(b)?1:key(a)<key(b)?-1:0)*sortD);
   $('rpCount').textContent=`${fmt(list.length)} รายการ`;
   const th=(k,l)=>`<th data-k="${k}">${l}${sortK===k?(sortD>0?' ▲':' ▼'):''}</th>`;
-  $('rp').innerHTML=`<thead><tr><th>#</th>${th('t','วันที่ / เวลา')}${th('g','กลุ่มเหตุ')}<th>รายละเอียด</th><th>สถานที่</th>${th('zone','เขตตรวจ')}${th('level','ระดับ')}<th>พิกัด</th></tr></thead><tbody>`+
-    rows.slice(0,500).map((r,i)=>`<tr><td class="n">${i+1}</td><td style="white-space:nowrap">${thDate(r.t)} ${hm(r.t)}</td><td><span class="gb" style="--c:${GBY[r.g].c}"><i>${r.g}</i>${esc(GBY[r.g].short)}</span></td><td>${esc(r.detail)}</td><td>${esc(r.place)}</td><td>${esc(r.zone)}</td><td><span class="lv lv-${r.level}">${r.level}</span></td><td class="c-note">${r.lat}, ${r.lng}</td></tr>`).join('')+
-    (rows.length>500?`<tr><td colspan="8" class="c-note" style="text-align:center">แสดง 500 รายการแรก · ดาวน์โหลด CSV เพื่อดูทั้งหมด</td></tr>`:'')+'</tbody>';
+  $('rp').innerHTML=`<thead><tr><th>#</th>${th('t','วัน/เวลา')}${th('what','รายการรับแจ้งเหตุ')}${th('g','ประเภทเหตุ')}<th>สถานที่เกิดเหตุ</th><th>สิ่งของที่ใช้</th>${th('zone','เขตตรวจ')}<th>พิกัด</th></tr></thead><tbody>`+
+    rows.slice(0,500).map((r,i)=>`<tr><td class="n">${i+1}</td><td style="white-space:nowrap">${thDate(r.t)} ${hm(r.t)}</td><td>${esc(r.what)}</td><td><span class="gb" style="--c:${GBY[r.g].c}"><i>${GBY[r.g].ic}</i>${esc(GBY[r.g].short)}</span></td><td>${esc(r.place)}</td><td>${r.weapon?`<span class="wp">${esc(r.weapon)}</span>`:''}</td><td>${esc(r.zone)}</td><td class="c-note">${r.lat!=null?r.lat+', '+r.lng:'—'}</td></tr>`).join('')+
+    (rows.length>500?`<tr><td colspan="8" class="c-note" style="text-align:center">แสดง 500 รายการแรก · ดาวน์โหลด CSV เพื่อดูทั้งหมด</td></tr>`:'')+(rows.length?'':`<tr><td colspan="8" class="c-note" style="text-align:center;padding:20px">ไม่มีเหตุในช่วงที่เลือก</td></tr>`)+'</tbody>';
 }
 $('rp').addEventListener('click',e=>{ const th=e.target.closest('th[data-k]'); if(!th) return; if(sortK===th.dataset.k) sortD*=-1; else { sortK=th.dataset.k; sortD=th.dataset.k==='t'?-1:1; } renderReport(filtered()); });
 $('csvBtn').onclick=()=>{
-  const list=filtered(), q=s=>'"'+String(s).replace(/"/g,'""')+'"';
-  const csv='﻿'+['ลำดับ,วันที่,เวลา,กลุ่ม,ชื่อกลุ่ม,รายละเอียด,สถานที่,เขตตรวจ,ระดับ,ละติจูด,ลองจิจูด',...list.map((r,i)=>[i+1,iso(r.t),hm(r.t),r.g,q(GBY[r.g].name),q(r.detail),q(r.place),q(r.zone),r.level,r.lat,r.lng].join(','))].join('\r\n');
+  const list=filtered(), q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+  const csv='﻿'+['ลำดับ,วันที่,เวลา,รายการรับแจ้งเหตุ,ประเภทเหตุ,สถานที่เกิดเหตุ,สิ่งของที่ใช้,เขตตรวจ,ละติจูด,ลองจิจูด',...list.map((r,i)=>[i+1,iso(r.t),hm(r.t),q(r.what),q(GBY[r.g].name),q(r.place),q(r.weapon),q(r.zone),r.lat??'',r.lng??''].join(','))].join('\r\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download=`crime_${$('fFrom').value}_${$('fTo').value}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 };
 
 /* ---------- บันทึกเหตุ ---------- */
 let pmap,pmark;
-function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3200); }
 function setPick(lat,lng,pan){ $('iLat').value=lat.toFixed(6); $('iLng').value=lng.toFixed(6); const z=zoneOf(lat,lng); $('pickZone').textContent='→ '+z; $('pickZone').style.color=z==='นอกเขต'?'#dc2626':'';
-  if(!pmark){ pmark=L.marker([lat,lng],{draggable:true,icon:pinIcon(+$('iGroup').value)}).addTo(pmap); pmark.on('dragend',e=>{ const p=e.target.getLatLng(); setPick(p.lat,p.lng); }); } else pmark.setLatLng([lat,lng]);
+  if(z!=='นอกเขต') $('iZone').value=z;
+  const g=groupOf($('iGroup').value);
+  if(!pmark){ pmark=L.marker([lat,lng],{draggable:true,icon:pinIcon(g)}).addTo(pmap); pmark.on('dragend',e=>{ const p=e.target.getLatLng(); setPick(p.lat,p.lng); }); } else pmark.setLatLng([lat,lng]);
   if(pan) pmap.setView([lat,lng],16); }
 function initPick(){
   if(pmap||!window.L) return;
@@ -1221,28 +1277,48 @@ function initPick(){
   pmap.fitBounds(zl.getBounds(),{padding:[10,10]});
   pmap.on('click',e=>setPick(e.latlng.lat,e.latlng.lng));
 }
-$('iGroup').addEventListener('change',()=>pmark&&pmark.setIcon(pinIcon(+$('iGroup').value)));
+$('iGroup').addEventListener('change',()=>pmark&&pmark.setIcon(pinIcon(groupOf($('iGroup').value))));
 ['iLat','iLng'].forEach(id=>$(id).addEventListener('change',()=>{ const a=parseFloat($('iLat').value),b=parseFloat($('iLng').value); if(isFinite(a)&&isFinite(b)) setPick(a,b,true); }));
 $('iGeo').onclick=()=>{ if(!navigator.geolocation) return toast('อุปกรณ์นี้ไม่รองรับการหาตำแหน่ง'); navigator.geolocation.getCurrentPosition(p=>setPick(p.coords.latitude,p.coords.longitude,true),()=>toast('หาตำแหน่งไม่ได้ (ไม่ได้อนุญาต)'),{enableHighAccuracy:true,timeout:10000}); };
-$('iReset').addEventListener('click',()=>{ if(pmark){ pmap.removeLayer(pmark); pmark=null; } $('pickZone').textContent=''; });
+function clearForm(){ $('incForm').reset(); setNow(); if(pmark){ pmap.removeLayer(pmark); pmark=null; } $('pickZone').textContent=''; }
+$('iReset').addEventListener('click',e=>{ e.preventDefault(); clearForm(); });
+function setNow(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); $('iWhen').value=d.toISOString().slice(0,16); }
+let PIN=''; try{ PIN=sessionStorage.getItem('crime-pin')||''; }catch(_){}
+let pendingRow=null;
+function collectRow(){
+  const lat=parseFloat($('iLat').value),lng=parseFloat($('iLng').value);
+  if(!isFinite(lat)||!isFinite(lng)) { toast('กรุณาคลิกแผนที่เพื่อปักหมุดจุดเกิดเหตุ'); return null; }
+  if(!$('iWhen').value) { toast('กรุณาระบุวัน/เวลาที่เกิดเหตุ'); return null; }
+  return {when:$('iWhen').value,what:$('iWhat').value.trim(),place:$('iPlace').value.trim(),victim:$('iVictim').value.trim(),suspect:$('iSuspect').value.trim(),detail:$('iDetail').value.trim(),weapon:$('iWeapon').value,type:$('iGroup').value,zone:$('iZone').value,lat:+lat.toFixed(7),lng:+lng.toFixed(7)};
+}
+async function sendRow(row){
+  const btn=$('incForm').querySelector('button[type=submit]'); btn.disabled=true; btn.textContent='⏳ กำลังบันทึก…';
+  try{
+    const j=await fetch(CRIME_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'add',pin:PIN,row})}).then(r=>r.json());
+    if(!j.ok){ if(j.auth){ PIN=''; try{sessionStorage.removeItem('crime-pin');}catch(_){} pendingRow=row; openPin(j.error||'รหัสไม่ถูกต้อง'); } else toast('⚠️ '+(j.error||'บันทึกไม่สำเร็จ')); return; }
+    INC.unshift({t:new Date(row.when),g:groupOf(row.type),type:row.type,lat:row.lat,lng:row.lng,zone:row.zone,place:row.place,what:row.what,weapon:row.weapon,row:j.row});
+    INC.sort((a,b)=>b.t-a.t); clearForm(); renderAll();
+    toast(`✅ บันทึกลงชีตแล้ว (แถวที่ ${j.row})`);
+  }catch(e){ toast('⚠️ ส่งข้อมูลไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
+  finally{ btn.disabled=false; btn.textContent='💾 บันทึกเหตุ'; }
+}
+function openPin(err){ $('pinErr').textContent=err||''; $('pinInput').value=''; $('pinDlg').showModal(); setTimeout(()=>$('pinInput').focus(),50); if(err){ const b=$('pinForm'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
+$('pinClose').onclick=()=>{ pendingRow=null; $('pinDlg').close(); };
+$('pinForm').addEventListener('submit',e=>{ e.preventDefault(); PIN=$('pinInput').value.trim(); if(!PIN) return; try{ sessionStorage.setItem('crime-pin',PIN); }catch(_){} $('pinDlg').close(); if(pendingRow){ const r=pendingRow; pendingRow=null; sendRow(r); } });
 $('incForm').addEventListener('submit',e=>{
   e.preventDefault();
-  const lat=parseFloat($('iLat').value),lng=parseFloat($('iLng').value), t=new Date($('iWhen').value);
-  if(!isFinite(lat)||!isFinite(lng)) return toast('กรุณาคลิกแผนที่เพื่อปักหมุดจุดเกิดเหตุ');
-  if(isNaN(t)) return toast('กรุณาระบุวันที่/เวลา');
-  const r={id:INC.length+1,t,g:+$('iGroup').value,lat:+lat.toFixed(6),lng:+lng.toFixed(6),zone:zoneOf(lat,lng),place:$('iPlace').value.trim()||'—',detail:$('iDetail').value.trim(),level:$('iLevel').value,src:'บันทึกใหม่'};
-  INC.unshift(r); INC.sort((a,b)=>b.t-a.t);
-  e.target.reset(); setNow(); if(pmark){ pmap.removeLayer(pmark); pmark=null; } $('pickZone').textContent='';
-  toast('✅ บันทึกเหตุแล้ว (ต้นแบบ: เก็บไว้ในหน้านี้ชั่วคราว ยังไม่ส่งไปที่ใด)'); renderAll();
+  const row=collectRow(); if(!row) return;
+  if(!CRIME_API){ INC.unshift({t:new Date(row.when),g:groupOf(row.type),lat:row.lat,lng:row.lng,zone:row.zone,place:row.place,what:row.what,weapon:row.weapon}); INC.sort((a,b)=>b.t-a.t); clearForm(); renderAll(); return toast('✅ บันทึกแล้ว (โหมดตัวอย่าง: ยังไม่ได้เชื่อมชีต)'); }
+  if(!PIN){ pendingRow=row; return openPin(); }
+  sendRow(row);
 });
-function setNow(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); $('iWhen').value=d.toISOString().slice(0,16); }
 
 /* ---------- สลับมุมมอง ---------- */
 function showView(v,push){
   ['dash','form','report'].forEach(k=>$('view'+k[0].toUpperCase()+k.slice(1)).hidden=k!==v);
   $('fbar').style.display=$('fsum').style.display=v==='form'?'none':'';
   document.querySelectorAll('nav .tab').forEach(t=>{ const on=t.dataset.view===v; t.classList.toggle('on',on); t.setAttribute('aria-selected',on); });
-  if(v==='dash'&&map) setTimeout(()=>map.invalidateSize(),30);
+  if(v==='dash') setTimeout(()=>{ if(map) map.invalidateSize(); if(mapDirty&&READY) renderMap(filtered()); },30);
   if(v==='form'){ initPick(); setTimeout(()=>pmap&&pmap.invalidateSize(),30); }
   if(push) history.replaceState(null,'',v==='dash'?location.pathname:'#'+v);
   window.scrollTo({top:0});
@@ -1250,13 +1326,22 @@ function showView(v,push){
 document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click',()=>showView(t.dataset.view,true)));
 
 function renderAll(){
+  if(!READY) return;
   const list=filtered();
-  const g=F.g?GBY[F.g].name:'ทุกกลุ่ม';
+  const g=F.g?GBY[F.g].name:'ทุกประเภท';
   $('fsum').textContent=`แสดง ${thDate(F.from)} – ${thDate(F.to)} · ${g} · ${F.zone||'ทุกเขต'} · ${fmt(list.length)} เหตุ`;
   renderKpi(); renderMap(list); renderLatest(list); renderClock(); renderCompare(); renderReport(list);
 }
-setRange(30); defaultCompare(); setNow(); renderAll();
-const h0=location.hash.slice(1); if(h0==='form'||h0==='report') showView(h0);
+let DEF_DAYS=30;
+(async function boot(){
+  const h0=location.hash.slice(1); if(h0==='form'||h0==='report') showView(h0);
+  setNow();
+  await loadData();
+  // ข้อมูลจริงยังน้อย → เปิดมาเป็นช่วง 90 วัน
+  if(LIVE && INC.filter(r=>r.t>TODAY-30*DAY).length<20) DEF_DAYS=90;
+  document.querySelectorAll('#quick button').forEach(x=>x.classList.toggle('on',x.dataset.d===String(DEF_DAYS)));
+  fillSelects(); setRange(DEF_DAYS); defaultCompare(); READY=true; renderAll();
+})();
 </script>
 </body>
 </html>
