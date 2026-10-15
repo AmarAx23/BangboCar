@@ -1300,7 +1300,43 @@ function initMap(){
   map.on('focus',()=>map.scrollWheelZoom.enable()); map.on('blur',()=>map.scrollWheelZoom.disable());
   $('lyHeat').onchange=e=>heat&&(e.target.checked?heat.addTo(map):map.removeLayer(heat));
   $('lyPins').onchange=e=>e.target.checked?pins.addTo(map):map.removeLayer(pins);
-  $('lyZone').onchange=e=>e.target.checked?zoneLayer.addTo(map):map.removeLayer(zoneLayer);
+  $('lyZone').onchange=e=>{ if(e.target.checked){ zoneLayer.addTo(map); animateZones(); } else hideZones(); };
+  setTimeout(animateZones,150);
+}
+/* เส้นขอบเขตตรวจวิ่งวาดทีละเขต (แบบเดียวกับหน้ารถหาย) */
+let zoneAnimTimer=null;
+function finishZoneAnim(){
+  clearTimeout(zoneAnimTimer); zoneAnimTimer=null;
+  Object.values(zoneLbl).forEach(poly=>{
+    const p=poly._path; if(p){ p.style.transition=p.style.strokeDasharray=p.style.strokeDashoffset=p.style.fillOpacity=p.style.opacity=''; }
+    const t=poly.getTooltip()&&poly.getTooltip().getElement(); if(t){ t.classList.remove('zl-wait','zl-pop'); t.style.opacity=''; t.style.transition=''; }
+  });
+}
+function animateZones(){
+  if(reduceMotion||!map||!map.hasLayer(zoneLayer)) return;
+  finishZoneAnim();
+  const DRAW=1400, STAGGER=250, FILL=500, polys=Object.values(zoneLbl);
+  polys.forEach((poly,i)=>{
+    const p=poly._path; if(!p||!p.getTotalLength) return;
+    const len=Math.ceil(p.getTotalLength())+2;
+    p.style.transition='none'; p.style.strokeDasharray=len; p.style.strokeDashoffset=len; p.style.fillOpacity=0;
+    const t=poly.getTooltip()&&poly.getTooltip().getElement(); if(t) t.classList.add('zl-wait');
+    p.getBoundingClientRect();
+    const d=i*STAGGER;
+    p.style.transition=`stroke-dashoffset ${DRAW}ms cubic-bezier(.65,0,.35,1) ${d}ms, fill-opacity ${FILL}ms ease ${d+DRAW-200}ms`;
+    p.style.strokeDashoffset=0; p.style.fillOpacity='';
+    if(t) setTimeout(()=>{ t.classList.remove('zl-wait'); t.classList.add('zl-pop'); },d+DRAW-100);
+  });
+  zoneAnimTimer=setTimeout(finishZoneAnim,(polys.length-1)*STAGGER+DRAW+FILL+500);
+}
+function hideZones(){
+  if(reduceMotion||!map.hasLayer(zoneLayer)){ map.removeLayer(zoneLayer); return; }
+  finishZoneAnim();
+  Object.values(zoneLbl).forEach(poly=>{
+    const p=poly._path; if(p){ p.style.transition='opacity .35s ease'; p.style.opacity=0; }
+    const t=poly.getTooltip()&&poly.getTooltip().getElement(); if(t){ t.style.transition='opacity .35s ease'; t.style.opacity=0; }
+  });
+  zoneAnimTimer=setTimeout(()=>{ finishZoneAnim(); if(!$('lyZone').checked) map.removeLayer(zoneLayer); },380);
 }
 let mapDirty=false;
 function renderMap(list){
