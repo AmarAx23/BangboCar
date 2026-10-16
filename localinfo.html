@@ -744,6 +744,49 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 #panelMap .sec-tabs{margin-bottom:12px}
 #panelMap #liMap{height:calc(100vh - 290px);min-height:420px}
 @media (max-width:700px){ #panelMap #liMap{height:62vh;min-height:360px} }
+
+/* ===== ภาพรวม: อินโฟกราฟิกจำนวนสถานที่ (โทนกรมท่า-ทอง ของตำรวจ) ===== */
+#panelOverview{--ov-navy:#0b2a5b;--ov-navy2:#163f80;--ov-gold:#c9a227;--ov-paper:#f7f9fc;--ov-ink:#0f172a;--ov-mute:#475569}
+:root[data-theme="dark"] #panelOverview{--ov-paper:#0f1a30;--ov-ink:#f1f5f9;--ov-mute:#94a3b8}
+.ov-tools{display:flex;justify-content:flex-end;max-width:760px;margin:0 auto 10px}
+.ov-poster{position:relative;max-width:760px;margin:0 auto;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.9),transparent 60%),var(--ov-paper);border-radius:18px;box-shadow:0 10px 30px rgba(11,42,91,.14);overflow:hidden;padding:46px 56px 54px;color:var(--ov-ink)}
+:root[data-theme="dark"] .ov-poster{background:radial-gradient(circle at 50% 38%,rgba(37,99,235,.10),transparent 60%),var(--ov-paper);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.ov-logo{display:block;width:118px;height:auto;margin:0 auto 18px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));position:relative}
+.ov-ribbon{position:relative;margin:0 auto;max-width:560px;background:linear-gradient(90deg,var(--ov-navy),var(--ov-navy2));color:#fff;text-align:center;padding:14px 46px;clip-path:polygon(22px 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,22px 100%,0 50%);box-shadow:inset 0 -3px 0 var(--ov-gold)}
+.ov-ribbon h2{margin:0;font-size:24px;font-weight:600;line-height:1.35}
+.ov-ribbon small{display:block;font-size:14px;font-weight:400;opacity:.85;margin-top:2px}
+.ov-asof{text-align:right;margin:22px 0 18px;font-size:17px;color:var(--ov-mute)}
+.ov-list{list-style:none;margin:0;padding:0}
+.ov-row{display:grid;grid-template-columns:36px minmax(0,1fr) 64px 76px 40px;align-items:baseline;gap:6px;padding:9px 0;font-size:18px}
+.ov-row .no{font-weight:600;color:var(--ov-navy2)}
+:root[data-theme="dark"] .ov-row .no{color:#93c5fd}
+.ov-row .nm{font-weight:600}
+.ov-row .lb,.ov-row .u{color:var(--ov-mute);font-size:16px}
+.ov-row .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.ov-row.sub{padding:3px 0;font-size:16px}
+.ov-row.sub .nm{font-weight:400;padding-left:18px;position:relative}
+.ov-row.sub .nm::before{content:'';position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--ov-ink)}
+.ov-row.sub .v{font-weight:600}
+.ov-zc{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:0;border:1px solid rgba(0,0,0,.25)}
+.ov-gap{height:10px}
+.ov-total{display:grid;grid-template-columns:minmax(0,1fr) 64px 76px 40px;gap:6px;align-items:baseline;margin-top:22px;padding-top:16px;border-top:2px dashed rgba(11,42,91,.25);font-size:20px;font-weight:700}
+.ov-total .t{text-align:right}
+.ov-total .lb,.ov-total .u{font-weight:500;font-size:17px;color:var(--ov-mute)}
+.ov-total .v{text-align:right;color:var(--ov-navy2)}
+:root[data-theme="dark"] .ov-total .v{color:#93c5fd}
+@media (max-width:640px){
+  .ov-poster{padding:34px 18px 40px;border-radius:14px}
+  .ov-logo{width:86px}
+  .ov-ribbon{padding:12px 30px}.ov-ribbon h2{font-size:18px}
+  .ov-asof{font-size:14px;text-align:center}
+  .ov-row{grid-template-columns:28px minmax(0,1fr) 44px 30px;font-size:15px}
+  .ov-row .lb{display:none}
+  .ov-row.sub{font-size:14px}
+  .ov-total{grid-template-columns:minmax(0,1fr) 54px 30px;font-size:17px}.ov-total .lb{display:none}
+}
+:root[data-theme="dark"] .ov-zc{border-color:rgba(255,255,255,.6)}
+@media (max-width:480px){ nav .tabbar{gap:8px} nav .tab{padding:.6em .4em;font-size:14px;white-space:nowrap} }
+@media print{ .ov-tools{display:none} .ov-poster{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
 </style>
 </head>
 <body>
@@ -758,6 +801,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
     </div>
   </div>
   <div class="tabbar" role="tablist" aria-label="มุมมอง">
+    <button class="tab" role="tab" data-view="overview" aria-selected="false">📊 ภาพรวม</button>
     <button class="tab on" role="tab" data-view="list" aria-selected="true">📋 รายชื่อ</button>
     <button class="tab" role="tab" data-view="map" aria-selected="false">🗺️ แผนที่</button>
   </div>
@@ -783,6 +827,16 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 </nav>
 <main>
   <div class="li-msg" id="liMsg" hidden></div>
+  <div id="panelOverview" hidden>
+    <div class="ov-tools"><button class="btn btn-print" id="ovPrint" type="button">🖨️ พิมพ์ / บันทึก PDF</button></div>
+    <div class="ov-poster" id="ovPoster">
+      <img class="ov-logo" src="logo.webp" alt="ตราสถานีตำรวจภูธรบางบ่อ">
+      <div class="ov-ribbon"><h2>ข้อมูลจำนวนสถานที่สำคัญในพื้นที่<small>สถานีตำรวจภูธรบางบ่อ จังหวัดสมุทรปราการ</small></h2></div>
+      <div class="ov-asof" id="ovAsof"></div>
+      <ol class="ov-list" id="ovList"></ol>
+      <div class="ov-total" id="ovTotal"></div>
+    </div>
+  </div>
   <div id="panelList">
   <div class="li-head">
     <h2>📍 สถานที่สำคัญในพื้นที่ สภ.บางบ่อ</h2>
@@ -909,14 +963,41 @@ function renderMap(list){
 }
 $('typeRow').addEventListener('click', e=>{ const b = e.target.closest('.type-card'); if(!b) return; S.type = b.dataset.t; renderTypes(); renderTable(); });
 ['pubTabs','mapTabs'].forEach(id => $(id).addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; S.type = b.dataset.t; renderTypes(); renderTable(); }));
-/* ---------- สลับมุมมอง รายชื่อ / แผนที่ ---------- */
+
+/* ---------- ภาพรวม (อินโฟกราฟิกจำนวนสถานที่) ---------- */
+const TH_NUM = n=>String(n).replace(/\d/g,d=>'๐๑๒๓๔๕๖๗๘๙'[d]);
+function ovZone(r){
+  if(r.lat==null || r.lng==null) return '';
+  const z = AREA.find(z=>{ let ins=false; const c=z.c; for(let i=0,j=c.length-1;i<c.length;j=i++){ const [xi,yi]=c[i],[xj,yj]=c[j]; if(((yi>r.lat)!==(yj>r.lat)) && (r.lng<(xj-xi)*(r.lat-yi)/(yj-yi)+xi)) ins=!ins; } return ins; });
+  return z ? z.name : 'นอกเขต';
+}
+function renderOverview(){
+  $('ovAsof').textContent = 'ข้อมูล ณ วันที่ ' + new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+  const row = (no,nm,v,cls)=>`<li class="ov-row${cls?' '+cls:''}"><span class="no">${no}</span><span class="nm">${nm}</span><span class="lb">จำนวน</span><span class="v">${fmt(v)}</span><span class="u">แห่ง</span></li>`;
+  const counts = new Map(); S.rows.forEach(r=>counts.set(r.type||'ไม่ระบุ', (counts.get(r.type||'ไม่ระบุ')||0)+1));
+  const types = [...counts].sort((a,b)=>b[1]-a[1]);
+  let h = types.map(([t,n],i)=>row(TH_NUM(i+1)+'.', `${typeIcon(t)} ${esc(t)}`, n)).join('');
+  // แยกตามเขตตรวจ (แบบหัวข้อย่อยในภาพตัวอย่าง)
+  const zc = {}; S.rows.forEach(r=>{ const z=ovZone(r)||'ยังไม่มีพิกัด'; zc[z]=(zc[z]||0)+1; });
+  const ZC = {'เขตตรวจที่ 1':'#FFD600','เขตตรวจที่ 2':'#000000','เขตตรวจที่ 3':'#F48FB1'};
+  const zones = ['เขตตรวจที่ 1','เขตตรวจที่ 2','เขตตรวจที่ 3','นอกเขต','ยังไม่มีพิกัด'].filter(z=>zc[z]);
+  if(S.rows.length){
+    h += '<li class="ov-gap" aria-hidden="true"></li>' + row(TH_NUM(types.length+1)+'.', '🚓 แยกตามเขตตรวจ', S.rows.length);
+    h += zones.map(z=>row('', `${ZC[z]?`<i class="ov-zc" style="background:${ZC[z]}"></i>`:''}${esc(z)}`, zc[z], 'sub')).join('');
+  }
+  $('ovList').innerHTML = h || '<li class="li-empty">ยังไม่มีข้อมูล</li>';
+  $('ovTotal').innerHTML = `<span class="t">รวมทั้งหมด</span><span class="lb">จำนวน</span><span class="v">${fmt(S.rows.length)}</span><span class="u">แห่ง</span>`;
+}
+$('ovPrint').addEventListener('click', ()=>print());
+/* ---------- สลับมุมมอง ภาพรวม / รายชื่อ / แผนที่ ---------- */
 function showView(v, push){
+  if(!['overview','list','map'].includes(v)) v = 'overview';
   const isMap = v === 'map';
-  $('panelList').hidden = isMap; $('panelMap').hidden = !isMap;
-  if(isMap) $('secure').hidden = true; else if(S.full) $('secure').hidden = false;
+  $('panelOverview').hidden = v !== 'overview'; $('panelList').hidden = v !== 'list'; $('panelMap').hidden = !isMap;
+  if(v !== 'list') $('secure').hidden = true; else if(S.full) $('secure').hidden = false;
   document.querySelectorAll('nav .tab').forEach(t => { const on = t.dataset.view === v; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
   if(isMap && liMap) setTimeout(()=>{ liMap.invalidateSize(); if(S.type && pinLayer.getLayers().length) liMap.fitBounds(pinLayer.getBounds(), {padding:[30,30], maxZoom:15}); else if(areaBounds) liMap.fitBounds(areaBounds, {padding:[16,16]}); }, 30);
-  if(push) history.replaceState(null, '', isMap ? '#map' : location.pathname + location.search);
+  if(push) history.replaceState(null, '', v === 'overview' ? location.pathname + location.search : '#' + v);
   window.scrollTo({top:0});
 }
 document.querySelectorAll('nav .tab').forEach(t => t.addEventListener('click', () => showView(t.dataset.view, true)));
@@ -997,11 +1078,11 @@ async function load(){
     $('liFoot').textContent = 'ข้อมูลจากชีต "ข้อมูลท้องถิ่น 2569" · หน้านี้แสดงเฉพาะข้อมูลทั่วไป ข้อมูลเจ้าของ/ความปลอดภัยต้องใส่รหัส';
     alertMsg('');
   }catch(err){ alertMsg('โหลดข้อมูลไม่สำเร็จ: ' + err.message); $('liSub').textContent = 'สถานีตำรวจภูธรบางบ่อ'; }
-  renderTypes(); renderTable();
+  renderTypes(); renderTable(); renderOverview();
   if(!reduceMotion) [...document.querySelectorAll('.kpi, .card')].forEach((c,i)=>{ c.style.setProperty('--d', Math.min(i,10)*50+'ms'); c.classList.add('reveal'); });
 }
 load();
-if(location.hash === '#map') showView('map');
+showView(location.hash.slice(1) || 'overview');
 </script>
 </body>
 </html>
