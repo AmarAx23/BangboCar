@@ -748,7 +748,8 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 /* ===== ภาพรวม: อินโฟกราฟิกจำนวนสถานที่ (โทนกรมท่า-ทอง ของตำรวจ) ===== */
 #panelOverview{--ov-navy:#0b2a5b;--ov-navy2:#163f80;--ov-gold:#c9a227;--ov-paper:#f7f9fc;--ov-ink:#0f172a;--ov-mute:#475569}
 :root[data-theme="dark"] #panelOverview{--ov-paper:#0f1a30;--ov-ink:#f1f5f9;--ov-mute:#94a3b8}
-.ov-tools{display:flex;justify-content:flex-end;max-width:760px;margin:0 auto 10px}
+#ovPrint[hidden]{display:none}
+@media (max-width:600px){ .ovp-x{display:none} }
 .ov-poster{position:relative;max-width:760px;margin:0 auto;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.9),transparent 60%),var(--ov-paper);border-radius:18px;box-shadow:0 10px 30px rgba(11,42,91,.14);overflow:hidden;padding:46px 56px 54px;color:var(--ov-ink)}
 :root[data-theme="dark"] .ov-poster{background:radial-gradient(circle at 50% 38%,rgba(37,99,235,.10),transparent 60%),var(--ov-paper);box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .ov-logo{display:block;width:118px;height:auto;margin:0 auto 18px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));position:relative}
@@ -786,7 +787,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 }
 :root[data-theme="dark"] .ov-zc{border-color:rgba(255,255,255,.6)}
 @media (max-width:480px){ nav .tabbar{gap:8px} nav .tab{padding:.6em .4em;font-size:14px;white-space:nowrap} }
-@media print{ .ov-tools{display:none} .ov-poster{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+@media print{ #ovPrint{display:none!important} .ov-poster{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
 </style>
 </head>
 <body>
@@ -822,13 +823,13 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
         </div>
       </div>
     </label>
+    <button class="btn btn-print" id="ovPrint" type="button" hidden title="พิมพ์ / บันทึก PDF">🖨️ พิมพ์<span class="ovp-x"> / บันทึก PDF</span></button>
     <button class="btn btn-print" id="lockBtn" type="button">🔒 ข้อมูลเจ้าหน้าที่</button>
   </div>
 </nav>
 <main>
   <div class="li-msg" id="liMsg" hidden></div>
   <div id="panelOverview" hidden>
-    <div class="ov-tools"><button class="btn btn-print" id="ovPrint" type="button">🖨️ พิมพ์ / บันทึก PDF</button></div>
     <div class="ov-poster" id="ovPoster">
       <img class="ov-logo" src="logo.webp" alt="ตราสถานีตำรวจภูธรบางบ่อ">
       <div class="ov-ribbon"><h2>ข้อมูลจำนวนสถานที่สำคัญในพื้นที่<small>สถานีตำรวจภูธรบางบ่อ จังหวัดสมุทรปราการ</small></h2></div>
@@ -993,7 +994,7 @@ $('ovPrint').addEventListener('click', ()=>print());
 function showView(v, push){
   if(!['overview','list','map'].includes(v)) v = 'overview';
   const isMap = v === 'map';
-  $('panelOverview').hidden = v !== 'overview'; $('panelList').hidden = v !== 'list'; $('panelMap').hidden = !isMap;
+  $('panelOverview').hidden = v !== 'overview'; $('ovPrint').hidden = v !== 'overview'; $('panelList').hidden = v !== 'list'; $('panelMap').hidden = !isMap;
   if(v !== 'list') $('secure').hidden = true; else if(S.full) $('secure').hidden = false;
   document.querySelectorAll('nav .tab').forEach(t => { const on = t.dataset.view === v; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
   if(isMap && liMap) setTimeout(()=>{ liMap.invalidateSize(); if(S.type && pinLayer.getLayers().length) liMap.fitBounds(pinLayer.getBounds(), {padding:[30,30], maxZoom:15}); else if(areaBounds) liMap.fitBounds(areaBounds, {padding:[16,16]}); }, 30);
