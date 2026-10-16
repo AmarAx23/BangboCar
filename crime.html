@@ -1140,7 +1140,7 @@ $('printBtn').onclick=()=>print(); $('pdfBtn').onclick=()=>print();
 /* ---------- ประเภทเหตุ: ชื่อมาจาก dropdown ในชีต (คอลัมน์ "ประเภทเหตุ") · สี/ไอคอนกำหนดตามคำในชื่อ ---------- */
 const DEFAULT_TYPES=['เหตุเกี่ยวกับทรัพย์','ชีวิต ร่างกาย','วัยรุ่นมั่วสุม','วงสุรา/มั่วสุม/ก่อความเดือดร้อนรำคาญ','แข่งขันรถในทาง'];
 const DEFAULT_WEAPONS=['ปืน','มีด','ระเบิด'];
-const STYLE=[[/รถหาย|ลักรถ|รถจักรยานยนต์หาย/,'🛵','#0ea5e9','รถหาย'],[/ทรัพย์/,'💰','#ef4444','ทรัพย์'],[/ชีวิต|ร่างกาย|ทำร้าย/,'⚠️','#8b5cf6','ชีวิต/ร่างกาย'],[/วัยรุ่น/,'👥','#10b981','วัยรุ่นมั่วสุม'],[/สุรา|รำคาญ/,'🍺','#f59e0b','วงสุรา/รำคาญ'],[/แข่ง|รถ/,'🏍️','#3b82f6','แข่งรถในทาง'],[/ยาเสพติด/,'💊','#ec4899','ยาเสพติด']];
+const STYLE=[[/รถหาย|ลักรถ|รถจักรยานยนต์หาย/,'🛵','#0ea5e9','รถหาย'],[/ทรัพย์/,'💰','#ef4444','ทรัพย์'],[/ชีวิต|ร่างกาย|ทำร้าย/,'🤕','#8b5cf6','ชีวิต/ร่างกาย'],[/วัยรุ่น/,'👥','#10b981','วัยรุ่นมั่วสุม'],[/สุรา|รำคาญ/,'🍻','#f59e0b','วงสุรา/รำคาญ'],[/แข่ง|รถ/,'🏁','#3b82f6','แข่งรถในทาง'],[/ยาเสพติด/,'💊','#ec4899','ยาเสพติด']];
 const SPARE=['#06b6d4','#84cc16','#f97316','#a855f7','#14b8a6'];
 let GROUPS=[], GBY={}, OTHER=null, OTHER_ADDED=true;
 function buildGroups(types){
@@ -1148,8 +1148,8 @@ function buildGroups(types){
   // ถ้าในชีตมีตัวเลือก "อื่นๆ" อยู่แล้ว ใช้ตัวนั้นรับเหตุที่ไม่ตรงประเภท · ถ้าไม่มี เพิ่ม "อื่นๆ / ไม่ระบุ" ให้เอง
   OTHER=GROUPS.find(g=>/^อื่น/.test(g.name.trim()));
   OTHER_ADDED=!OTHER;
-  if(OTHER){ OTHER.ic='📌'; OTHER.c='#64748b'; OTHER.short='อื่นๆ'; GROUPS=GROUPS.filter(g=>g!==OTHER).concat(OTHER); GROUPS.forEach((g,i)=>g.no=i+1); }
-  else { OTHER={no:GROUPS.length+1,name:'อื่นๆ / ไม่ระบุ',short:'อื่นๆ',ic:'📌',c:'#64748b'}; GROUPS.push(OTHER); }
+  if(OTHER){ OTHER.ic='📋'; OTHER.c='#64748b'; OTHER.short='อื่นๆ'; GROUPS=GROUPS.filter(g=>g!==OTHER).concat(OTHER); GROUPS.forEach((g,i)=>g.no=i+1); }
+  else { OTHER={no:GROUPS.length+1,name:'อื่นๆ / ไม่ระบุ',short:'อื่นๆ',ic:'📋',c:'#64748b'}; GROUPS.push(OTHER); }
   GBY=Object.fromEntries(GROUPS.map(g=>[g.no,g]));
 }
 const groupOf=type=>{ const g=GROUPS.find(g=>g.name===String(type||'').trim()); return g?g.no:OTHER.no; };
@@ -1325,7 +1325,8 @@ function fillSelects(){
   $('iGroup').innerHTML='<option value="">— เลือกประเภทเหตุ —</option>'+GROUPS.filter(g=>!(OTHER_ADDED&&g===OTHER)&&!g.ext).map(g=>`<option value="${esc(g.name)}">${g.ic} ${esc(g.name)}</option>`).join('');
   const wps=[...new Set(WEAPONS.concat(INC.map(r=>r.weapon).filter(Boolean)))];
   $('weaponList').innerHTML=wps.map(w=>`<option value="${esc(w)}">`).join('');
-  const whats=[...new Set(INC.map(r=>r.what).filter(Boolean).concat(['ทะเลาะวิวาท','ทำร้ายร่างกาย','ลักทรัพย์','วิ่งราวทรัพย์','รถจักรยานยนต์หาย','วัยรุ่นมั่วสุม','แข่งรถในทาง','ก่อความเดือดร้อนรำคาญ']))];
+  // ตัวเลือกช่อง "รายการรับแจ้งเหตุ" = ประเภทเหตุในชีต (7 ประเภท) เท่านั้น · ไม่ดึงข้อความเดิมจากชีต (อาจมีบ้านเลขที่/เบอร์โทร)
+  const whats=GROUPS.filter(g=>!(OTHER_ADDED&&g===OTHER)&&!g.ext).map(g=>g.name);
   $('whatList').innerHTML=whats.map(w=>`<option value="${esc(w)}">`).join('');
 }
 function readDates(){ F.from=new Date($('fFrom').value+'T00:00:00'); F.to=new Date($('fTo').value+'T23:59:59'); }
