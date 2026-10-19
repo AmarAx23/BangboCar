@@ -792,8 +792,6 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%)}
-.cb.can{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
-.cb.can:hover{transform:scale(1.12);box-shadow:0 0 0 4px rgba(37,99,235,.15)}
 .cb.busy{opacity:.55;pointer-events:none}
 .ck-hint{font-size:12.5px;color:var(--accent);font-weight:600}
 /* --- ชื่อผู้ดำรงตำแหน่งใต้หัวคอลัมน์ --- */
@@ -801,6 +799,76 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .rp-row .nm .rp-person{display:inline;margin-left:8px;font-size:12.5px}
 @media (max-width:700px){ .ck-tbl th .rp-person{white-space:normal;font-size:10px;line-height:1.25} }
 /* --- เช็คลิสต์ (หน้าตาแบบชีต) --- */
+/* ===== ช่องติ๊กแบบ neon-checkbox · ดัดแปลงจาก "hot-dragonfly-56" by 00Kubi on Uiverse.io (MIT) ===== */
+.cb{--primary:#00e09a;--primary-dark:#00b87e;--primary-light:#88ffdd;--size:26px;--box-bg:#fff;--box-line:#b8c4cf;position:relative;display:inline-block;width:var(--size);height:var(--size);flex:none;font-style:normal;-webkit-tap-highlight-color:transparent;vertical-align:middle}
+:root[data-theme="dark"] .cb{--box-bg:rgba(0,0,0,.8);--box-line:#475569}
+.cb.miss{--box-line:#ef4444;--box-bg:#fef2f2}
+:root[data-theme="dark"] .cb.miss{--box-bg:#450a0a;--box-line:#f87171}
+.cb.can{cursor:pointer}
+.cb.busy{opacity:.55;pointer-events:none}
+.neon-checkbox__frame{position:relative;display:block;width:100%;height:100%}
+.neon-checkbox__frame span{display:block}
+.neon-checkbox__box{position:absolute;inset:0;background:var(--box-bg);border-radius:5px;border:2px solid var(--box-line);transition:all .4s ease}
+.neon-checkbox__check-container{position:absolute;inset:2px;display:flex;align-items:center;justify-content:center}
+.neon-checkbox__check{width:80%;height:80%;fill:none;stroke:var(--primary);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;transform-origin:center;transition:all .4s cubic-bezier(.16,1,.3,1)}
+.neon-checkbox__glow{position:absolute;inset:-2px;border-radius:7px;background:var(--primary);opacity:0;filter:blur(8px);transform:scale(1.2);transition:all .4s ease}
+.neon-checkbox__borders{position:absolute;inset:0;border-radius:5px;overflow:hidden}
+.neon-checkbox__borders span{position:absolute;width:40px;height:1px;background:var(--primary);opacity:0;transition:opacity .4s ease}
+.neon-checkbox__borders span:nth-child(1){top:0;left:-100%;animation:borderFlow1 2s linear infinite}
+.neon-checkbox__borders span:nth-child(2){top:-100%;right:0;width:1px;height:40px;animation:borderFlow2 2s linear infinite}
+.neon-checkbox__borders span:nth-child(3){bottom:0;right:-100%;animation:borderFlow3 2s linear infinite}
+.neon-checkbox__borders span:nth-child(4){bottom:-100%;left:0;width:1px;height:40px;animation:borderFlow4 2s linear infinite}
+.neon-checkbox__effects{position:absolute;inset:0;pointer-events:none}
+.neon-checkbox__particles span{position:absolute;width:4px;height:4px;background:var(--primary);border-radius:50%;opacity:0;pointer-events:none;top:50%;left:50%;box-shadow:0 0 6px var(--primary)}
+.neon-checkbox__rings{position:absolute;inset:-20px;pointer-events:none}
+.neon-checkbox__rings .ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--primary);opacity:0;transform:scale(0)}
+.neon-checkbox__sparks span{position:absolute;width:20px;height:1px;background:linear-gradient(90deg,var(--primary),transparent);opacity:0}
+.cb.can:hover .neon-checkbox__box{border-color:var(--primary);transform:scale(1.05)}
+.cb.on .neon-checkbox__box{border-color:var(--primary);background:rgba(0,255,170,.1)}
+:root:not([data-theme="dark"]) .cb.on .neon-checkbox__box{background:#e9fdf5}
+.cb.on .neon-checkbox__check{stroke-dashoffset:0;transform:scale(1.1)}
+.cb.on .neon-checkbox__glow{opacity:.2}
+.cb.on .neon-checkbox__borders span{opacity:1}
+/* เอฟเฟกต์ระเบิดเฉพาะตอนเพิ่งกดติ๊ก (ไม่เล่นทุกช่องตอนโหลดหน้า) */
+.cb.on.just .neon-checkbox__particles span{animation:particleExplosion .6s ease-out forwards}
+.cb.on.just .neon-checkbox__rings .ring{animation:ringPulse .6s ease-out forwards}
+.cb.on.just .neon-checkbox__sparks span{animation:sparkFlash .6s ease-out forwards}
+.ck-in .cb.on .neon-checkbox__check{animation:ckDraw .5s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--wd,0ms) + var(--d,0ms) + 250ms)}
+@keyframes ckDraw{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
+@keyframes borderFlow1{0%{transform:translateX(0)}100%{transform:translateX(200%)}}
+@keyframes borderFlow2{0%{transform:translateY(0)}100%{transform:translateY(200%)}}
+@keyframes borderFlow3{0%{transform:translateX(0)}100%{transform:translateX(-200%)}}
+@keyframes borderFlow4{0%{transform:translateY(0)}100%{transform:translateY(-200%)}}
+@keyframes particleExplosion{0%{transform:translate(-50%,-50%) scale(1);opacity:0}20%{opacity:1}100%{transform:translate(calc(-50% + var(--x,20px)),calc(-50% + var(--y,20px))) scale(0);opacity:0}}
+@keyframes ringPulse{0%{transform:scale(0);opacity:1}100%{transform:scale(2);opacity:0}}
+@keyframes sparkFlash{0%{transform:rotate(var(--r,0deg)) translateX(0) scale(1);opacity:1}100%{transform:rotate(var(--r,0deg)) translateX(30px) scale(0);opacity:0}}
+.neon-checkbox__particles span:nth-child(1){--x:25px;--y:-25px}.neon-checkbox__particles span:nth-child(2){--x:-25px;--y:-25px}
+.neon-checkbox__particles span:nth-child(3){--x:25px;--y:25px}.neon-checkbox__particles span:nth-child(4){--x:-25px;--y:25px}
+.neon-checkbox__particles span:nth-child(5){--x:35px;--y:0px}.neon-checkbox__particles span:nth-child(6){--x:-35px;--y:0px}
+.neon-checkbox__particles span:nth-child(7){--x:0px;--y:35px}.neon-checkbox__particles span:nth-child(8){--x:0px;--y:-35px}
+.neon-checkbox__particles span:nth-child(9){--x:20px;--y:-30px}.neon-checkbox__particles span:nth-child(10){--x:-20px;--y:30px}
+.neon-checkbox__particles span:nth-child(11){--x:30px;--y:20px}.neon-checkbox__particles span:nth-child(12){--x:-30px;--y:-20px}
+.neon-checkbox__sparks span:nth-child(1){--r:0deg;top:50%;left:50%}.neon-checkbox__sparks span:nth-child(2){--r:90deg;top:50%;left:50%}
+.neon-checkbox__sparks span:nth-child(3){--r:180deg;top:50%;left:50%}.neon-checkbox__sparks span:nth-child(4){--r:270deg;top:50%;left:50%}
+.neon-checkbox__rings .ring:nth-child(1){animation-delay:0s}.neon-checkbox__rings .ring:nth-child(2){animation-delay:.1s}.neon-checkbox__rings .ring:nth-child(3){animation-delay:.2s}
+.ck-legend .cb{--size:22px}
+@media (prefers-reduced-motion:reduce){ .neon-checkbox__borders span,.ck-in .cb.on .neon-checkbox__check,.cb.on.just *{animation:none!important} }
+@media print{ .neon-checkbox__borders,.neon-checkbox__effects,.neon-checkbox__glow{display:none} }
+/* ===== การ์ดสัปดาห์ · ดัดแปลงจาก "cowardly-ape-35" by alexruix on Uiverse.io (MIT) ===== */
+.ck-week{border-radius:20px!important;border:2px solid #c3c6ce!important;background:#f5f5f5!important;overflow:visible!important;margin-bottom:34px!important;transition:border-color .5s ease-out,box-shadow .5s ease-out!important;position:relative}
+:root[data-theme="dark"] .ck-week{background:var(--surface)!important;border-color:#334155!important}
+.ck-week:hover{border-color:#008bf8!important;box-shadow:0 4px 18px 0 rgba(0,0,0,.25)!important;transform:none!important}
+.ck-week.cur{border-color:#008bf8!important;box-shadow:0 4px 18px rgba(0,139,248,.18)!important}
+.ck-week .ck-side{border-radius:18px 0 0 18px}
+.ck-week .ck-tbl-wrap{border-radius:0 18px 18px 0}
+.ck-week .ck-tbl th{background:transparent}
+.ck-week .ck-tbl tfoot td{padding-bottom:22px}
+.ck-btn{position:absolute;left:50%;bottom:0;transform:translate(-50%,125%);width:min(60%,280px);border-radius:1rem;border:none;background:#008bf8;color:#fff;font:600 14px 'Prompt',sans-serif;padding:.5rem 1rem;opacity:0;transition:.3s ease-out;cursor:pointer;z-index:2;pointer-events:none}
+.ck-week:hover .ck-btn,.ck-btn:focus-visible{transform:translate(-50%,50%);opacity:1;pointer-events:auto}
+@media (hover:none){ .ck-btn{display:none} }
+@media (max-width:900px){ .ck-week .ck-side{border-radius:18px 18px 0 0} .ck-week .ck-tbl-wrap{border-radius:0 0 18px 18px} }
+@media print{ .ck-btn{display:none} }
+
 .ck-months{display:inline-flex;align-items:center;gap:6px}
 .ck-months .wk-sel{min-width:170px}
 .ck-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
@@ -827,16 +895,9 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ck-tbl td.t .ti{display:inline-block;width:24px}
 .ck-cell{display:inline-flex;align-items:center;gap:10px;justify-content:center}
 .ck-cell .tg{font-size:12.5px;color:var(--muted);white-space:nowrap;min-width:84px;text-align:right}
-.cb{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;border:2px solid #cbd5e1;background:var(--surface);flex:none;font-style:normal}
-.cb.on{background:#16a34a;border-color:#16a34a}
-.cb.on::after{content:'';width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
-.cb.miss{border-color:#ef4444;background:#fef2f2}
-:root[data-theme="dark"] .cb{border-color:#475569}
-:root[data-theme="dark"] .cb.miss{background:#450a0a;border-color:#f87171}
 .ck-tbl tfoot td{font-weight:700;font-size:13px;border-top:2px solid var(--border);border-bottom:none}
 .ck-skel{height:220px;border-radius:14px;margin-bottom:14px;background:linear-gradient(90deg,rgba(148,163,184,.12) 25%,rgba(148,163,184,.26) 50%,rgba(148,163,184,.12) 75%);background-size:200% 100%;animation:ckSkel 1.2s linear infinite}
 @keyframes ckSkel{to{background-position:-200% 0}}
-.ck-in .cb.on{animation:cbPop .35s cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--wd,0ms) + var(--d,0ms) + 250ms)}
 /* motion: การ์ดสัปดาห์ไล่เข้า · แถวไล่เข้า · เลื่อนเดือนซ้าย/ขวา · ติ๊กแล้วเด้ง */
 .ck-week.ck-in{animation:ckCard .55s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:var(--wd,0ms)}
 .ck-week.ck-in.from-r{animation-name:ckFromR}.ck-week.ck-in.from-l{animation-name:ckFromL}
@@ -847,10 +908,6 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ck-week.cur .wb{animation:wbPulse 2.2s ease-in-out infinite}
 .ck-tbl tbody tr{transition:background-color .15s ease}
 .ck-tbl tbody tr:hover{background:rgba(37,99,235,.05)}
-.cb{position:relative}
-.cb.just{animation:cbTick .5s cubic-bezier(.34,1.56,.64,1)}
-.cb.just::before{content:'';position:absolute;inset:-3px;border-radius:8px;border:2px solid #16a34a;animation:cbRing .6s ease-out forwards;pointer-events:none}
-.cb.just:not(.on)::before{border-color:#94a3b8}
 .ck-tbl tfoot td.bump{animation:ftBump .5s ease}
 #panelCheck:not([hidden]),#panelList:not([hidden]){animation:ckPanel .35s ease both}
 @keyframes ckCard{0%{opacity:0;transform:translateY(18px) scale(.985)}100%{opacity:1;transform:none}}
@@ -1118,6 +1175,8 @@ function currentIndex(){
 let CKM = '';
 const monthOf = w=>(w.month||'').replace('ประจำเดือน','').trim();
 let CK_DIR = '';
+const NEON_IN = '<span class="neon-checkbox__frame"><span class="neon-checkbox__box"><span class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check" aria-hidden="true"><path d="M3,12.5l7,7L21,5"></path></svg></span><span class="neon-checkbox__glow"></span><span class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></span></span><span class="neon-checkbox__effects"><span class="neon-checkbox__particles">' + '<span></span>'.repeat(12) + '</span><span class="neon-checkbox__rings"><span class="ring"></span><span class="ring"></span><span class="ring"></span></span><span class="neon-checkbox__sparks"><span></span><span></span><span></span><span></span></span></span></span>';
+document.querySelectorAll('.ck-legend .cb').forEach(e=>e.innerHTML = NEON_IN);
 function renderCheck(noAnim){
   const months = [...new Set(W.map(monthOf))];
   const mi = months.indexOf(CKM);
@@ -1128,8 +1187,8 @@ function renderCheck(noAnim){
   $('ckWeeks').innerHTML = list.map(({w,i})=>{ const ph = phase(w), s = stats(w);
     return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}${dir&&!noAnim?' from-'+dir:''}" id="ckw${i}" style="--wd:${Math.min(wn++,6)*90}ms"><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
       `<div class="ck-tbl-wrap"><table class="ck-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${roleHtml(r.name)}</th>`).join('')}</tr></thead><tbody>` +
-      w.tasks.map((t,ti)=>`<tr style="--rd:${ti*45}ms"><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><i class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%20)*20}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}"></i></span></td>`; }).join('')}</tr>`).join('') +
-      `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
+      w.tasks.map((t,ti)=>`<tr style="--rd:${ti*45}ms"><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><span class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%20)*20}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}">${NEON_IN}</span></span></td>`; }).join('')}</tr>`).join('') +
+      `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div><button type="button" class="ck-btn" data-goto="${i}">📋 ดูสรุปสัปดาห์นี้</button></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
   if(noAnim) document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>{ b.style.transition='none'; b.style.width = b.dataset.w + '%'; });
   else requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>b.style.width = b.dataset.w + '%')));
 }
@@ -1158,7 +1217,7 @@ async function tick(p){
   }catch(err){ c.done = prev; renderCheck(true); toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ const e2 = document.querySelector(`.cb[data-w="${p.w}"][data-t="${p.t}"][data-r="${p.r}"]`); if(e2) e2.classList.remove('busy'); }
 }
-$('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
+$('ckWeeks').addEventListener('click', e=>{ const g = e.target.closest('.ck-btn'); if(g){ cur = +g.dataset.goto; showView('list', true); return; } const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
 $('ckWeeks').addEventListener('keydown', e=>{ if((e.key===' '||e.key==='Enter') && e.target.classList.contains('can')){ e.preventDefault(); e.target.click(); } });
 $('ckMonths').addEventListener('change', e=>{ if(e.target.id!=='ckMonthSel') return; CKM = e.target.value; renderCheck(); window.scrollTo({top:0}); });
 $('ckMonths').addEventListener('click', e=>{ const b = e.target.closest('button[data-step]'); if(!b || b.disabled) return; const months = [...new Set(W.map(monthOf))]; const i = months.indexOf(CKM) + (+b.dataset.step); if(months[i]){ CKM = months[i]; CK_DIR = +b.dataset.step>0 ? 'r' : 'l'; renderCheck(); window.scrollTo({top:0}); } });
