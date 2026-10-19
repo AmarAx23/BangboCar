@@ -773,6 +773,29 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @keyframes cmIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){ .cm-in{animation:none} .rp-bar i{transition:none} }
 @media (max-width:700px){ .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))} .kpi-val{font-size:24px} .kpi .ring{width:42px;height:42px} .wk-sel{min-width:0;flex:1} .st{min-width:54px} .st .tg{white-space:normal;font-size:10.5px;line-height:1.3} .mx td{padding:8px 4px} .mx td.task{min-width:120px;font-size:13px} .wh th.wk{white-space:normal;min-width:120px} .wh td{min-width:48px} }
+#pinDlg{padding:0;border:none;background:transparent;box-shadow:none;width:min(400px,92vw);overflow:visible}
+#pinDlg::backdrop{background:rgba(15,23,42,.45);backdrop-filter:blur(4px)}
+#pinDlg .login-box{position:relative;padding:40px;background:#fff;box-shadow:0 20px 45px rgba(15,23,42,.25);border:1px solid #e2e8f0;border-radius:10px;text-align:left}
+#pinDlg .lg-title{color:#0f172a;font-size:20px;font-weight:700;margin-bottom:4px}
+#pinDlg .lg-sub{color:#64748b;font-size:13px;margin-bottom:34px;line-height:1.5}
+#pinDlg .lg-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer}
+#pinDlg .user-box{position:relative}
+#pinDlg .user-box input{width:100%;padding:10px 0;font-size:16px;color:#0f172a;margin-bottom:24px;border:none;border-bottom:1px solid #94a3b8;outline:none;background:transparent;font-family:inherit;letter-spacing:3px;border-radius:0}
+#pinDlg .user-box label{position:absolute;top:0;left:0;padding:10px 0;font-size:16px;color:#64748b;pointer-events:none;transition:.5s}
+#pinDlg .user-box input:focus~label,#pinDlg .user-box input:valid~label{top:-20px;color:#2563eb;font-size:12px}
+#pinDlg .lg-err{min-height:20px;color:#dc2626;font-size:13px}
+#pinDlg .lg-send{position:relative;display:inline-block;padding:10px 22px;color:#0f172a;font-size:16px;font-weight:600;font-family:inherit;background:transparent;border:none;cursor:pointer;overflow:hidden;transition:.5s;margin-top:18px;letter-spacing:1px}
+#pinDlg .lg-send:hover,#pinDlg .lg-send:focus-visible{background:#16a34a;color:#fff;border-radius:5px;outline:none;box-shadow:0 0 5px #22c55e,0 0 20px rgba(34,197,94,.6)}
+#pinDlg .lg-send:disabled{opacity:.6;cursor:progress}
+#pinDlg .lg-send span{position:absolute;display:block;bottom:2px;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,#16a34a);animation:lgRun 2s linear infinite}
+#pinDlg .login-box.shake{animation:lgShake .4s}
+@keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.cb.can{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+.cb.can:hover{transform:scale(1.12);box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+.cb.busy{opacity:.55;pointer-events:none}
+.ck-hint{font-size:12.5px;color:var(--accent);font-weight:600}
 /* --- เช็คลิสต์ (หน้าตาแบบชีต) --- */
 .ck-months{display:inline-flex;background:var(--track);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
 .ck-months button{border:none;background:transparent;color:var(--muted);font:600 13px 'Prompt',sans-serif;padding:6px 12px;border-radius:8px;cursor:pointer}
@@ -868,7 +891,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
         <button class="wk-now" id="ckNow" type="button">ไปที่สัปดาห์นี้</button>
       </div>
     </div>
-    <div class="ck-legend"><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>สัปดาห์ผ่านไปแล้ว ไม่ได้ดำเนินการ</span></div>
+    <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 กดที่ช่องเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที)</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>สัปดาห์ผ่านไปแล้ว ไม่ได้ดำเนินการ</span></div>
     <div id="ckWeeks"><div class="ck-skel"></div><div class="ck-skel"></div></div>
   </div>
   <div id="panelList" hidden>
@@ -908,10 +931,25 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   </div>
   <p class="cm-note" id="cmFoot" style="text-align:center;margin-top:16px"></p>
 </main>
+<dialog id="pinDlg">
+  <form class="login-box" id="pinForm" method="dialog" autocomplete="off">
+    <button type="button" class="lg-close" id="pinClose" aria-label="ปิด">✕</button>
+    <div class="lg-title">🔒 ยืนยันเจ้าหน้าที่</div>
+    <div class="lg-sub">ใส่รหัสเพื่อติ๊กเช็คลิสต์ลงชีต<br>(ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์)</div>
+    <div class="user-box">
+      <input type="password" id="pinInput" required inputmode="numeric" autocomplete="off">
+      <label for="pinInput">รหัสผ่าน</label>
+    </div>
+    <div class="lg-err" id="pinErr"></div>
+    <button type="submit" class="lg-send"><span></span>บันทึก</button>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
 <script>
 /* ===== ผลการตรวจผู้บังคับบัญชา · อ่านจากชีต "POLICE 4.0" (อ่านอย่างเดียว ผ่าน gviz JSONP) =====
    โครงชีต: แต่ละสัปดาห์ = แถวหัว (ชื่อสัปดาห์ | หัวข้อที่ต้องดำเนินการ | ตำแหน่ง | การดำเนินการ ...) + แถวหัวข้อ (ชื่อหัวข้อ | เป้าหมาย | ติ๊ก ...) */
 const SHEET_ID = '108INRQfhH8MWuyARdZds9PiIgan6t_xI-py6xPJDmis', SHEET_GID = '0';
+const CMD_API = 'https://script.google.com/macros/s/AKfycbxKRQtD9N35wdijyNVIt35qgpSFELSw93ZF3iA5jYP6GUfOQjA0Bv6LpORA3UJWspxASw/exec';   // ← URL เว็บแอป Apps Script ของชีต POLICE 4.0 (ลงท้าย /exec) · เว้นว่าง = ดูอย่างเดียว
 const TH_M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const TH_M_ND = TH_M.map(m=>m.replace(/\./g,''));
 const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -968,6 +1006,7 @@ function parseSheet(resp){
     }
     if(!wk) return;
     if(/หัวข้อที่ต้องดำเนินการ/.test(b)){
+      if(wk.tasks.length){ wk = null; return; }   // บล็อกที่ยังไม่มีชื่อสัปดาห์ → ข้าม
       wk.roles = [];
       for(let c=2; c<r.length; c+=2){ const n = String(r[c]||'').trim(); if(n) wk.roles.push({name:n, col:c}); }
       return;
@@ -1046,19 +1085,46 @@ function currentIndex(){
 /* ---------- หน้า "เช็คลิสต์": หน้าตาแบบชีต แยกเป็นการ์ดรายสัปดาห์ ---------- */
 let CKM = '';
 const monthOf = w=>(w.month||'').replace('ประจำเดือน','').trim();
-function renderCheck(){
+function renderCheck(noAnim){
   const months = [...new Set(W.map(monthOf))];
   $('ckMonths').innerHTML = [['','ทุกเดือน'],...months.map(m=>[m,m])].map(([v,l])=>`<button type="button" data-m="${esc(v)}" class="${CKM===v?'on':''}">${esc(l)}</button>`).join('');
   const list = W.map((w,i)=>({w,i})).filter(x=>!CKM || monthOf(x.w)===CKM);
-  $('ckSub').textContent = `${fmt(list.length)} สัปดาห์${CKM?` · ${CKM}`:''} · ติ๊กในชีตแล้วกดรีเฟรชหน้านี้เพื่อดูผลล่าสุด`;
+  $('ckSub').textContent = `${fmt(list.length)} สัปดาห์${CKM?` · ${CKM}`:''}${CMD_API?'':' · ติ๊กในชีตแล้วกดรีเฟรชหน้านี้เพื่อดูผลล่าสุด'}`;
   let k = 0;
   $('ckWeeks').innerHTML = list.map(({w,i})=>{ const ph = phase(w), s = stats(w);
-    return `<section class="ck-week ${ph} ck-in" id="ckw${i}"><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
+    return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}" id="ckw${i}"><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
       `<div class="ck-tbl-wrap"><table class="ck-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${esc(r.name)}</th>`).join('')}</tr></thead><tbody>` +
-      w.tasks.map(t=>`<tr><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map(c=>{ const cls = c.done ? 'on' : ph==='past' ? 'miss' : ''; return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><i class="cb ${cls}" style="--d:${(k++%40)*25}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}"></i></span></td>`; }).join('')}</tr>`).join('') +
+      w.tasks.map((t,ti)=>`<tr><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><i class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%40)*25}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}"></i></span></td>`; }).join('')}</tr>`).join('') +
       `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>b.style.width = b.dataset.w + '%')));
+  if(noAnim) document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>{ b.style.transition='none'; b.style.width = b.dataset.w + '%'; });
+  else requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>b.style.width = b.dataset.w + '%')));
 }
+/* ---------- ติ๊กบนเว็บ → บันทึกลงชีตผ่าน Apps Script (รหัสตรวจที่ฝั่งเซิร์ฟเวอร์) ---------- */
+let PIN = ''; try{ PIN = sessionStorage.getItem('cmd-pin') || ''; }catch(_){}
+let pendingTick = null;
+function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2600); }
+function openPin(err){ $('pinErr').textContent = err||''; $('pinInput').value = ''; $('pinDlg').showModal(); setTimeout(()=>$('pinInput').focus(), 50); if(err){ const b = $('pinForm'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
+$('pinClose').onclick = ()=>{ pendingTick = null; $('pinDlg').close(); };
+$('pinForm').addEventListener('submit', e=>{ e.preventDefault(); PIN = $('pinInput').value.trim(); if(!PIN) return; try{ sessionStorage.setItem('cmd-pin', PIN); }catch(_){} $('pinDlg').close(); if(pendingTick){ const p = pendingTick; pendingTick = null; tick(p); } });
+async function tick(p){
+  if(!PIN){ pendingTick = p; return openPin(); }
+  const w = W[p.w], t = w && w.tasks[p.t], c = t && t.cells[p.r]; if(!c) return;
+  const prev = c.done; c.done = !prev; renderCheck(true);
+  const el = document.querySelector(`.cb[data-w="${p.w}"][data-t="${p.t}"][data-r="${p.r}"]`); if(el) el.classList.add('busy');
+  try{
+    const j = await fetch(CMD_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'set', pin:PIN, week:w.label, task:t.name, role:w.roles[p.r].name, value:c.done})}).then(r=>r.json());
+    if(!j.ok){
+      c.done = prev; renderCheck(true);
+      if(j.auth){ PIN = ''; try{ sessionStorage.removeItem('cmd-pin'); }catch(_){} pendingTick = p; openPin(j.error || 'รหัสไม่ถูกต้อง'); }
+      else toast('⚠️ ' + (j.error || 'บันทึกไม่สำเร็จ'));
+      return;
+    }
+    toast(c.done ? `✓ ติ๊กแล้ว · ${w.roles[p.r].name} · ${t.name}` : `เอาติ๊กออกแล้ว · ${w.roles[p.r].name}`);
+  }catch(err){ c.done = prev; renderCheck(true); toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+  finally{ const e2 = document.querySelector(`.cb[data-w="${p.w}"][data-t="${p.t}"][data-r="${p.r}"]`); if(e2) e2.classList.remove('busy'); }
+}
+$('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
+$('ckWeeks').addEventListener('keydown', e=>{ if((e.key===' '||e.key==='Enter') && e.target.classList.contains('can')){ e.preventDefault(); e.target.click(); } });
 $('ckMonths').addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; CKM = b.dataset.m; renderCheck(); });
 function scrollToCurrent(smooth){
   const i = currentIndex(); if(CKM && monthOf(W[i])!==CKM){ CKM = ''; renderCheck(); }
@@ -1083,7 +1149,7 @@ showView(location.hash.slice(1));
     W = parseSheet(await loadJSONP());
     if(!W.length) throw new Error('ไม่พบข้อมูลสัปดาห์ในชีต');
     $('wkSel').innerHTML = W.map((w,i)=>`<option value="${i}">${esc(w.label)}</option>`).join('');
-    cur = currentIndex(); render(); renderCheck(); if(VIEW==='check') setTimeout(()=>scrollToCurrent(false), 60);
+    cur = currentIndex(); CKM = monthOf(W[cur]); $('ckHint').hidden = !CMD_API; render(); renderCheck(); if(VIEW==='check') setTimeout(()=>scrollToCurrent(false), 60);
     $('cmSub').textContent = `สถานีตำรวจภูธรบางบ่อ · ${W.length} สัปดาห์ · ${W[0].roles.length} ตำแหน่ง`;
     $('cmFoot').textContent = `ข้อมูลจากชีต "POLICE 4.0" · อัปเดต ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. · ติ๊กในชีตแล้วกดรีเฟรชหน้านี้เพื่อดูผลล่าสุด`;
     if(!reduceMotion) document.querySelectorAll('.kpi, .card').forEach((c,i)=>{ c.style.setProperty('--d', i*60+'ms'); c.classList.add('cm-in'); });
