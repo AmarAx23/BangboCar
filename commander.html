@@ -796,6 +796,10 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .cb.can:hover{transform:scale(1.12);box-shadow:0 0 0 4px rgba(37,99,235,.15)}
 .cb.busy{opacity:.55;pointer-events:none}
 .ck-hint{font-size:12.5px;color:var(--accent);font-weight:600}
+/* --- ชื่อผู้ดำรงตำแหน่งใต้หัวคอลัมน์ --- */
+.rp-person{display:block;font-size:11.5px;font-weight:500;color:var(--faint);margin-top:1px;white-space:nowrap;letter-spacing:0;text-transform:none}
+.rp-row .nm .rp-person{display:inline;margin-left:8px;font-size:12.5px}
+@media (max-width:700px){ .ck-tbl th .rp-person{white-space:normal;font-size:10px;line-height:1.25} }
 /* --- เช็คลิสต์ (หน้าตาแบบชีต) --- */
 .ck-months{display:inline-flex;align-items:center;gap:6px}
 .ck-months .wk-sel{min-width:170px}
@@ -989,6 +993,9 @@ function setTheme(t, save){
 }
 $('themeBtn').addEventListener('change', e=>setTheme(e.target.checked ? 'dark' : 'light', true));
 $('themeBtn').checked = isDark();
+// ชื่อผู้ดำรงตำแหน่ง (แสดงใต้ชื่อตำแหน่ง) · แก้/เพิ่มได้ที่นี่
+const ROLE_PERSON = {'สวป.(1)':'สมบัติ โชติไพรัตน์', 'สวป.(2)':'สุภัทร ศรีภา'};
+const roleHtml = r=>esc(r) + (ROLE_PERSON[r] ? `<small class="rp-person">${esc(ROLE_PERSON[r])}</small>` : '');
 const TASK_IC = [[/ประชุม/,'🗣️'],[/อบรม|ปล่อยแถว/,'🚓'],[/จุดบังคับ/,'📍'],[/จุดเสี่ยง|ล่อแหลม/,'⚠️'],[/ซักซ้อม|แผน/,'🛡️']];
 const taskIcon = t=>{ const m = TASK_IC.find(([re])=>re.test(t)); return m ? m[1] : '📋'; };
 const toAr = s=>String(s==null?'':s).replace(/[๐-๙]/g,d=>'๐๑๒๓๔๕๖๗๘๙'.indexOf(d));
@@ -1080,19 +1087,19 @@ function render(){
   const cell = c=>{ const st = c.done ? 'ok' : ph==='past' ? 'miss' : ph==='fut' ? 'fut' : 'wait';
     const ic = {ok:'✓', miss:'✕', wait:'…', fut:'–'}[st], tt = {ok:'ดำเนินการแล้ว', miss:'ไม่ได้ดำเนินการ', wait:'รอดำเนินการ', fut:'ยังไม่ถึงสัปดาห์'}[st];
     return `<td><span class="st ${st}" title="${tt}"><span class="ic">${ic}</span><span class="tg">${esc(c.target||'')}</span></span></td>`; };
-  $('mx').innerHTML = `<thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${esc(r.name)}</th>`).join('')}</tr></thead><tbody>` +
+  $('mx').innerHTML = `<thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${roleHtml(r.name)}</th>`).join('')}</tr></thead><tbody>` +
     w.tasks.map((t,i)=>`<tr class="cm-in" style="--d:${i*60}ms"><td class="task"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map(cell).join('')}</tr>`).join('') +
     `</tbody><tfoot><tr><td>ดำเนินการแล้ว</td>${w.roles.map((r,i)=>{ const x = roleStats(w,i); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot>`;
   // per role
   $('rp').innerHTML = w.roles.map((r,i)=>{ const x = roleStats(w,i), miss = w.tasks.filter(t=>!t.cells[i].done).map(t=>t.name);
-    return `<div class="rp-row cm-in" style="--d:${i*80}ms"><div class="top"><span class="nm">${esc(r.name)}</span><span class="pc" style="color:${pctColor(x.pct)}">${Math.round(x.pct*100)}%<small>${x.done}/${x.tot}</small></span></div><div class="rp-bar"><i data-w="${x.pct*100}" style="background:${pctColor(x.pct)}"></i></div>${miss.length?`<div class="rp-miss">${ph==='past'?'ไม่ได้ทำ':'ยังไม่ได้ทำ'}: ${miss.map(esc).join(' · ')}</div>`:'<div class="rp-miss" style="color:#16a34a">✓ ครบทุกหัวข้อ</div>'}</div>`; }).join('');
+    return `<div class="rp-row cm-in" style="--d:${i*80}ms"><div class="top"><span class="nm">${roleHtml(r.name)}</span><span class="pc" style="color:${pctColor(x.pct)}">${Math.round(x.pct*100)}%<small>${x.done}/${x.tot}</small></span></div><div class="rp-bar"><i data-w="${x.pct*100}" style="background:${pctColor(x.pct)}"></i></div>${miss.length?`<div class="rp-miss">${ph==='past'?'ไม่ได้ทำ':'ยังไม่ได้ทำ'}: ${miss.map(esc).join(' · ')}</div>`:'<div class="rp-miss" style="color:#16a34a">✓ ครบทุกหัวข้อ</div>'}</div>`; }).join('');
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('#rp .rp-bar i').forEach(b=>b.style.width = b.dataset.w + '%')));
   renderHeat();
 }
 function renderHeat(){
   const roles = W[0] ? W[0].roles.map(r=>r.name) : [];
   const bg = p=>{ const c = pctColor(p); return `background:${c}${isDark()?'55':'26'};color:${c}`; };
-  $('hm').innerHTML = `<thead><tr><th style="text-align:left">สัปดาห์</th>${roles.map(r=>`<th>${esc(r)}</th>`).join('')}<th>รวม</th></tr></thead><tbody>` +
+  $('hm').innerHTML = `<thead><tr><th style="text-align:left">สัปดาห์</th>${roles.map(r=>`<th>${roleHtml(r)}</th>`).join('')}<th>รวม</th></tr></thead><tbody>` +
     W.map((w,wi)=>{ const ph = phase(w), s = stats(w);
       const td = (p,lbl)=>ph==='fut' ? `<td class="na" data-w="${wi}">–</td>` : `<td data-w="${wi}" style="${bg(p)}" title="${lbl}">${Math.round(p*100)}%</td>`;
       return `<tr class="${wi===cur?'sel':''}"><th class="wk" data-w="${wi}" style="cursor:pointer">${esc(w.label)} <span style="color:var(--faint);font-weight:400">${esc(w.month.replace('ประจำเดือน ',''))}</span></th>${w.roles.map((r,i)=>{ const x = roleStats(w,i); return td(x.pct, `${r.name}: ${x.done}/${x.tot}`); }).join('')}${td(s.pct, `รวม ${s.done}/${s.tot}`)}</tr>`; }).join('') + '</tbody>';
@@ -1120,7 +1127,7 @@ function renderCheck(noAnim){
   let k = 0, wn = 0; const dir = CK_DIR; CK_DIR = '';
   $('ckWeeks').innerHTML = list.map(({w,i})=>{ const ph = phase(w), s = stats(w);
     return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}${dir&&!noAnim?' from-'+dir:''}" id="ckw${i}" style="--wd:${Math.min(wn++,6)*90}ms"><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
-      `<div class="ck-tbl-wrap"><table class="ck-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${esc(r.name)}</th>`).join('')}</tr></thead><tbody>` +
+      `<div class="ck-tbl-wrap"><table class="ck-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${roleHtml(r.name)}</th>`).join('')}</tr></thead><tbody>` +
       w.tasks.map((t,ti)=>`<tr style="--rd:${ti*45}ms"><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><i class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%20)*20}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}"></i></span></td>`; }).join('')}</tr>`).join('') +
       `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
   if(noAnim) document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>{ b.style.transition='none'; b.style.width = b.dataset.w + '%'; });
