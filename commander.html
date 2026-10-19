@@ -832,11 +832,37 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ck-tbl tfoot td{font-weight:700;font-size:13px;border-top:2px solid var(--border);border-bottom:none}
 .ck-skel{height:220px;border-radius:14px;margin-bottom:14px;background:linear-gradient(90deg,rgba(148,163,184,.12) 25%,rgba(148,163,184,.26) 50%,rgba(148,163,184,.12) 75%);background-size:200% 100%;animation:ckSkel 1.2s linear infinite}
 @keyframes ckSkel{to{background-position:-200% 0}}
-.ck-in .cb.on{animation:cbPop .35s cubic-bezier(.34,1.56,.64,1) both;animation-delay:var(--d,0ms)}
+.ck-in .cb.on{animation:cbPop .35s cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--wd,0ms) + var(--d,0ms) + 250ms)}
+/* motion: การ์ดสัปดาห์ไล่เข้า · แถวไล่เข้า · เลื่อนเดือนซ้าย/ขวา · ติ๊กแล้วเด้ง */
+.ck-week.ck-in{animation:ckCard .55s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:var(--wd,0ms)}
+.ck-week.ck-in.from-r{animation-name:ckFromR}.ck-week.ck-in.from-l{animation-name:ckFromL}
+.ck-week.ck-in tbody tr{animation:ckRow .4s ease both;animation-delay:calc(var(--wd,0ms) + var(--rd,0ms) + 120ms)}
+.ck-week.ck-in .ck-side .wl,.ck-week.ck-in .ck-side .wd{animation:ckRow .45s ease both;animation-delay:calc(var(--wd,0ms) + 80ms)}
+.ck-week{transition:box-shadow .2s ease,transform .2s ease}
+.ck-week:hover{box-shadow:0 10px 28px rgba(15,23,42,.12);transform:translateY(-2px)}
+.ck-week.cur .wb{animation:wbPulse 2.2s ease-in-out infinite}
+.ck-tbl tbody tr{transition:background-color .15s ease}
+.ck-tbl tbody tr:hover{background:rgba(37,99,235,.05)}
+.cb{position:relative}
+.cb.just{animation:cbTick .5s cubic-bezier(.34,1.56,.64,1)}
+.cb.just::before{content:'';position:absolute;inset:-3px;border-radius:8px;border:2px solid #16a34a;animation:cbRing .6s ease-out forwards;pointer-events:none}
+.cb.just:not(.on)::before{border-color:#94a3b8}
+.ck-tbl tfoot td.bump{animation:ftBump .5s ease}
+#panelCheck:not([hidden]),#panelList:not([hidden]){animation:ckPanel .35s ease both}
+@keyframes ckCard{0%{opacity:0;transform:translateY(18px) scale(.985)}100%{opacity:1;transform:none}}
+@keyframes ckFromR{0%{opacity:0;transform:translateX(40px)}100%{opacity:1;transform:none}}
+@keyframes ckFromL{0%{opacity:0;transform:translateX(-40px)}100%{opacity:1;transform:none}}
+@keyframes ckRow{0%{opacity:0;transform:translateX(-10px)}100%{opacity:1;transform:none}}
+@keyframes cbTick{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:none}}
+@keyframes cbRing{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.9)}}
+@keyframes wbPulse{0%,100%{box-shadow:0 0 0 0 rgba(250,204,21,.0)}50%{box-shadow:0 0 0 5px rgba(250,204,21,.35)}}
+@keyframes ftBump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes ckPanel{0%{opacity:0}100%{opacity:1}}
 @keyframes cbPop{0%{transform:scale(.4);opacity:0}100%{transform:none;opacity:1}}
 @media (max-width:900px){ .ck-week{grid-template-columns:1fr} .ck-side{flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:center;text-align:left;padding:12px 14px} .ck-side .wbar{flex-basis:100%} .ck-side .wb{align-self:auto} }
 @media (max-width:700px){ .ck-cell{flex-direction:column;gap:4px} .ck-cell .tg{display:none} .ck-tbl th{font-size:11.5px;padding:8px 3px;white-space:normal} .ck-tbl td{padding:8px 4px} .ck-tbl td.t{white-space:normal;min-width:130px;font-size:13px} nav .tab{padding:.55em 1em} }
-@media (prefers-reduced-motion:reduce){ .ck-skel,.ck-in .cb.on{animation:none} .ck-side .wbar i{transition:none} }
+@media (prefers-reduced-motion:reduce){ .ck-skel,.ck-in .cb.on,.ck-week.ck-in,.ck-week.ck-in tbody tr,.ck-week.ck-in .ck-side .wl,.ck-week.ck-in .ck-side .wd,.cb.just,.cb.just::before,.ck-week.cur .wb,.ck-tbl tfoot td.bump,#panelCheck,#panelList{animation:none!important} .ck-side .wbar i,.ck-week{transition:none} .ck-week:hover{transform:none} }
+@media print{ .ck-week,.ck-week *{animation:none!important} }
 @media print{ .ck-months,#ckNow{display:none!important} .ck-week{break-inside:avoid;box-shadow:none} .ck-side{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
 @media print{ .wk-bar,.nav-right{display:none!important} .cm-in{animation:none} .rp-bar i{transition:none} }
 </style>
@@ -1084,17 +1110,18 @@ function currentIndex(){
 /* ---------- หน้า "เช็คลิสต์": หน้าตาแบบชีต แยกเป็นการ์ดรายสัปดาห์ ---------- */
 let CKM = '';
 const monthOf = w=>(w.month||'').replace('ประจำเดือน','').trim();
+let CK_DIR = '';
 function renderCheck(noAnim){
   const months = [...new Set(W.map(monthOf))];
   const mi = months.indexOf(CKM);
   $('ckMonths').innerHTML = `<button class="wk-nav" type="button" data-step="-1" aria-label="เดือนก่อน"${mi<=0?' disabled':''}>‹</button><select class="wk-sel" id="ckMonthSel" aria-label="เลือกเดือน">${[['','📅 ทุกเดือน'],...months.map(m=>[m,m])].map(([v,l])=>`<option value="${esc(v)}"${CKM===v?' selected':''}>${esc(l)}</option>`).join('')}</select><button class="wk-nav" type="button" data-step="1" aria-label="เดือนถัดไป"${mi<0||mi>=months.length-1?' disabled':''}>›</button>`;
   const list = W.map((w,i)=>({w,i})).filter(x=>!CKM || monthOf(x.w)===CKM);
   $('ckSub').textContent = `${fmt(list.length)} สัปดาห์${CKM?` · ${CKM}`:''}${CMD_API?'':' · ติ๊กในชีตแล้วกดรีเฟรชหน้านี้เพื่อดูผลล่าสุด'}`;
-  let k = 0;
+  let k = 0, wn = 0; const dir = CK_DIR; CK_DIR = '';
   $('ckWeeks').innerHTML = list.map(({w,i})=>{ const ph = phase(w), s = stats(w);
-    return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}" id="ckw${i}"><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
+    return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}${dir&&!noAnim?' from-'+dir:''}" id="ckw${i}" style="--wd:${Math.min(wn++,6)*90}ms"><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
       `<div class="ck-tbl-wrap"><table class="ck-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${esc(r.name)}</th>`).join('')}</tr></thead><tbody>` +
-      w.tasks.map((t,ti)=>`<tr><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><i class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%40)*25}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}"></i></span></td>`; }).join('')}</tr>`).join('') +
+      w.tasks.map((t,ti)=>`<tr style="--rd:${ti*45}ms"><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><i class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%20)*20}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}"></i></span></td>`; }).join('')}</tr>`).join('') +
       `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
   if(noAnim) document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>{ b.style.transition='none'; b.style.width = b.dataset.w + '%'; });
   else requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>b.style.width = b.dataset.w + '%')));
@@ -1110,7 +1137,8 @@ async function tick(p){
   if(!PIN){ pendingTick = p; return openPin(); }
   const w = W[p.w], t = w && w.tasks[p.t], c = t && t.cells[p.r]; if(!c) return;
   const prev = c.done; c.done = !prev; renderCheck(true);
-  const el = document.querySelector(`.cb[data-w="${p.w}"][data-t="${p.t}"][data-r="${p.r}"]`); if(el) el.classList.add('busy');
+  const el = document.querySelector(`.cb[data-w="${p.w}"][data-t="${p.t}"][data-r="${p.r}"]`);
+  if(el){ el.classList.add('busy'); if(!reduceMotion){ el.classList.add('just'); const ft = el.closest('table').querySelectorAll('tfoot td')[p.r+1]; if(ft) ft.classList.add('bump'); } }
   try{
     const j = await fetch(CMD_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'set', pin:PIN, week:w.label, task:t.name, role:w.roles[p.r].name, value:c.done})}).then(r=>r.json());
     if(!j.ok){
@@ -1126,7 +1154,7 @@ async function tick(p){
 $('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
 $('ckWeeks').addEventListener('keydown', e=>{ if((e.key===' '||e.key==='Enter') && e.target.classList.contains('can')){ e.preventDefault(); e.target.click(); } });
 $('ckMonths').addEventListener('change', e=>{ if(e.target.id!=='ckMonthSel') return; CKM = e.target.value; renderCheck(); window.scrollTo({top:0}); });
-$('ckMonths').addEventListener('click', e=>{ const b = e.target.closest('button[data-step]'); if(!b || b.disabled) return; const months = [...new Set(W.map(monthOf))]; const i = months.indexOf(CKM) + (+b.dataset.step); if(months[i]){ CKM = months[i]; renderCheck(); window.scrollTo({top:0}); } });
+$('ckMonths').addEventListener('click', e=>{ const b = e.target.closest('button[data-step]'); if(!b || b.disabled) return; const months = [...new Set(W.map(monthOf))]; const i = months.indexOf(CKM) + (+b.dataset.step); if(months[i]){ CKM = months[i]; CK_DIR = +b.dataset.step>0 ? 'r' : 'l'; renderCheck(); window.scrollTo({top:0}); } });
 function scrollToCurrent(smooth){
   const i = currentIndex(); if(CKM && monthOf(W[i])!==CKM){ CKM = ''; renderCheck(); }
   const el = $('ckw'+i); if(!smooth && el===document.querySelector('#ckWeeks .ck-week')) return; // สัปดาห์แรกอยู่บนสุดอยู่แล้ว ไม่ต้องเลื่อน
