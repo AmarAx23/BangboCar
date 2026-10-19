@@ -802,9 +802,10 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .cb.busy{opacity:.55;pointer-events:none}
 .ck-hint{font-size:12.5px;color:var(--accent);font-weight:600}
 /* --- ชื่อผู้ดำรงตำแหน่งใต้หัวคอลัมน์ --- */
+.rp-person .pp{display:inline-block;white-space:nowrap}
 .rp-person{display:block;font-size:11.5px;font-weight:500;color:var(--faint);margin-top:1px;white-space:nowrap;letter-spacing:0;text-transform:none}
 .rp-row .nm .rp-person{display:inline;margin-left:8px;font-size:12.5px}
-@media (max-width:700px){ .ck-tbl th .rp-person{white-space:normal;font-size:10px;line-height:1.25} }
+@media (max-width:700px){ .ck-tbl th .rp-person,.wh th .rp-person,.mx th .rp-person{white-space:normal;font-size:10px;line-height:1.25} .wh th{white-space:normal} }
 /* --- เช็คลิสต์ (หน้าตาแบบชีต) --- */
 /* ===== ช่องติ๊กแบบ neon-checkbox · ดัดแปลงจาก "hot-dragonfly-56" by 00Kubi on Uiverse.io (MIT) ===== */
 .cb{--primary:#00e09a;--primary-dark:#00b87e;--primary-light:#88ffdd;--size:26px;--box-bg:#fff;--box-line:#b8c4cf;position:relative;display:inline-block;width:var(--size);height:var(--size);flex:none;font-style:normal;-webkit-tap-highlight-color:transparent;vertical-align:middle}
@@ -1068,8 +1069,13 @@ function setTheme(t, save){
 $('themeBtn').addEventListener('change', e=>setTheme(e.target.checked ? 'dark' : 'light', true));
 $('themeBtn').checked = isDark();
 // ชื่อผู้ดำรงตำแหน่ง (แสดงใต้ชื่อตำแหน่ง) · แก้/เพิ่มได้ที่นี่
-const ROLE_PERSON = {'สวป.(1)':'สมบัติ โชติไพรัตน์', 'สวป.(2)':'สุภัทร ศรีภา'};
-const roleHtml = r=>esc(r) + (ROLE_PERSON[r] ? `<small class="rp-person">${esc(ROLE_PERSON[r])}</small>` : '');
+const ROLE_PERSON = {'ผกก.':'พ.ต.อ.ชัยรัชต์ รุ่งเรือง', 'รอง ผกก.ป.':'พ.ต.ท.ฉัตรชัย ใบใหญ่', 'สวป.(1)':'พ.ต.ท.สมบัติ โชติไพรัตน์', 'สวป.(2)':'พ.ต.ท.สุภัทร ศรีภา'};
+const roleKey = r=>String(r||'').replace(/[\s.]/g,'');
+const ROLE_PERSON_K = Object.fromEntries(Object.entries(ROLE_PERSON).map(([k,v])=>[roleKey(k),v]));
+const personOf = r=>ROLE_PERSON_K[roleKey(r)];
+// rank and each name part are unbreakable chunks, so narrow columns wrap between words, never inside one
+const personHtml = p=>{ const m = String(p).match(/^((?:[ก-๙]{1,3}\.)+)\s*(.*)$/); const sp = x=>`<span class="pp">${esc(x)}</span>`, names = (m ? m[2] : String(p)).split(/\s+/).filter(Boolean).map(sp).join(' '); return m ? sp(m[1]) + '<wbr>' + names : names; };
+const roleHtml = r=>esc(r) + (personOf(r) ? `<small class="rp-person">${personHtml(personOf(r))}</small>` : '');
 const TASK_IC = [[/ประชุม/,'🗣️'],[/อบรม|ปล่อยแถว/,'🚓'],[/จุดบังคับ/,'📍'],[/จุดเสี่ยง|ล่อแหลม/,'⚠️'],[/ซักซ้อม|แผน/,'🛡️']];
 const taskIcon = t=>{ const m = TASK_IC.find(([re])=>re.test(t)); return m ? m[1] : '📋'; };
 const toAr = s=>String(s==null?'':s).replace(/[๐-๙]/g,d=>'๐๑๒๓๔๕๖๗๘๙'.indexOf(d));
