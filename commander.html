@@ -883,8 +883,8 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
     </div>
   </div>
   <div class="tabbar" role="tablist" aria-label="มุมมอง">
-    <button class="tab on" role="tab" data-view="check" aria-selected="true">✅ เช็คลิสต์</button>
-    <button class="tab" role="tab" data-view="list" aria-selected="false">📋 รายการ</button>
+    <button class="tab on" role="tab" data-view="list" aria-selected="true">📋 รายการ</button>
+    <button class="tab" role="tab" data-view="check" aria-selected="false">✅ เช็คลิสต์</button>
   </div>
   <div class="nav-right">
     <a class="btn btn-reset nav-switch" href="index.html">🏠 หน้าแรก</a>
@@ -909,7 +909,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 </nav>
 <main>
   <div class="cm-msg" id="cmMsg" hidden></div>
-  <div id="panelCheck">
+  <div id="panelCheck" hidden>
     <div class="cm-head">
       <div>
         <h2>✅ CHECKLIST การขับเคลื่อนผู้บังคับบัญชา</h2>
@@ -923,7 +923,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
     <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 กดที่ช่องเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที)</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>สัปดาห์ผ่านไปแล้ว ไม่ได้ดำเนินการ</span></div>
     <div id="ckWeeks"><div class="ck-skel"></div><div class="ck-skel"></div></div>
   </div>
-  <div id="panelList" hidden>
+  <div id="panelList">
   <div class="cm-head">
     <div>
       <h2>📋 สรุปผลการดำเนินการรายสัปดาห์</h2>
@@ -1169,12 +1169,12 @@ function scrollToCurrent(smooth){
 }
 $('ckNow').addEventListener('click', ()=>scrollToCurrent(true));
 /* ---------- สลับหน้าย่อย ---------- */
-let VIEW = 'check';
+let VIEW = 'list';
 function showView(v, push){
-  if(v!=='list') v = 'check'; VIEW = v;
+  if(v!=='check') v = 'list'; VIEW = v;
   $('panelCheck').hidden = v!=='check'; $('panelList').hidden = v!=='list';
   document.querySelectorAll('nav .tab').forEach(t=>{ const on = t.dataset.view===v; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
-  if(push) history.replaceState(null, '', v==='list' ? '#list' : location.pathname + location.search);
+  if(push) history.replaceState(null, '', v==='check' ? '#check' : location.pathname + location.search);
   window.scrollTo({top:0});
   if(W.length){ if(v==='list') render(); else { renderCheck(); setTimeout(()=>scrollToCurrent(false), 60); } }
 }
