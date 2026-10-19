@@ -797,9 +797,8 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .cb.busy{opacity:.55;pointer-events:none}
 .ck-hint{font-size:12.5px;color:var(--accent);font-weight:600}
 /* --- เช็คลิสต์ (หน้าตาแบบชีต) --- */
-.ck-months{display:inline-flex;background:var(--track);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
-.ck-months button{border:none;background:transparent;color:var(--muted);font:600 13px 'Prompt',sans-serif;padding:6px 12px;border-radius:8px;cursor:pointer}
-.ck-months button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.ck-months{display:inline-flex;align-items:center;gap:6px}
+.ck-months .wk-sel{min-width:170px}
 .ck-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
 .ck-legend span{display:inline-flex;align-items:center;gap:7px}
 .ck-week{display:grid;grid-template-columns:220px minmax(0,1fr);background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow);scroll-margin-top:90px}
@@ -888,7 +887,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
       </div>
       <div class="wk-bar">
         <div class="ck-months" id="ckMonths" role="group" aria-label="เลือกเดือน"></div>
-        <button class="wk-now" id="ckNow" type="button">ไปที่สัปดาห์นี้</button>
+        <button class="wk-now" id="ckNow" type="button">สัปดาห์นี้</button>
       </div>
     </div>
     <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 กดที่ช่องเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที)</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>สัปดาห์ผ่านไปแล้ว ไม่ได้ดำเนินการ</span></div>
@@ -1087,7 +1086,8 @@ let CKM = '';
 const monthOf = w=>(w.month||'').replace('ประจำเดือน','').trim();
 function renderCheck(noAnim){
   const months = [...new Set(W.map(monthOf))];
-  $('ckMonths').innerHTML = [['','ทุกเดือน'],...months.map(m=>[m,m])].map(([v,l])=>`<button type="button" data-m="${esc(v)}" class="${CKM===v?'on':''}">${esc(l)}</button>`).join('');
+  const mi = months.indexOf(CKM);
+  $('ckMonths').innerHTML = `<button class="wk-nav" type="button" data-step="-1" aria-label="เดือนก่อน"${mi<=0?' disabled':''}>‹</button><select class="wk-sel" id="ckMonthSel" aria-label="เลือกเดือน">${[['','📅 ทุกเดือน'],...months.map(m=>[m,m])].map(([v,l])=>`<option value="${esc(v)}"${CKM===v?' selected':''}>${esc(l)}</option>`).join('')}</select><button class="wk-nav" type="button" data-step="1" aria-label="เดือนถัดไป"${mi<0||mi>=months.length-1?' disabled':''}>›</button>`;
   const list = W.map((w,i)=>({w,i})).filter(x=>!CKM || monthOf(x.w)===CKM);
   $('ckSub').textContent = `${fmt(list.length)} สัปดาห์${CKM?` · ${CKM}`:''}${CMD_API?'':' · ติ๊กในชีตแล้วกดรีเฟรชหน้านี้เพื่อดูผลล่าสุด'}`;
   let k = 0;
@@ -1125,7 +1125,8 @@ async function tick(p){
 }
 $('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
 $('ckWeeks').addEventListener('keydown', e=>{ if((e.key===' '||e.key==='Enter') && e.target.classList.contains('can')){ e.preventDefault(); e.target.click(); } });
-$('ckMonths').addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; CKM = b.dataset.m; renderCheck(); });
+$('ckMonths').addEventListener('change', e=>{ if(e.target.id!=='ckMonthSel') return; CKM = e.target.value; renderCheck(); window.scrollTo({top:0}); });
+$('ckMonths').addEventListener('click', e=>{ const b = e.target.closest('button[data-step]'); if(!b || b.disabled) return; const months = [...new Set(W.map(monthOf))]; const i = months.indexOf(CKM) + (+b.dataset.step); if(months[i]){ CKM = months[i]; renderCheck(); window.scrollTo({top:0}); } });
 function scrollToCurrent(smooth){
   const i = currentIndex(); if(CKM && monthOf(W[i])!==CKM){ CKM = ''; renderCheck(); }
   const el = $('ckw'+i); if(!smooth && el===document.querySelector('#ckWeeks .ck-week')) return; // สัปดาห์แรกอยู่บนสุดอยู่แล้ว ไม่ต้องเลื่อน
