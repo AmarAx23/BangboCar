@@ -867,19 +867,19 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 :root[data-theme="dark"] .ck-week{background:var(--surface)!important;border-color:#334155!important}
 .ck-week:hover{border-color:#008bf8!important;box-shadow:0 4px 18px 0 rgba(0,0,0,.25)!important;transform:none!important}
 /* ===== การ์ดสัปดาห์ปัจจุบัน · ดัดแปลงจาก "heavy-elephant-39" by alexruix on Uiverse.io (MIT) ===== */
-.ck-week.cur{--cur-g:linear-gradient(to left,#f7ba2b 0%,#ea5358 100%);border:5px solid transparent!important;background:linear-gradient(#f5f5f5,#f5f5f5) padding-box,var(--cur-g) border-box!important;box-shadow:none!important;z-index:1;isolation:isolate}
+.ck-week.cur{--cur-g:linear-gradient(to left,#f7ba2b 0%,#ea5358 100%);border:2.5px solid transparent!important;background:linear-gradient(#f5f5f5,#f5f5f5) padding-box,var(--cur-g) border-box!important;box-shadow:none!important;z-index:1;isolation:isolate}
 :root[data-theme="dark"] .ck-week.cur{border-color:transparent!important;background:linear-gradient(var(--surface),var(--surface)) padding-box,var(--cur-g) border-box!important}
 .ck-week.cur::after{content:'';position:absolute;top:30px;left:0;right:0;height:100%;width:100%;z-index:-1;transform:scale(.8);filter:blur(25px);background:var(--cur-g);opacity:.55;transition:opacity .5s;pointer-events:none;border-radius:20px}
 .ck-week.cur:hover{border-color:transparent!important;box-shadow:none!important}
 .ck-week.cur:hover::after{opacity:0}
-.ck-week.cur .ck-side{background:#181818!important;border-radius:15px 0 0 15px}
+.ck-week.cur .ck-side{background:#181818!important;border-radius:17.5px 0 0 17.5px}
 .ck-week.cur .ck-side .wl,.ck-week.cur .ck-side .wd{transition:color 1s}
 .ck-week.cur:hover .ck-side .wl,.ck-week.cur:hover .ck-side .wd{color:#f7ba2b}
 .ck-week.cur .ck-side .wb{background:linear-gradient(to left,#f7ba2b,#ea5358);color:#fff}
 .ck-week.cur .ck-side .wbar i{background:linear-gradient(to left,#f7ba2b,#ea5358)}
-.ck-week.cur .ck-tbl-wrap{border-radius:0 15px 15px 0;background:#f5f5f5}
+.ck-week.cur .ck-tbl-wrap{border-radius:0 17.5px 17.5px 0;background:#f5f5f5}
 :root[data-theme="dark"] .ck-week.cur .ck-tbl-wrap{background:var(--surface)}
-@media (max-width:900px){ .ck-week.cur .ck-side{border-radius:15px 15px 0 0} .ck-week.cur .ck-tbl-wrap{border-radius:0 0 15px 15px} }
+@media (max-width:900px){ .ck-week.cur .ck-side{border-radius:17.5px 17.5px 0 0} .ck-week.cur .ck-tbl-wrap{border-radius:0 0 17.5px 17.5px} }
 @media print{ .ck-week.cur::after{display:none} }
 .ck-week .ck-side{border-radius:18px 0 0 18px}
 .ck-week .ck-tbl-wrap{border-radius:0 18px 18px 0}
@@ -922,7 +922,9 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ck-week.ck-in .ck-side .wl,.ck-week.ck-in .ck-side .wd{animation:ckRow .45s ease both;animation-delay:calc(var(--wd,0ms) + 80ms)}
 .ck-week{transition:box-shadow .2s ease,transform .2s ease}
 .ck-week:hover{box-shadow:0 10px 28px rgba(15,23,42,.12);transform:translateY(-2px)}
-.ck-week.cur .wb{animation:wbPulse 2.2s ease-in-out infinite}
+/* soft breathing glow on the 'this week' badge: only opacity/transform animate, so it stays smooth */
+.ck-week.cur .wb{position:relative;isolation:isolate}
+.ck-week.cur .wb::before{content:'';position:absolute;inset:-3px;border-radius:inherit;background:linear-gradient(to left,#f7ba2b,#ea5358);filter:blur(7px);z-index:-1;opacity:.25;transform:scale(.92);animation:wbGlow 3.2s cubic-bezier(.45,0,.55,1) infinite;will-change:opacity,transform;pointer-events:none}
 .ck-tbl tbody tr{transition:background-color .15s ease}
 .ck-tbl tbody tr:hover{background:rgba(37,99,235,.05)}
 .ck-tbl tfoot td.bump{animation:ftBump .5s ease}
@@ -933,13 +935,13 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @keyframes ckRow{0%{opacity:0;transform:translateX(-10px)}100%{opacity:1;transform:none}}
 @keyframes cbTick{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:none}}
 @keyframes cbRing{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.9)}}
-@keyframes wbPulse{0%,100%{box-shadow:0 0 0 0 rgba(250,204,21,.0)}50%{box-shadow:0 0 0 5px rgba(250,204,21,.35)}}
+@keyframes wbGlow{0%,100%{opacity:.2;transform:scale(.92)}50%{opacity:.85;transform:scale(1.12)}}
 @keyframes ftBump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
 @keyframes ckPanel{0%{opacity:0}100%{opacity:1}}
 @keyframes cbPop{0%{transform:scale(.4);opacity:0}100%{transform:none;opacity:1}}
 @media (max-width:900px){ .ck-week{grid-template-columns:1fr} .ck-side{flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:center;text-align:left;padding:12px 14px} .ck-side .wbar{flex-basis:100%} .ck-side .wb{align-self:auto} }
 @media (max-width:700px){ .ck-cell{flex-direction:column;gap:4px} .ck-cell .tg{display:none} .ck-tbl th{font-size:11.5px;padding:8px 3px;white-space:normal} .ck-tbl td{padding:8px 4px} .ck-tbl td.t{white-space:normal;min-width:130px;font-size:13px} nav .tab{padding:.55em 1em} }
-@media (prefers-reduced-motion:reduce){ .ck-skel,.ck-in .cb.on,.ck-week.ck-in,.ck-week.ck-in tbody tr,.ck-week.ck-in .ck-side .wl,.ck-week.ck-in .ck-side .wd,.cb.just,.cb.just::before,.ck-week.cur .wb,.ck-tbl tfoot td.bump,#panelCheck,#panelList{animation:none!important} .ck-side .wbar i,.ck-week{transition:none} .ck-week:hover{transform:none} }
+@media (prefers-reduced-motion:reduce){ .ck-skel,.ck-in .cb.on,.ck-week.ck-in,.ck-week.ck-in tbody tr,.ck-week.ck-in .ck-side .wl,.ck-week.ck-in .ck-side .wd,.cb.just,.cb.just::before,.ck-week.cur .wb,.ck-week.cur .wb::before,.ck-tbl tfoot td.bump,#panelCheck,#panelList{animation:none!important} .ck-side .wbar i,.ck-week{transition:none} .ck-week:hover{transform:none} }
 @media print{ .ck-week,.ck-week *{animation:none!important} }
 @media print{ .ck-months,#ckNow{display:none!important} .ck-week{break-inside:avoid;box-shadow:none} .ck-side{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
 @media print{ .wk-bar,.nav-right{display:none!important} .cm-in{animation:none} .rp-bar i{transition:none} }
