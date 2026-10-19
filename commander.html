@@ -1062,7 +1062,8 @@ function renderCheck(){
 $('ckMonths').addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; CKM = b.dataset.m; renderCheck(); });
 function scrollToCurrent(smooth){
   const i = currentIndex(); if(CKM && monthOf(W[i])!==CKM){ CKM = ''; renderCheck(); }
-  const el = $('ckw'+i); if(el) el.scrollIntoView({behavior: smooth && !reduceMotion ? 'smooth' : 'auto', block:'start'});
+  const el = $('ckw'+i); if(!smooth && el===document.querySelector('#ckWeeks .ck-week')) return; // สัปดาห์แรกอยู่บนสุดอยู่แล้ว ไม่ต้องเลื่อน
+  if(el) el.scrollIntoView({behavior: smooth && !reduceMotion ? 'smooth' : 'auto', block:'start'});
 }
 $('ckNow').addEventListener('click', ()=>scrollToCurrent(true));
 /* ---------- สลับหน้าย่อย ---------- */
