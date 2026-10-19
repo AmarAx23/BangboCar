@@ -858,16 +858,25 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ck-week{border-radius:20px!important;border:2px solid #c3c6ce!important;background:#f5f5f5!important;overflow:visible!important;margin-bottom:34px!important;transition:border-color .5s ease-out,box-shadow .5s ease-out!important;position:relative}
 :root[data-theme="dark"] .ck-week{background:var(--surface)!important;border-color:#334155!important}
 .ck-week:hover{border-color:#008bf8!important;box-shadow:0 4px 18px 0 rgba(0,0,0,.25)!important;transform:none!important}
-.ck-week.cur{border-color:#008bf8!important;box-shadow:0 4px 18px rgba(0,139,248,.18)!important}
+/* ===== การ์ดสัปดาห์ปัจจุบัน · ดัดแปลงจาก "heavy-elephant-39" by alexruix on Uiverse.io (MIT) ===== */
+.ck-week.cur{--cur-g:linear-gradient(to left,#f7ba2b 0%,#ea5358 100%);border:5px solid transparent!important;background:linear-gradient(#f5f5f5,#f5f5f5) padding-box,var(--cur-g) border-box!important;box-shadow:none!important;z-index:1;isolation:isolate}
+:root[data-theme="dark"] .ck-week.cur{border-color:transparent!important;background:linear-gradient(var(--surface),var(--surface)) padding-box,var(--cur-g) border-box!important}
+.ck-week.cur::after{content:'';position:absolute;top:30px;left:0;right:0;height:100%;width:100%;z-index:-1;transform:scale(.8);filter:blur(25px);background:var(--cur-g);opacity:.55;transition:opacity .5s;pointer-events:none;border-radius:20px}
+.ck-week.cur:hover{border-color:transparent!important;box-shadow:none!important}
+.ck-week.cur:hover::after{opacity:0}
+.ck-week.cur .ck-side{background:#181818!important;border-radius:15px 0 0 15px}
+.ck-week.cur .ck-side .wl,.ck-week.cur .ck-side .wd{transition:color 1s}
+.ck-week.cur:hover .ck-side .wl,.ck-week.cur:hover .ck-side .wd{color:#f7ba2b}
+.ck-week.cur .ck-side .wb{background:linear-gradient(to left,#f7ba2b,#ea5358);color:#fff}
+.ck-week.cur .ck-side .wbar i{background:linear-gradient(to left,#f7ba2b,#ea5358)}
+.ck-week.cur .ck-tbl-wrap{border-radius:0 15px 15px 0;background:#f5f5f5}
+:root[data-theme="dark"] .ck-week.cur .ck-tbl-wrap{background:var(--surface)}
+@media (max-width:900px){ .ck-week.cur .ck-side{border-radius:15px 15px 0 0} .ck-week.cur .ck-tbl-wrap{border-radius:0 0 15px 15px} }
+@media print{ .ck-week.cur::after{display:none} }
 .ck-week .ck-side{border-radius:18px 0 0 18px}
 .ck-week .ck-tbl-wrap{border-radius:0 18px 18px 0}
 .ck-week .ck-tbl th{background:transparent}
-.ck-week .ck-tbl tfoot td{padding-bottom:22px}
-.ck-btn{position:absolute;left:50%;bottom:0;transform:translate(-50%,125%);width:min(60%,280px);border-radius:1rem;border:none;background:#008bf8;color:#fff;font:600 14px 'Prompt',sans-serif;padding:.5rem 1rem;opacity:0;transition:.3s ease-out;cursor:pointer;z-index:2;pointer-events:none}
-.ck-week:hover .ck-btn,.ck-btn:focus-visible{transform:translate(-50%,50%);opacity:1;pointer-events:auto}
-@media (hover:none){ .ck-btn{display:none} }
 @media (max-width:900px){ .ck-week .ck-side{border-radius:18px 18px 0 0} .ck-week .ck-tbl-wrap{border-radius:0 0 18px 18px} }
-@media print{ .ck-btn{display:none} }
 
 .ck-months{display:inline-flex;align-items:center;gap:6px}
 .ck-months .wk-sel{min-width:170px}
@@ -1188,7 +1197,7 @@ function renderCheck(noAnim){
     return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}${dir&&!noAnim?' from-'+dir:''}" id="ckw${i}" style="--wd:${Math.min(wn++,6)*90}ms"><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
       `<div class="ck-tbl-wrap"><table class="ck-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${roleHtml(r.name)}</th>`).join('')}</tr></thead><tbody>` +
       w.tasks.map((t,ti)=>`<tr style="--rd:${ti*45}ms"><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><span class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%20)*20}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}">${NEON_IN}</span></span></td>`; }).join('')}</tr>`).join('') +
-      `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div><button type="button" class="ck-btn" data-goto="${i}">📋 ดูสรุปสัปดาห์นี้</button></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
+      `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
   if(noAnim) document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>{ b.style.transition='none'; b.style.width = b.dataset.w + '%'; });
   else requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('#ckWeeks .wbar i').forEach(b=>b.style.width = b.dataset.w + '%')));
 }
@@ -1217,7 +1226,7 @@ async function tick(p){
   }catch(err){ c.done = prev; renderCheck(true); toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ const e2 = document.querySelector(`.cb[data-w="${p.w}"][data-t="${p.t}"][data-r="${p.r}"]`); if(e2) e2.classList.remove('busy'); }
 }
-$('ckWeeks').addEventListener('click', e=>{ const g = e.target.closest('.ck-btn'); if(g){ cur = +g.dataset.goto; showView('list', true); return; } const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
+$('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
 $('ckWeeks').addEventListener('keydown', e=>{ if((e.key===' '||e.key==='Enter') && e.target.classList.contains('can')){ e.preventDefault(); e.target.click(); } });
 $('ckMonths').addEventListener('change', e=>{ if(e.target.id!=='ckMonthSel') return; CKM = e.target.value; renderCheck(); window.scrollTo({top:0}); });
 $('ckMonths').addEventListener('click', e=>{ const b = e.target.closest('button[data-step]'); if(!b || b.disabled) return; const months = [...new Set(W.map(monthOf))]; const i = months.indexOf(CKM) + (+b.dataset.step); if(months[i]){ CKM = months[i]; CK_DIR = +b.dataset.step>0 ? 'r' : 'l'; renderCheck(); window.scrollTo({top:0}); } });
