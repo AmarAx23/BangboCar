@@ -1178,7 +1178,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 /* ===== ผลการตรวจยึดรถ · อ่าน/บันทึกชีต "ยึดรถตรวจสอบ" ผ่าน Apps Script (ไม่อ่านชีตตรง เพราะมีชื่อ/ที่อยู่ผู้ขับขี่) =====
    GET  → รายการสาธารณะ (ไม่มีป้ายทะเบียน เลขตัวถัง ชื่อ ที่อยู่ ไฟล์)
    POST {action:'full'|'add'|'login', pin}  → ต้องใส่รหัส (ตรวจที่ฝั่งสคริปต์) */
-const SEIZE_API = '';   // ← URL เว็บแอป Apps Script ของชีต "ยึดรถตรวจสอบ" (ลงท้าย /exec)
+const SEIZE_API = 'https://script.google.com/macros/s/AKfycbxHe8wPVTLrN1mcPjlqZKlHZ55LcT3XOEYdKqNwgUKOkM6YS6AfKUiafiJ4wiijdQe0/exec';   // ← URL เว็บแอป Apps Script ของชีต "ยึดรถตรวจสอบ" (ลงท้าย /exec)
 const TH_M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const TH_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
