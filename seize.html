@@ -995,6 +995,35 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .sz-more{display:block;margin:12px auto 0;padding:6px 16px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .sz-more:hover{color:var(--accent);border-color:var(--accent)}
 .sz-more[hidden]{display:none}
+/* ---- motion ---- */
+#panelForm:not([hidden]){animation:ckPanel .35s ease both}
+.mcol .c i{transition:height .8s cubic-bezier(.2,.8,.2,1),transform .2s ease,filter .2s ease;transition-delay:var(--td,0ms),0ms,0ms}
+.mcol .c:hover i{transform:translateY(-4px);filter:brightness(1.12) saturate(1.1)}
+.mcol .c i b{opacity:0;transition:opacity .4s ease calc(var(--td,0ms) + .45s)}
+.mcol.on .c i b{opacity:1}
+.hb .r .t i{transition-delay:var(--td,0ms)}
+.hb .r:hover .t i{filter:brightness(1.12)}
+.sz-tbl .chip{transition:transform .15s ease}
+.sz-tbl tr:hover .chip{transform:scale(1.04)}
+.sz-tbl.pv-in .pv{animation:pvIn .45s ease backwards}
+@keyframes pvIn{from{opacity:0;background:rgba(220,38,38,.18)}}
+.kpi-val.bump{animation:kBump .5s cubic-bezier(.3,1.5,.5,1)}
+@keyframes kBump{40%{transform:scale(1.08)}}
+.ff.anim>*{animation:szIn .45s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:var(--d,0ms)}
+.ff input,.ff select,.ff textarea{transition:border-color .2s,box-shadow .2s,background .2s}
+.ff input:focus,.ff select:focus,.ff textarea:focus{box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.ff .quick button{transition:border-color .15s,color .15s,transform .15s}
+.ff .quick button:active{transform:scale(.94)}
+.drop{transition:border-color .2s,background .2s,transform .2s}
+.drop.over{transform:scale(1.01)}
+.thumbs .th.new{animation:thPop .4s cubic-bezier(.3,1.5,.5,1)}
+@keyframes thPop{from{opacity:0;transform:scale(.6)}}
+#iSave.ok{animation:saveOk .9s ease}
+@keyframes saveOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);background:#16a34a}60%{box-shadow:0 0 0 12px rgba(34,197,94,0);background:#16a34a}}
+.sz-recent .it{animation:szIn .4s ease backwards;animation-delay:var(--d,0ms);transition:border-color .2s,transform .2s}
+.sz-recent .it:hover{border-color:var(--accent);transform:translateX(3px)}
+.sz-recent .it.fresh{animation:freshIn .9s ease}
+@keyframes freshIn{0%{opacity:0;transform:translateY(-8px);background:rgba(34,197,94,.25)}100%{background:transparent}}
 .sz-in{animation:szIn .5s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:var(--d,0ms)}
 @keyframes szIn{from{opacity:0;transform:translateY(10px)}}
 /* ---- แบบฟอร์ม ---- */
@@ -1037,7 +1066,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .sz-tbl .prt:hover{transform:translateY(-1px);border-color:var(--accent);box-shadow:0 4px 12px rgba(37,99,235,.18)}
 .sz-tbl .prt:disabled{opacity:.5;cursor:progress}
 @media print{ .sz-tbl .pc{display:none} }
-@media (prefers-reduced-motion:reduce){ .sz-in{animation:none} .mcol .c i,.hb .r .t i{transition:none} }
+@media (prefers-reduced-motion:reduce){ #panelForm,.sz-tbl.pv-in .pv,.kpi-val.bump,.ff.anim>*,.thumbs .th.new,#iSave.ok,.sz-recent .it{animation:none!important} .mcol .c i b{opacity:1;transition:none} .sz-in{animation:none} .mcol .c i,.hb .r .t i{transition:none} }
 </style>
 </head>
 <body>
@@ -1246,15 +1275,15 @@ function fillSel(id, vals, first, label){
 }
 function bars(id, map, color){
   const ent = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,7), max = Math.max(1, ...ent.map(e=>e[1]));
-  $(id).innerHTML = ent.length ? ent.map(([k,v],i)=>`<div class="r sz-in" style="--d:${i*50}ms"><span class="n" title="${esc(k)}">${esc(k)}</span><span class="v">${fmt(v)}</span><span class="t"><i data-w="${v/max*100}" style="background:${color}"></i></span></div>`).join('') : '<div class="empty">ไม่มีข้อมูล</div>';
+  $(id).innerHTML = ent.length ? ent.map(([k,v],i)=>`<div class="r sz-in" style="--d:${i*50}ms;--td:${i*70}ms"><span class="n" title="${esc(k)}">${esc(k)}</span><span class="v">${fmt(v)}</span><span class="t"><i data-w="${v/max*100}" style="background:${color}"></i></span></div>`).join('') : '<div class="empty">ไม่มีข้อมูล</div>';
 }
 function render(){
   const F = filtered(), mSel = $('fMonth').value;
   const mc = F.filter(r=>isMc(r.type)).length;
-  $('kAll').textContent = fmt(F.length);
+  countUp($('kAll'), F.length);
   $('kAllSub').textContent = mSel ? ymFull(mSel) : (R.length ? `${dLabel(R.reduce((a,r)=>r.date<a?r.date:a, R[0].date))} – ${dLabel(R.reduce((a,r)=>r.date>a?r.date:a, R[0].date))}` : '');
-  $('kMc').textContent = fmt(mc); $('kMcSub').textContent = F.length ? Math.round(mc/F.length*100)+'%' : '';
-  $('kCar').textContent = fmt(F.length-mc); $('kCarSub').textContent = F.length ? Math.round((F.length-mc)/F.length*100)+'%' : '';
+  countUp($('kMc'), mc); $('kMcSub').textContent = F.length ? Math.round(mc/F.length*100)+'%' : '';
+  countUp($('kCar'), F.length-mc); $('kCarSub').textContent = F.length ? Math.round((F.length-mc)/F.length*100)+'%' : '';
   const ch = {}; F.forEach(r=>{ const k = r.charge || 'ไม่ระบุ'; ch[k] = (ch[k]||0)+1; });
   const top = Object.entries(ch).sort((a,b)=>b[1]-a[1])[0];
   $('kTop').textContent = top ? top[0] : '–'; $('kTopSub').textContent = top ? `${fmt(top[1])} คัน` : '';
@@ -1262,12 +1291,13 @@ function render(){
   const base = R.filter(r=>(!$('fType').value || r.type===$('fType').value) && (!$('fTeam').value || r.team===$('fTeam').value));
   const months = uniq(R.map(r=>ymOf(r.date))).sort().slice(-12), mm = {}; base.forEach(r=>{ const k = ymOf(r.date); mm[k] = (mm[k]||0)+1; });
   const mx = Math.max(1, ...months.map(k=>mm[k]||0));
-  $('cMonth').innerHTML = months.length ? months.map(k=>`<div class="c${k===mSel?' sel':''}" data-m="${k}" title="${ymFull(k)}"><i data-h="${(mm[k]||0)/mx*100}"><b>${fmt(mm[k]||0)}</b></i><span>${ymLabel(k)}</span></div>`).join('') : '<div class="sz-empty" style="flex:1">ไม่มีข้อมูล</div>';
+  $('cMonth').innerHTML = months.length ? months.map((k,i)=>`<div class="c${k===mSel?' sel':''}" data-m="${k}" title="${ymFull(k)}" style="--td:${i*60}ms"><i data-h="${(mm[k]||0)/mx*100}"><b>${fmt(mm[k]||0)}</b></i><span>${ymLabel(k)}</span></div>`).join('') : '<div class="sz-empty" style="flex:1">ไม่มีข้อมูล</div>';
   bars('cCharge', ch, 'linear-gradient(90deg,#f87171,#dc2626)');
   const tm = {}; F.forEach(r=>{ const k = r.team || 'ไม่ระบุ'; tm[k] = (tm[k]||0)+1; });
   bars('cTeam', tm, 'linear-gradient(90deg,#60a5fa,#2563eb)');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     document.querySelectorAll('#cMonth i').forEach(b=>b.style.height = Math.max(2, b.dataset.h) + '%');
+    $('cMonth').classList.add('on');
     document.querySelectorAll('.hb i').forEach(b=>b.style.width = b.dataset.w + '%');
   }));
   renderTable(F);
@@ -1317,6 +1347,7 @@ async function enterStaff(after){
     $('staffBtn').classList.add('on'); $('staffBtn').textContent = '🔒 ซ่อนข้อมูลส่วนบุคคล';
     try{ sessionStorage.setItem('seize-staff','1'); }catch(_){}
     render(); toast('🔓 แสดงข้อมูลเต็มแล้ว');
+    if(!reduceMotion){ $('tbl').classList.add('pv-in'); setTimeout(()=>$('tbl').classList.remove('pv-in'), 700); }
     if(typeof after==='function') after();
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ $('staffBtn').disabled = false; }
@@ -1418,7 +1449,15 @@ $('csvBtn').addEventListener('click', ()=>{
 });
 
 /* ---------- แบบฟอร์ม ---------- */
-let FILES = [];   // {name, type, data(base64), url}
+let FILES = [], FRESH = 0;
+/* ตัวเลขนับขึ้น */
+function countUp(el, to){
+  const from = +(el.dataset.n || 0); el.dataset.n = to;
+  if(reduceMotion || from===to){ el.textContent = fmt(to); return; }
+  const t0 = performance.now(), dur = 700;
+  const step = now=>{ const p = Math.min(1, (now-t0)/dur), e = 1-Math.pow(1-p, 3); el.textContent = fmt(Math.round(from + (to-from)*e)); if(p<1) requestAnimationFrame(step); else { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); } };
+  requestAnimationFrame(step);
+}   // {name, type, data(base64), url}
 function fillForm(){
   const sel = (id, vals, ph)=>{ const el = $(id), cur = el.value; el.innerHTML = (ph?`<option value="">${ph}</option>`:'') + vals.map(v=>`<option>${esc(v)}</option>`).join(''); if(cur && vals.includes(cur)) el.value = cur; };
   sel('iType', optsOf('type'), '— เลือกประเภทรถ —');
@@ -1428,7 +1467,7 @@ function fillForm(){
   dl('modelList', uniq(R.map(r=>r.model))); dl('placeList', uniq(R.map(r=>r.place)));
   if(!$('iDate').value) $('iDate').value = todayISO();
   const last = [...R].sort((a,b)=>b.date.localeCompare(a.date) || b.row-a.row).slice(0,5);
-  $('recent').innerHTML = last.length ? last.map(r=>`<div class="it"><b>${esc(r.type)} ${esc([r.brand,r.model].filter(Boolean).join(' '))}</b>${esc(r.charge||'')}<br><small>${dLabel(r.date)} · ${esc(r.place||'')}</small></div>`).join('') : '<div class="sz-empty">ยังไม่มีรายการ</div>';
+  $('recent').innerHTML = last.length ? last.map((r,i)=>`<div class="it${r.row===FRESH?' fresh':''}" style="--d:${i*60}ms"><b>${esc(r.type)} ${esc([r.brand,r.model].filter(Boolean).join(' '))}</b>${esc(r.charge||'')}<br><small>${dLabel(r.date)} · ${esc(r.place||'')}</small></div>`).join('') : '<div class="sz-empty">ยังไม่มีรายการ</div>';
 }
 document.querySelectorAll('.quick button').forEach(b=>b.addEventListener('click', ()=>{ $(b.dataset.fill).value = b.dataset.v; }));
 function shrink(file){
@@ -1450,15 +1489,16 @@ function shrink(file){
   });
 }
 async function addFiles(list){
+  const start = FILES.length;
   for(const f of [...list]){
     if(FILES.length >= 4){ toast('แนบได้สูงสุด 4 ไฟล์'); break; }
     if(f.size > 25*1024*1024){ toast('⚠️ ไฟล์ ' + f.name + ' ใหญ่เกินไป'); continue; }
     try{ const x = await shrink(f); if(x.data.length*0.75 > 8*1024*1024){ toast('⚠️ ไฟล์ ' + f.name + ' ใหญ่เกิน 8 MB'); continue; } FILES.push(x); }catch(err){ toast('⚠️ ' + err.message); }
   }
-  drawThumbs();
+  drawThumbs(start);
 }
-function drawThumbs(){
-  $('thumbs').innerHTML = FILES.map((f,i)=>`<div class="th">${f.url?`<img src="${f.url}" alt="">`:'📄 PDF'}<button type="button" data-i="${i}" aria-label="ลบไฟล์">✕</button></div>`).join('');
+function drawThumbs(newFrom){
+  $('thumbs').innerHTML = FILES.map((f,i)=>`<div class="th${newFrom!=null&&i>=newFrom?' new':''}">${f.url?`<img src="${f.url}" alt="">`:'📄 PDF'}<button type="button" data-i="${i}" aria-label="ลบไฟล์">✕</button></div>`).join('');
 }
 $('thumbs').addEventListener('click', e=>{ const b = e.target.closest('[data-i]'); if(!b) return; FILES.splice(+b.dataset.i, 1); drawThumbs(); });
 $('iFiles').addEventListener('change', e=>{ addFiles(e.target.files); e.target.value = ''; });
@@ -1481,6 +1521,7 @@ async function save(){
     const j = await api({action:'add', pin:PIN, row, files: FILES.map(f=>({name:f.name, type:f.type, data:f.data}))});
     if(!j.ok){ if(j.auth) authFail(j, save); else toast('⚠️ ' + (j.error||'บันทึกไม่สำเร็จ')); return; }
     toast(`✓ บันทึกแล้ว (แถวที่ ${j.row}${j.files?` · ${j.files} ไฟล์`:''})`);
+    btn.classList.remove('ok'); void btn.offsetWidth; btn.classList.add('ok'); FRESH = j.row;
     const keep = {date:row.date, team:row.team, place:row.place};
     $('szForm').reset(); FILES = []; drawThumbs();
     $('iDate').value = keep.date; $('iTeam').value = keep.team; $('iPlace').value = keep.place;   // ตรวจยึดหลายคันที่จุดเดียวกัน ไม่ต้องกรอกซ้ำ
@@ -1499,6 +1540,7 @@ function showView(v, push){
   if(push) history.replaceState(null, '', v==='form' ? '#form' : location.pathname + location.search);
   window.scrollTo({top:0});
   if(v==='list' && R.length) render();
+  if(v==='form' && !reduceMotion){ const ff = $('szForm'); ff.classList.remove('anim'); [...ff.children].forEach((c,i)=>c.style.setProperty('--d', Math.min(i,18)*28+'ms')); void ff.offsetWidth; ff.classList.add('anim'); setTimeout(()=>ff.classList.remove('anim'), 1200); }
 }
 document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click', ()=>showView(t.dataset.view, true)));
 showView(location.hash.slice(1));
