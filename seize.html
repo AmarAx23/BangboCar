@@ -1206,7 +1206,8 @@ const PAGE = window.innerWidth < 700 ? 20 : 40;
 let R = [], OPTS = {}, STAFF = null, PIN = '', SHOW = PAGE;
 try{ PIN = sessionStorage.getItem('seize-pin') || ''; }catch(_){}
 const uniq = a=>[...new Set(a.map(s=>String(s||'').trim()).filter(Boolean))];
-const optsOf = k=>uniq([...(OPTS[k]||[]), ...R.map(r=>r[k]), ...(DEF[k]||[])]);
+// ถ้าคอลัมน์ในชีตมี dropdown ใช้เฉพาะตัวเลือกจากชีต (กันชีตปฏิเสธค่าที่ไม่อยู่ในรายการ) ไม่งั้นใช้ค่าเริ่มต้น
+const optsOf = k=>uniq([...(OPTS[k]||[]), ...R.map(r=>r[k]), ...((OPTS[k]||[]).length ? [] : (DEF[k]||[]))]);
 const ymOf = d=>d.slice(0,7);
 const ymLabel = ym=>{ const [y,m] = ym.split('-').map(Number); return TH_M[m-1] + String(y+543).slice(-2); };
 const ymFull = ym=>{ const [y,m] = ym.split('-').map(Number); return TH_FULL[m-1] + ' ' + (y+543); };
