@@ -1138,12 +1138,23 @@ $('themeBtn').addEventListener('change',e=>{ if(e.target.checked) document.docum
 $('printBtn').onclick=()=>print(); $('pdfBtn').onclick=()=>print();
 
 /* ---------- ประเภทเหตุ: ชื่อมาจาก dropdown ในชีต (คอลัมน์ "ประเภทเหตุ") · สี/ไอคอนกำหนดตามคำในชื่อ ---------- */
-const DEFAULT_TYPES=['เหตุเกี่ยวกับทรัพย์','ชีวิต ร่างกาย','วัยรุ่นมั่วสุม','วงสุรา/มั่วสุม/ก่อความเดือดร้อนรำคาญ','แข่งขันรถในทาง'];
+const DEFAULT_TYPES=['เหตุเกี่ยวกับทรัพย์','ชีวิต ร่างกาย','วงสุรา/มั่วสุม/ก่อความเดือดร้อนรำคาญ','แข่งขันรถในทาง'];
+// ปรับรายการประเภทจากชีต: ยุบ "วัยรุ่นมั่วสุม" รวมกับ "วงสุรา/มั่วสุม/ก่อความเดือดร้อนรำคาญ" · เพิ่มประเภทใหม่ถ้าในชีตยังไม่มี
+const TYPE_MERGE=[[/วัยรุ่น/,/สุรา|มั่วสุม|รำคาญ/,'วงสุรา/มั่วสุม/ก่อความเดือดร้อนรำคาญ']];
+const TYPE_ADD=[[/อาวุธ/,'อาวุธ ปืน / มีด / ระเบิด และอื่นๆ'],[/นักเรียน/,'นักเรียนทะเลาะวิวาท']];
+function fixTypes(types){
+  let t=types.map(x=>String(x).trim()).filter(Boolean);
+  TYPE_MERGE.forEach(([from,to,name])=>{ if(t.some(x=>from.test(x))){ t=t.filter(x=>!from.test(x)); if(!t.some(x=>to.test(x))) t.push(name); } });
+  const oi=t.findIndex(x=>/^อื่น/.test(x)), at=oi<0?t.length:oi;
+  TYPE_ADD.filter(([re])=>!t.some(x=>re.test(x))).forEach(([,name],k)=>t.splice(at+k,0,name));
+  return t;
+}
 const DEFAULT_WEAPONS=['ปืน','มีด','ระเบิด'];
-const STYLE=[[/รถหาย|ลักรถ|รถจักรยานยนต์หาย/,'🛵','#0ea5e9','รถหาย'],[/ทรัพย์/,'💰','#ef4444','ทรัพย์'],[/ชีวิต|ร่างกาย|ทำร้าย/,'🤕','#8b5cf6','ชีวิต/ร่างกาย'],[/วัยรุ่น/,'👥','#10b981','วัยรุ่นมั่วสุม'],[/สุรา|รำคาญ/,'🍻','#f59e0b','วงสุรา/รำคาญ'],[/แข่ง|รถ/,'🏁','#3b82f6','แข่งรถในทาง'],[/ยาเสพติด/,'💊','#ec4899','ยาเสพติด']];
+const STYLE=[[/รถหาย|ลักรถ|รถจักรยานยนต์หาย/,'🛵','#0ea5e9','รถหาย'],[/อาวุธ|ปืน|ระเบิด/,'🔫','#dc2626','อาวุธ ปืน/มีด/ระเบิด'],[/นักเรียน/,'🏫','#10b981','นักเรียนทะเลาะวิวาท'],[/ทรัพย์/,'💰','#ef4444','ทรัพย์'],[/ชีวิต|ร่างกาย|ทำร้าย/,'🤕','#8b5cf6','ชีวิต/ร่างกาย'],[/สุรา|มั่วสุม|รำคาญ/,'🍻','#f59e0b','วงสุรา/มั่วสุม'],[/แข่ง|รถ/,'🏁','#3b82f6','แข่งรถในทาง'],[/ยาเสพติด/,'💊','#ec4899','ยาเสพติด']];
 const SPARE=['#06b6d4','#84cc16','#f97316','#a855f7','#14b8a6'];
 let GROUPS=[], GBY={}, OTHER=null, OTHER_ADDED=true;
 function buildGroups(types){
+  types=fixTypes(types);
   GROUPS=types.map((name,i)=>{ const s=STYLE.find(([re])=>re.test(name)); return {no:i+1,name,short:s?s[3]:(name.length>14?name.slice(0,13)+'…':name),ic:s?s[1]:'📌',c:s?s[2]:SPARE[i%SPARE.length]}; });
   // ถ้าในชีตมีตัวเลือก "อื่นๆ" อยู่แล้ว ใช้ตัวนั้นรับเหตุที่ไม่ตรงประเภท · ถ้าไม่มี เพิ่ม "อื่นๆ / ไม่ระบุ" ให้เอง
   OTHER=GROUPS.find(g=>/^อื่น/.test(g.name.trim()));
@@ -1152,7 +1163,9 @@ function buildGroups(types){
   else { OTHER={no:GROUPS.length+1,name:'อื่นๆ / ไม่ระบุ',short:'อื่นๆ',ic:'📋',c:'#64748b'}; GROUPS.push(OTHER); }
   GBY=Object.fromEntries(GROUPS.map(g=>[g.no,g]));
 }
-const groupOf=type=>{ const g=GROUPS.find(g=>g.name===String(type||'').trim()); return g?g.no:OTHER.no; };
+const groupOf=type=>{ const t=String(type||'').trim(); let g=GROUPS.find(g=>g.name===t);
+  if(!g){ const m=TYPE_MERGE.find(([from])=>from.test(t)); if(m) g=GROUPS.find(x=>m[1].test(x.name)); }   // เหตุเก่า "วัยรุ่นมั่วสุม" นับรวมกับวงสุรา/มั่วสุม
+  return g?g.no:OTHER.no; };
 const ZCOL={'เขตตรวจที่ 1':'#FFD600','เขตตรวจที่ 2':'#795548','เขตตรวจที่ 3':'#F48FB1'};
 const TH_M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const TH_D=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
