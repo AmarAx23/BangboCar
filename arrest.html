@@ -1241,7 +1241,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 /* ===== ผลการจับกุม · อ่าน/บันทึกชีต "ผลการจับกุม" ผ่าน Apps Script (ไม่อ่านชีตตรง เพราะมีข้อมูลผู้ถูกจับกุม) =====
    GET  → ข้อมูลสำหรับสถิติเท่านั้น (วันเวลา หมวดคดี ผู้จับกุม)
    POST {action:'full'|'add'|'img'|'login', pin}  → ต้องใส่รหัส (ตรวจที่ฝั่งสคริปต์) */
-const ARREST_API = '';   // ← URL เว็บแอป Apps Script ของชีตผลการจับกุม (ลงท้าย /exec)
+const ARREST_API = 'https://script.google.com/macros/s/AKfycbzIkTcK8rBcYSo5rMzQ8yEvCUkpu3bAKhaHRjiYn_3DPAjS4i0vxGZF8Yj4UsHSW7_h/exec';   // ← URL เว็บแอป Apps Script ของชีตผลการจับกุม (ลงท้าย /exec)
 const TH_M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const TH_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
