@@ -1362,7 +1362,7 @@ td{height:1.7em}
 <h1>บันทึกการตรวจยึด</h1>
 <p class="r">วันที่ ${V(String(d),2)} เดือน ${V(TH_MFULL[m-1],6)} พ.ศ. ${V(String(y+543),3)}</p>
 <p class="r">ชุดปฏิบัติการ${V(team,4)}</p>
-${(imgs&&imgs.length) ? `<div class="ph${imgs.length===1?' one':''}">${imgs.map(u=>`<img src="${u}" alt="">`).join('')}</div>` : '<div class="ph"></div>'}
+${(imgs&&imgs.length) ? `<div class="ph${imgs.length===1?' one':''}">${imgs.map(u=>`<img src="${u}" alt="">`).join('')}</div>` : '<div class="gap"></div>'}
 <p>ผู้ขับขี่${V(s.driver,16)} ที่อยู่${V(s.addr,22)}</p>
 <p>สถานที่ตรวจยึดรถ${V(r.place,26)}</p>
 <p>ข้อหา / พฤติการณ์${V(r.charge,26)}</p>
