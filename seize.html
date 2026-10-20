@@ -1030,8 +1030,13 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .sz-recent .it b{display:block;color:var(--text-strong);font-weight:600}
 .sz-recent .it small{color:var(--faint)}
 .sz-tips{font-size:13px;color:var(--muted);line-height:1.75;margin:0;padding-left:18px}
-@media (max-width:700px){ .sz-tbl thead{display:none} .sz-tbl,.sz-tbl tbody{display:block} .sz-tbl tr{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:11px 2px;border-bottom:1px solid var(--border)} .sz-tbl td{display:block;border:0;padding:0;grid-column:1/-1} .sz-tbl td.d{grid-column:1;grid-row:1} .sz-tbl td.tm{grid-column:2;grid-row:1;color:var(--muted);font-size:12.5px} .sz-tbl td.pl::before{content:'📍 '} .sz-tbl td.pv{background:none;font-size:13px} .sz-tbl td.sz-empty{grid-column:1/-1} .ff{grid-template-columns:1fr} .sz-bar input[type=search]{min-width:100%} }
+@media (max-width:700px){ .sz-tbl td.pc{grid-column:1/-1;width:auto;text-align:left} .sz-tbl .prt{width:auto;height:32px;padding:0 12px;font-size:13px;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;color:var(--text)} .sz-tbl .prt::after{content:'พิมพ์บันทึก';font-weight:600} .sz-tbl thead{display:none} .sz-tbl,.sz-tbl tbody{display:block} .sz-tbl tr{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:11px 2px;border-bottom:1px solid var(--border)} .sz-tbl td{display:block;border:0;padding:0;grid-column:1/-1} .sz-tbl td.d{grid-column:1;grid-row:1} .sz-tbl td.tm{grid-column:2;grid-row:1;color:var(--muted);font-size:12.5px} .sz-tbl td.pl::before{content:'📍 '} .sz-tbl td.pv{background:none;font-size:13px} .sz-tbl td.sz-empty{grid-column:1/-1} .ff{grid-template-columns:1fr} .sz-bar input[type=search]{min-width:100%} }
 @media print{ .sz-bar,.sz-more,#panelForm{display:none!important} .sz-tbl th{position:static} }
+.sz-tbl td.pc,.sz-tbl th.pc{text-align:center;width:52px}
+.sz-tbl .prt{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;line-height:1;transition:transform .15s,border-color .15s,box-shadow .15s}
+.sz-tbl .prt:hover{transform:translateY(-1px);border-color:var(--accent);box-shadow:0 4px 12px rgba(37,99,235,.18)}
+.sz-tbl .prt:disabled{opacity:.5;cursor:progress}
+@media print{ .sz-tbl .pc{display:none} }
 @media (prefers-reduced-motion:reduce){ .sz-in{animation:none} .mcol .c i,.hb .r .t i{transition:none} }
 </style>
 </head>
@@ -1269,7 +1274,7 @@ function render(){
 }
 function renderTable(F){
   const pv = !!STAFF;
-  const head = `<thead><tr><th>วันที่</th><th>รถ</th>${pv?'<th class="pv">ป้ายทะเบียน / เลขตัวถัง</th>':''}<th>สถานที่ตรวจยึด</th><th>ข้อหา / พฤติการณ์</th>${pv?'<th class="pv">ผู้ขับขี่</th>':''}<th>ชุดปฏิบัติการ</th>${pv?'<th class="pv">ไฟล์</th>':''}</tr></thead>`;
+  const head = `<thead><tr><th>วันที่</th><th>รถ</th>${pv?'<th class="pv">ป้ายทะเบียน / เลขตัวถัง</th>':''}<th>สถานที่ตรวจยึด</th><th>ข้อหา / พฤติการณ์</th>${pv?'<th class="pv">ผู้ขับขี่</th>':''}<th>ชุดปฏิบัติการ</th>${pv?'<th class="pv">ไฟล์</th>':''}<th class="pc" title="พิมพ์บันทึกการตรวจยึด">พิมพ์</th></tr></thead>`;
   const rows = F.slice(0, SHOW).map((r,i)=>{
     const s = pv && STAFF[r.row] || {};
     const veh = [r.brand, r.model].filter(Boolean).join(' ');
@@ -1280,9 +1285,10 @@ function renderTable(F){
       + (pv?`<td class="pv">${esc(s.driver||'–')}<small>${esc(s.addr||'')}</small></td>`:'')
       + `<td class="tm">${esc((r.team||'–').replace('ชุดปฏิบัติการที่','ชุดที่'))}</td>`
       + (pv?`<td class="pv">${s.fileUrl?`<a class="fl" href="${esc(s.fileUrl)}" target="_blank" rel="noopener">📎 เปิด</a>`:(s.file && s.file!=='FALSE'?'✓':'–')}</td>`:'')
+      + `<td class="pc"><button class="prt" type="button" data-row="${r.row}" title="พิมพ์บันทึกการตรวจยึด" aria-label="พิมพ์บันทึกการตรวจยึด ${dLabel(r.date)}">🖨️</button></td>`
       + `</tr>`;
   }).join('');
-  $('tbl').innerHTML = head + `<tbody>${rows || `<tr><td colspan="9" class="sz-empty">ไม่พบรายการตามตัวกรอง</td></tr>`}</tbody>`;
+  $('tbl').innerHTML = head + `<tbody>${rows || `<tr><td colspan="10" class="sz-empty">ไม่พบรายการตามตัวกรอง</td></tr>`}</tbody>`;
   $('tblTitle').textContent = `รายการรถที่ตรวจยึด · ${fmt(F.length)} คัน` + (pv ? ' · 🔓 แสดงข้อมูลเต็ม' : '');
   $('moreBtn').hidden = F.length <= SHOW;
   $('moreBtn').textContent = `แสดงเพิ่ม (อีก ${fmt(F.length-SHOW)} รายการ) ▾`;
@@ -1299,17 +1305,19 @@ $('pinClose').addEventListener('click', ()=>{ pending = null; $('pinDlg').close(
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); const v = $('pinInput').value.trim(); if(!v) return; PIN = v; try{ sessionStorage.setItem('seize-pin', PIN); }catch(_){} $('pinDlg').close(); const p = pending; pending = null; if(p) p(); });
 function needPin(fn){ if(!PIN){ pending = fn; openPin(); return true; } return false; }
 function authFail(j, retry){ PIN = ''; try{ sessionStorage.removeItem('seize-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); }
-async function enterStaff(){
+async function enterStaff(after){
   if(!SEIZE_API) return toast('⚠️ ยังไม่ได้เชื่อมต่อ Apps Script');
-  if(needPin(enterStaff)) return;
+  const again = ()=>enterStaff(after);
+  if(needPin(again)) return;
   $('staffBtn').disabled = true;
   try{
     const j = await api({action:'full', pin:PIN});
-    if(!j.ok){ if(j.auth) authFail(j, enterStaff); else toast('⚠️ ' + (j.error||'โหลดไม่สำเร็จ')); return; }
+    if(!j.ok){ if(j.auth) authFail(j, again); else toast('⚠️ ' + (j.error||'โหลดไม่สำเร็จ')); return; }
     STAFF = {}; j.rows.forEach(s=>STAFF[s.row] = s);
     $('staffBtn').classList.add('on'); $('staffBtn').textContent = '🔒 ซ่อนข้อมูลส่วนบุคคล';
     try{ sessionStorage.setItem('seize-staff','1'); }catch(_){}
     render(); toast('🔓 แสดงข้อมูลเต็มแล้ว');
+    if(typeof after==='function') after();
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ $('staffBtn').disabled = false; }
 }
@@ -1317,6 +1325,60 @@ $('staffBtn').addEventListener('click', ()=>{
   if(STAFF){ STAFF = null; $('staffBtn').classList.remove('on'); $('staffBtn').textContent = '🔓 ดูข้อมูลเต็ม (เจ้าหน้าที่)'; try{ sessionStorage.removeItem('seize-staff'); }catch(_){} render(); return; }
   enterStaff();
 });
+/* ---------- พิมพ์บันทึกการตรวจยึด (แบบตามไฟล์ Word ของสถานี · A4 หน้าเดียว) ---------- */
+const TH_MFULL = TH_FULL;
+function memoHtml(r, s){
+  const [y,m,d] = r.date.split('-').map(Number);
+  const vinEng = String(s.vin||'').split('/').map(x=>x.trim());
+  const team = String(r.team||'').replace(/^ชุดปฏิบัติการ\s*/,'');
+  const V = (v, w)=>v ? `<span class="v">${esc(v)}</span>` : `<span class="v e" style="min-width:${w||6}em">&nbsp;</span>`;
+  const row = (k, v)=>`<tr><th>${k}</th><td>${esc(v||'')}</td></tr>`;
+  return `<!doctype html><html lang="th"><head><meta charset="utf-8"><title>บันทึกการตรวจยึด ${esc(d+' '+TH_M[m-1]+' '+(y+543))}</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@page{size:A4;margin:2.54cm 2cm 2cm 3cm}
+*{box-sizing:border-box}
+body{margin:0;font-family:'TH SarabunPSK','TH Sarabun New','Sarabun',sans-serif;font-size:16pt;line-height:1.5;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+h1{font-size:20pt;font-weight:700;text-align:center;margin:0 0 .3em}
+.r{text-align:right;margin:0}
+p{margin:0 0 .35em}
+.gap{height:2.2em}
+.v{display:inline;border-bottom:1.2px dotted #000;padding:0 .35em;line-height:1.75}
+.v.e{display:inline-block}
+h3{font-size:16pt;font-weight:700;margin:1em 0 .3em}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #000;padding:.12em .45em;vertical-align:top;text-align:left;font-size:16pt}
+th{width:32%;background:#ededed;font-weight:700}
+td{height:1.7em}
+</style></head><body>
+<h1>บันทึกการตรวจยึด</h1>
+<p class="r">วันที่ ${V(String(d),2)} เดือน ${V(TH_MFULL[m-1],6)} พ.ศ. ${V(String(y+543),3)}</p>
+<p class="r">ชุดปฏิบัติการ${V(team,4)}</p>
+<div class="gap"></div>
+<p>ผู้ขับขี่${V(s.driver,16)} ที่อยู่${V(s.addr,22)}</p>
+<p>สถานที่ตรวจยึดรถ${V(r.place,26)}</p>
+<p>ข้อหา / พฤติการณ์${V(r.charge,26)}</p>
+<h3>รายละเอียดรถที่ตรวจยึด</h3>
+<table>
+${row('ประเภทรถ', r.type)}${row('ยี่ห้อ / รุ่น', [r.brand, r.model].filter(Boolean).join(' / '))}${row('สี', r.color)}${row('หมายเลขทะเบียน', s.plate)}${row('หมายเลขตัวถัง', vinEng[0])}${row('หมายเลขเครื่องยนต์', vinEng[1]||'')}<tr><th>สภาพรถ /<br>อุปกรณ์ที่ติดมา</th><td style="height:3.2em"></td></tr>
+</table>
+</body></html>`;
+}
+function printMemo(rowNo){
+  const r = R.find(x=>x.row===rowNo), s = STAFF && STAFF[rowNo];
+  if(!r) return;
+  if(!s){ enterStaff(()=>printMemo(rowNo)); return; }
+  const fr = document.createElement('iframe');
+  fr.setAttribute('aria-hidden','true'); fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+  document.body.appendChild(fr);
+  const w = fr.contentWindow; w.document.open(); w.document.write(memoHtml(r, s)); w.document.close();
+  let done = false;
+  const go = ()=>{ if(done) return; done = true; try{ w.focus(); w.print(); }catch(_){ toast('⚠️ พิมพ์ไม่สำเร็จ'); } setTimeout(()=>fr.remove(), 60000); };
+  const ready = ()=>{ try{ (w.document.fonts && w.document.fonts.ready || Promise.resolve()).then(()=>setTimeout(go, 150)); }catch(_){ go(); } };
+  if(w.document.readyState === 'complete') ready(); else fr.addEventListener('load', ready);
+  setTimeout(go, 3500);   // สำรอง กรณีโหลดฟอนต์ช้า
+}
+$('tbl').addEventListener('click', e=>{ const b = e.target.closest('.prt'); if(!b) return; printMemo(+b.dataset.row); });
 $('csvBtn').addEventListener('click', ()=>{
   const F = filtered(), pv = !!STAFF;
   const H = ['วันที่','ประเภทรถ','ยี่ห้อ','รุ่น','สี', ...(pv?['ป้ายทะเบียน','เลขตัวถัง/เลขเครื่อง']:[]), 'สถานที่ตรวจยึด','ข้อหา/พฤติการณ์', ...(pv?['ชื่อ-สกุลผู้ขับขี่','ที่อยู่']:[]), 'ชุดปฏิบัติการที่'];
