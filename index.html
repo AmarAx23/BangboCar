@@ -714,6 +714,75 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .a2hs-share{display:inline-block;vertical-align:-4px;width:18px;height:18px}
 .a2hs-note{font-size:12.5px;color:#64748b;margin-top:12px;line-height:1.5}
 @media print{ .a2hs-btn{display:none!important} }
+
+/* ===== แบบฟอร์มบันทึกเหตุรถหาย ===== */
+#panel-form[hidden]{display:none}
+body.form-mode .controls,body.form-mode .kpi-row,body.form-mode .print-header,body.form-mode #tableCard{display:none!important}
+.th-pin{width:30px;height:30px;border-radius:50% 50% 50% 0;background:#dc2626;border:3px solid #fff;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.th-pin::after{content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;left:7px;top:7px}
+.form-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px;align-items:start}
+@media (max-width:900px){ .form-grid{grid-template-columns:1fr} }
+.ff{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.ff .full{grid-column:1/-1}
+.ff .sec{grid-column:1/-1;font-size:13px;font-weight:700;color:var(--text-strong);margin-top:4px;padding-top:10px;border-top:1px dashed var(--border);display:flex;align-items:center;gap:6px}
+.ff .sec:first-child{border-top:0;margin-top:0;padding-top:0}
+.ff label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted);min-width:0}
+.ff label .req{color:#dc2626}
+.ff input,.ff select,.ff textarea{background:var(--surface2);border:1px solid var(--input-border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:14px;font-family:'Prompt',sans-serif;min-height:38px;width:100%;box-sizing:border-box;margin:0;outline:none}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:#3b82f6;background:var(--surface)}
+.ff input:disabled{opacity:.55;cursor:not-allowed}
+.ff input[type=date],.ff input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;text-align:left}
+.ff input::-webkit-date-and-time-value{text-align:left}
+.ff textarea{min-height:64px;resize:vertical}
+.ff .priv{font-size:12px;color:#92400e;background:#fef3c7;border-radius:8px;padding:6px 10px}
+:root[data-theme="dark"] .ff .priv{background:#3a2f12;color:#f0c55a}
+.ff .acts{display:flex;gap:10px;grid-column:1/-1;margin-top:6px;flex-wrap:wrap}
+.ff button[disabled]{opacity:.6;cursor:progress}
+.ff label.tick{flex-direction:row;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--input-border);border-radius:8px;background:var(--surface2);cursor:pointer;font-size:13.5px;color:var(--text);user-select:none;transition:border-color .15s,background .15s,color .15s}
+.ff label.tick input{width:17px;height:17px;min-height:0;padding:0;accent-color:#2563eb;flex:none;cursor:pointer}
+.ff label.tick:has(input:checked){border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
+:root[data-theme="dark"] .ff label.tick:has(input:checked){background:rgba(37,99,235,.18);color:#93c5fd}
+.ff .pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.ff .zone-out{font-size:13px;font-weight:700;color:var(--accent-hover);min-height:38px;display:flex;align-items:center;padding:0 10px;border-radius:8px;background:var(--surface2);border:1px dashed var(--input-border)}
+.ff .zone-out.out{color:#dc2626}
+#pickMap{height:460px;border-radius:10px;overflow:hidden;background:var(--track);z-index:0;cursor:crosshair}
+:root[data-theme="dark"] #pickMap .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
+.pick-tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+.form-setup{font-size:13px;color:#92400e;background:#fef3c7;border-radius:10px;padding:10px 14px;margin-bottom:14px;line-height:1.6}
+:root[data-theme="dark"] .form-setup{background:#3a2f12;color:#f0c55a}
+@media (max-width:640px){ .ff{grid-template-columns:minmax(0,1fr)} #pickMap{height:340px} }
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%)}
+@media print{ #panel-form,#pinDlg{display:none!important} }
+/* PIN dialog — based on "silent-liger-75" by yashasvi9199 on Uiverse.io (MIT) */
+#pinDlg{padding:0;border:none;background:transparent;box-shadow:none;width:min(380px,92vw);max-width:none;overflow:visible;color:#fff}
+#pinDlg[open]{margin:auto;animation:pinPop .45s cubic-bezier(.34,1.56,.64,1)}
+#pinDlg::backdrop{background:rgba(2,6,23,.6);backdrop-filter:blur(4px)}
+#pinDlg[open]::backdrop{animation:pinFade .3s ease}
+#pinDlg .pl-card{background-image:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);border-radius:22px;padding:2px;transition:all .3s}
+#pinDlg .pl-card:hover{box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
+#pinDlg .pl-card2{border-radius:20px;transition:all .2s}
+#pinDlg .pl-card2:hover{transform:scale(.98)}
+#pinDlg .pl-form{display:flex;flex-direction:column;gap:10px;padding:0 2em .4em;background:#171717;border-radius:25px;transition:.4s ease-in-out;text-align:center}
+#pinDlg .lg-title{margin:1.6em 0 0;color:#fff;font-size:1.2em;font-weight:700}
+#pinDlg .lg-sub{color:#9ca3af;font-size:12.5px;line-height:1.55;margin-bottom:.8em}
+#pinDlg .pl-field{display:flex;align-items:center;justify-content:center;gap:.5em;border-radius:25px;padding:.6em .9em;border:none;outline:none;color:#fff;background:#171717;box-shadow:inset 2px 5px 10px rgb(5,5,5)}
+#pinDlg .pl-field:focus-within{box-shadow:inset 2px 5px 10px rgb(5,5,5),0 0 0 1px rgba(0,255,117,.45)}
+#pinDlg .pl-icon{height:1.3em;width:1.3em;flex:none;fill:#fff}
+#pinDlg .pl-input{background:none;border:none;outline:none;width:100%;color:#d3d3d3;font-size:16px;font-family:inherit;letter-spacing:3px;padding:0}
+#pinDlg .pl-input::placeholder{color:#6b7280;letter-spacing:normal}
+#pinDlg .lg-err{min-height:18px;color:#f87171;font-size:13px}
+#pinDlg .pl-btns{display:flex;justify-content:center;flex-direction:row;margin-top:.6em;margin-bottom:2.2em;gap:.5em}
+#pinDlg .pl-b1,#pinDlg .pl-b2{padding:.5em 1.1em;border-radius:5px;border:none;outline:none;transition:.4s ease-in-out;background-color:#252525;color:#fff;font-family:inherit;font-size:15px;cursor:pointer}
+#pinDlg .pl-b1{padding:.5em 1.6em}
+#pinDlg .pl-b1:hover,#pinDlg .pl-b1:focus-visible{background-color:#000;color:#00ff75}
+#pinDlg .pl-b2:hover,#pinDlg .pl-b2:focus-visible{background-color:#000;color:#fff}
+#pinDlg .pl-b1:disabled{opacity:.6;cursor:progress}
+#pinDlg .login-box.shake{animation:lgShake .4s}
+@keyframes pinPop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
+@keyframes pinFade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#pinDlg[open],#pinDlg[open]::backdrop{animation:none}}
+@keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 </style>
 </head>
 <body>
@@ -799,6 +868,21 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
     </div>
   </div>
 </div>
+<dialog id="pinDlg">
+  <div class="pl-card"><div class="pl-card2">
+  <form class="pl-form login-box" id="pinForm" method="dialog" autocomplete="off">
+    <div class="lg-title">🔒 ยืนยันเจ้าหน้าที่</div>
+    <div class="lg-sub">ใส่รหัสเพื่อบันทึกเหตุลงชีต<br>(ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์)</div>
+    <div class="pl-field"><svg class="pl-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><input type="password" class="pl-input" id="pinInput" required inputmode="numeric" autocomplete="off" placeholder="รหัสผ่าน" aria-label="รหัสผ่าน"></div>
+    <div class="lg-err" id="pinErr"></div>
+    <div class="pl-btns">
+      <button type="submit" class="pl-b1">บันทึก</button>
+      <button type="button" class="pl-b2" id="pinClose">ยกเลิก</button>
+    </div>
+  </form>
+  </div></div>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
 <dialog id="a2hsDlg" aria-labelledby="a2hsTitle">
   <div class="a2hs-box">
     <button type="button" class="a2hs-x" id="a2hsClose" aria-label="ปิด">✕</button>
@@ -822,6 +906,7 @@ if(!/[?&](from|to)=/.test(location.search) && !location.hash) document.getElemen
   <div class="tabbar" role="tablist">
     <button class="tab on" role="tab" data-tab="overview" aria-selected="true">📊 ภาพรวม</button>
     <button class="tab" role="tab" data-tab="heat" aria-selected="false">🔥 Heat Map</button>
+    <button class="tab" role="tab" data-tab="form" aria-selected="false">📝 บันทึกเหตุ</button>
   </div>
   <div class="nav-right">
     <span id="syncStatus" style="font-size:12px;color:var(--faint)"><span class="live-dot busy"></span>กำลังโหลดข้อมูล...</span>
@@ -1026,6 +1111,44 @@ if(!/[?&](from|to)=/.test(location.search) && !location.hash) document.getElemen
   </div>
   </div>
   <!-- Table -->
+  <div class="tab-panel" id="panel-form" hidden>
+    <div class="form-setup" id="formSetup" hidden>⚙️ ยังไม่ได้เชื่อมต่อชีตสำหรับบันทึก — ติดตั้ง Apps Script ในชีตรถหาย แล้วนำ URL (ลงท้าย /exec) มาใส่ที่ <code>THEFT_API</code></div>
+    <div class="form-grid">
+      <div class="card">
+        <div class="card-title">📝 บันทึกเหตุรถจักรยานยนต์หาย</div>
+        <form class="ff" id="thForm" autocomplete="off" novalidate>
+          <div class="sec">🗓️ วันเดือนปี ที่เกิดเหตุ</div>
+          <label><span>วันที่ <span class="req">*</span></span><input type="date" id="tDate"></label>
+          <label><span>เวลา</span><input type="time" id="tTime"></label>
+          <label class="full tick"><input type="checkbox" id="tRange">ไม่ทราบเวลาแน่ชัด — ระบุเป็นช่วง (จอดไว้ตั้งแต่ … ถึง …)</label>
+          <label class="rng" hidden><span>ถึงวันที่ <span class="req">*</span></span><input type="date" id="tDate2"></label>
+          <label class="rng" hidden><span>ถึงเวลา</span><input type="time" id="tTime2"></label>
+          <div class="sec">🏍️ ยี่ห้อ รุ่น สี / หมายเลขทะเบียน</div>
+          <label><span>ยี่ห้อ <span class="req">*</span></span><input type="text" id="tBrand" list="brandList" placeholder="เช่น ฮอนด้า"><datalist id="brandList"></datalist></label>
+          <label><span>รุ่น <span class="req">*</span></span><input type="text" id="tModel" list="modelList" placeholder="เช่น เวฟ 110ไอ, คลิก"><datalist id="modelList"></datalist></label>
+          <label><span>สี</span><input type="text" id="tColor" list="colorList" placeholder="เช่น ดำเทา"><datalist id="colorList"><option value="ดำ"><option value="ขาว"><option value="แดง"><option value="น้ำเงิน"><option value="เทา"><option value="ดำเทา"><option value="ดำแดง"><option value="ขาวแดง"><option value="ขาวน้ำเงิน"></datalist></label>
+          <label><span>หมายเลขทะเบียน</span><input type="text" id="tPlate" placeholder="เช่น 1กข 234"></label>
+          <label><span>จังหวัด (ทะเบียน)</span><input type="text" id="tProv" list="provList" placeholder="เช่น กทม., สมุทรปราการ"><datalist id="provList"><option value="กทม."><option value="สมุทรปราการ"><option value="ฉะเชิงเทรา"><option value="ชลบุรี"></datalist></label>
+          <label class="tick" style="align-self:end"><input type="checkbox" id="tNoPlate">ไม่ติดแผ่นป้ายทะเบียน</label>
+          <div class="sec">📍 สถานที่ / ผู้เสียหาย</div>
+          <label class="full"><span>สถานที่เกิดเหตุ <span class="req">*</span></span><input type="text" id="tPlace" placeholder="เช่น หน้าร้าน… ม.2 ต.บางบ่อ อ.บางบ่อ จ.สมุทรปราการ"></label>
+          <label><span>ผู้เสียหาย</span><input type="text" id="tVictim" placeholder="ชื่อ-สกุล"></label>
+          <label><span>เบอร์โทรผู้เสียหาย</span><input type="tel" id="tPhone" inputmode="tel" placeholder="0xx-xxx-xxxx"></label>
+          <div class="sec">🧭 พิกัด</div>
+          <label><span>ละติจูด (Lat) <span class="req">*</span></span><input type="text" id="tLat" inputmode="decimal" placeholder="คลิกบนแผนที่"></label>
+          <label><span>ลองจิจูด (Lng) <span class="req">*</span></span><input type="text" id="tLng" inputmode="decimal" placeholder="คลิกบนแผนที่"></label>
+          <label><span>ความแม่นยำของพิกัด</span><select id="tAcc"><option>สูง</option><option>กลาง</option><option>ต่ำ</option></select></label>
+          <label><span>เขตตรวจ</span><span class="zone-out" id="tZone">— ปักหมุดแล้วบอกให้เอง —</span></label>
+          <div class="acts"><button class="btn btn-print" type="submit" id="tSave">💾 บันทึกเหตุ</button><button class="btn btn-reset" type="button" id="tReset">ยกเลิก</button><button class="btn btn-reset" type="button" id="tGeo">📍 ใช้ตำแหน่งปัจจุบัน</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-title">📍 ปักหมุดจุดเกิดเหตุ</div>
+        <div id="pickMap"></div>
+        <div class="pick-tip">คลิกบนแผนที่ หรือลากหมุด เพื่อกรอกพิกัดอัตโนมัติ · วางพิกัดจาก Google Maps ในช่อง Lat ได้ (เช่น 13.575, 100.850)</div>
+      </div>
+    </div>
+  </div>
   <div class="table-card" id="tableCard">
     <div class="table-header">
       <h3>รายการเหตุทั้งหมด</h3>
@@ -1339,6 +1462,7 @@ function applyData(rows, locRows){
   const navSub = document.querySelector('.nav-sub');
   if(navSub) navSub.textContent = `สถานีตำรวจภูธรบางบ่อ · ${MONTH_LABELS[ALL_MONTHS[0]]} – ${MONTH_LABELS[ALL_MONTHS[ALL_MONTHS.length-1]]}`;
   render(getFiltered());
+  try{ fillTheftLists(); }catch(_){}
 }
 
 // ===== Loading screen =====
@@ -2287,11 +2411,89 @@ document.addEventListener('fullscreenchange', updateFsButtons);
 document.addEventListener('webkitfullscreenchange', updateFsButtons);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const c=document.querySelector('.fs-card.pseudo-full'); if(c) toggleFullscreen(c); } });
 
+
+// ===== แบบฟอร์มบันทึกเหตุรถหาย → Apps Script ของชีตรถหาย (ต้องใส่รหัส · ตรวจที่สคริปต์) =====
+const THEFT_API = '';   // ← URL เว็บแอป Apps Script ของชีตรถหาย (ลงท้าย /exec)
+const $f = id=>document.getElementById(id);
+let toastT; function toast(m){ const t=$f('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3400); }
+const p2 = n=>String(n).padStart(2,'0');
+function setNowTheft(){ const d=new Date(); $f('tDate').value=d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); $f('tTime').value=p2(d.getHours())+':'+p2(d.getMinutes()); }
+function fillTheftLists(){
+  const cnt=(arr)=>{ const m={}; arr.filter(Boolean).forEach(x=>m[x]=(m[x]||0)+1); return Object.keys(m).sort((a,b)=>m[b]-m[a]); };
+  const brands=['ฮอนด้า','ยามาฮ่า','ซูซูกิ','คาวาซากิ','จีพีเอ็กซ์','เวสป้า'];
+  const models=cnt((RAW||[]).map(r=>String(r.model||'').replace(/^(ฮอนด้า|ยามาฮ่า|ซูซูกิ|คาวาซากิ|จีพีเอ็กซ์|เวสป้า)\s*/,'').replace(/^รุ่น\s*/,'').trim())).slice(0,40);
+  $f('brandList').innerHTML=brands.map(v=>`<option value="${esc(v)}">`).join('');
+  $f('modelList').innerHTML=models.map(v=>`<option value="${esc(v)}">`).join('');
+}
+let pmap=null, pmark=null;
+function initPick(){
+  if(!window.L) return;
+  if(pmap){ pmap.invalidateSize(); return; }
+  pmap=L.map('pickMap',{maxZoom:18,minZoom:10});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(pmap);
+  const zl=L.geoJSON({type:'FeatureCollection',features:ZONE_POLYS},{style:f=>({color:f.properties.color||'#2563eb',weight:2.5,fillOpacity:.08,fillColor:f.properties.color||'#2563eb'}),interactive:false}).addTo(pmap);
+  pmap.fitBounds(zl.getBounds(),{padding:[10,10]});
+  pmap.on('click',e=>setPick(e.latlng.lat,e.latlng.lng));
+}
+function setPick(lat,lng,pan){
+  $f('tLat').value=lat.toFixed(6); $f('tLng').value=lng.toFixed(6);
+  const z=zoneOf({lat,lng}); const zo=$f('tZone'); zo.textContent=z; zo.classList.toggle('out', z==='นอกเขต');
+  if(!pmark){ pmark=L.marker([lat,lng],{draggable:true,icon:L.divIcon({className:'',html:'<div class="th-pin"></div>',iconSize:[30,30],iconAnchor:[15,34]})}).addTo(pmap); pmark.on('dragend',e=>{ const p=e.target.getLatLng(); setPick(p.lat,p.lng); }); } else pmark.setLatLng([lat,lng]);
+  if(pan) pmap.setView([lat,lng],16);
+}
+$f('tLat').addEventListener('change',()=>{
+  const m=String($f('tLat').value).match(/(-?\d{1,2}\.\d+)\s*[,\s]\s*(-?\d{2,3}\.\d+)/);   // วาง "13.57, 100.85" จาก Google Maps ได้
+  if(m){ $f('tLat').value=m[1]; $f('tLng').value=m[2]; }
+  const a=parseFloat($f('tLat').value), b=parseFloat($f('tLng').value); if(isFinite(a)&&isFinite(b)&&pmap) setPick(a,b,true);
+});
+$f('tLng').addEventListener('change',()=>{ const a=parseFloat($f('tLat').value), b=parseFloat($f('tLng').value); if(isFinite(a)&&isFinite(b)&&pmap) setPick(a,b,true); });
+$f('tGeo').addEventListener('click',()=>{ if(!navigator.geolocation) return toast('อุปกรณ์นี้ไม่รองรับการหาตำแหน่ง'); navigator.geolocation.getCurrentPosition(p=>setPick(p.coords.latitude,p.coords.longitude,true),()=>toast('หาตำแหน่งไม่ได้ ลองคลิกบนแผนที่แทน'),{enableHighAccuracy:true,timeout:10000}); });
+$f('tRange').addEventListener('change',()=>{ document.querySelectorAll('#thForm .rng').forEach(el=>el.hidden=!$f('tRange').checked); if($f('tRange').checked && !$f('tDate2').value) $f('tDate2').value=$f('tDate').value; });
+$f('tNoPlate').addEventListener('change',()=>{ const on=$f('tNoPlate').checked; ['tPlate','tProv'].forEach(id=>{ $f(id).disabled=on; if(on) $f(id).value=''; }); });
+function clearTheft(){ $f('thForm').reset(); ['tPlate','tProv'].forEach(id=>$f(id).disabled=false); document.querySelectorAll('#thForm .rng').forEach(el=>el.hidden=true); setNowTheft(); if(pmark){ pmap.removeLayer(pmark); pmark=null; } const zo=$f('tZone'); zo.textContent='— ปักหมุดแล้วบอกให้เอง —'; zo.classList.remove('out'); }
+$f('tReset').addEventListener('click', clearTheft);
+function theftRow(){
+  const v=id=>$f(id).value.trim();
+  const r={date:v('tDate'),time:v('tTime'),range:$f('tRange').checked,date2:v('tDate2'),time2:v('tTime2'),brand:v('tBrand'),model:v('tModel'),color:v('tColor'),
+    plate:v('tPlate'),prov:v('tProv'),noPlate:$f('tNoPlate').checked,place:v('tPlace'),victim:v('tVictim'),phone:v('tPhone').replace(/\D/g,''),
+    lat:parseFloat(v('tLat')),lng:parseFloat(v('tLng')),acc:v('tAcc')};
+  const miss=[['date','tDate','วันที่เกิดเหตุ'],['brand','tBrand','ยี่ห้อ'],['model','tModel','รุ่น'],['place','tPlace','สถานที่เกิดเหตุ']].find(([k])=>!r[k]);
+  if(miss){ toast('กรุณากรอก '+miss[2]); $f(miss[1]).focus(); return null; }
+  if(r.range && !r.date2){ toast('กรุณาระบุ "ถึงวันที่"'); $f('tDate2').focus(); return null; }
+  if(r.range && (r.date2+' '+r.time2) < (r.date+' '+r.time)){ toast('ช่วงเวลาไม่ถูกต้อง: "ถึง" ต้องอยู่หลัง "ตั้งแต่"'); $f('tDate2').focus(); return null; }
+  if(!isFinite(r.lat)||!isFinite(r.lng)){ toast('กรุณาคลิกแผนที่เพื่อปักหมุดจุดเกิดเหตุ'); return null; }
+  return r;
+}
+let PIN=''; try{ PIN=sessionStorage.getItem('theft-pin')||''; }catch(_){}
+let pendingRow=null;
+function openPin(err){ $f('pinErr').textContent=err||''; $f('pinInput').value=''; $f('pinDlg').showModal(); setTimeout(()=>$f('pinInput').focus(),50); if(err){ const b=$f('pinForm'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
+$f('pinClose').addEventListener('click',()=>{ pendingRow=null; $f('pinDlg').close(); });
+$f('pinForm').addEventListener('submit',e=>{ e.preventDefault(); const v=$f('pinInput').value.trim(); if(!v) return; PIN=v; try{ sessionStorage.setItem('theft-pin',PIN); }catch(_){} $f('pinDlg').close(); if(pendingRow){ const r=pendingRow; pendingRow=null; sendTheft(r); } });
+async function sendTheft(row){
+  const btn=$f('tSave'); btn.disabled=true; btn.textContent='⏳ กำลังบันทึก…';
+  try{
+    const j=await fetch(THEFT_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'add',pin:PIN,row})}).then(r=>r.json());
+    if(!j.ok){ if(j.auth){ PIN=''; try{ sessionStorage.removeItem('theft-pin'); }catch(_){} pendingRow=row; openPin(j.error||'รหัสไม่ถูกต้อง'); } else toast('⚠️ '+(j.error||'บันทึกไม่สำเร็จ')); return; }
+    clearTheft(); toast(`✅ บันทึกลงชีตแล้ว (แถวที่ ${j.row})`);
+    setTimeout(()=>loadData(true), 1500);
+  }catch(e){ toast('⚠️ ส่งข้อมูลไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
+  finally{ btn.disabled=false; btn.textContent='💾 บันทึกเหตุ'; }
+}
+$f('thForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const row=theftRow(); if(!row) return;
+  if(!THEFT_API){ $f('formSetup').hidden=false; return toast('⚠️ ยังไม่ได้เชื่อมต่อชีตสำหรับบันทึก'); }
+  if(!PIN){ pendingRow=row; return openPin(); }
+  sendTheft(row);
+});
+setNowTheft();
+if(!THEFT_API) $f('formSetup').hidden=false;
+
 // ===== Page tabs: ภาพรวม / Heat Map =====
 // The filter bar, KPIs and incident table are shared; only the chart area switches.
 // Open a tab directly with #heatmap in the URL (e.g. .../BangboCar/#heatmap).
 function showTab(name, updateHash){
-  if(name !== 'heat') name = 'overview';
+  if(name !== 'heat' && name !== 'form') name = 'overview';
   setTimeout(()=>{ if(firstRevealDone) revealVisible(); }, 0);
   document.querySelectorAll('.tabbar .tab').forEach(t=>{
     const on = t.dataset.tab === name;
@@ -2299,9 +2501,12 @@ function showTab(name, updateHash){
   });
   document.getElementById('panel-overview').hidden = name !== 'overview';
   document.getElementById('panel-heat').hidden     = name !== 'heat';
-  // the incident table belongs to the overview tab only
-  document.getElementById('tableCard').hidden      = name === 'heat';
-  if(updateHash) history.replaceState(null, '', name==='heat' ? '#heatmap' : location.pathname + location.search);
+  document.getElementById('panel-form').hidden     = name !== 'form';
+  // the incident table belongs to the overview tab only · ตัวกรอง/KPI ไม่ใช้ในหน้าบันทึกเหตุ
+  document.getElementById('tableCard').hidden      = name !== 'overview';
+  document.body.classList.toggle('form-mode', name === 'form');
+  if(updateHash) history.replaceState(null, '', name==='heat' ? '#heatmap' : name==='form' ? '#form' : location.pathname + location.search);
+  if(name === 'form') setTimeout(initPick, 0);
   if(name === 'heat'){
     setTimeout(()=>{
       if(theftMap){
@@ -2316,7 +2521,7 @@ function showTab(name, updateHash){
   if(name === 'overview') Object.values(charts).forEach(c=>c && c.resize && c.resize());
 }
 document.querySelectorAll('.tabbar .tab').forEach(t=>t.addEventListener('click', ()=>showTab(t.dataset.tab, true)));
-showTab(location.hash === '#heatmap' ? 'heat' : 'overview', false);
+showTab(location.hash === '#heatmap' ? 'heat' : location.hash === '#form' ? 'form' : 'overview', false);
 
 // ===== Table (sortable) =====
 const SLOT_ORDER = ['กลางคืน (00-06น.)','เช้า (06-12น.)','บ่าย (12-18น.)','เย็น-ดึก (18-24น.)','ไม่ระบุ'];
