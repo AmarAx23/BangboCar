@@ -1094,6 +1094,42 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .mcol .c{min-width:0}
 .sz-grid.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 @media (max-width:700px){ .kpi-row.k5{grid-template-columns:repeat(2,minmax(0,1fr))} .sz-grid.two{grid-template-columns:1fr} }
+
+/* ===== รอตรวจสอบ (จากแบบฟอร์มสายตรวจ) ===== */
+.tab .pd-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:4px;border-radius:99px;background:#dc2626;color:#fff;font-size:11.5px;font-weight:700;animation:pdPulse 2.4s ease-in-out infinite}
+@keyframes pdPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.45)}50%{box-shadow:0 0 0 6px rgba(220,38,38,0)}}
+.pd-tools{display:flex;gap:8px;flex-wrap:wrap}
+#pdLock[hidden],#pdList[hidden]{display:none!important}
+.pd-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.pd-card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 14px 12px 18px;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.pd-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--lv,#94a3b8)}
+.pd-card .nm{font-size:16px;font-weight:700;color:var(--text-strong)}
+.pd-card .nm small{font-weight:500;color:var(--muted);font-size:13px}
+.pd-card .tg{display:flex;flex-wrap:wrap;gap:6px}
+.pd-card .tg span{font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+.pd-card .meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+.pd-card .go{margin-top:4px;align-self:flex-start}
+.pd-empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.pd-empty .ic{font-size:42px}
+#rvDlg{border:0;border-radius:16px;padding:0;width:min(94vw,760px);max-width:none;background:var(--surface);color:var(--text);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+#rvDlg[open]{margin:auto;animation:rvPop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes rvPop{0%{opacity:0;transform:scale(.85)}100%{opacity:1;transform:scale(1)}}
+#rvDlg::backdrop{background:rgba(15,23,42,.6);backdrop-filter:blur(3px)}
+#rvDlg .hd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;position:sticky;top:0;background:var(--surface);z-index:1}
+#rvDlg .hd button{margin-left:auto;border:0;background:var(--surface2);color:var(--text);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px}
+#rvDlg .bd{padding:14px 16px;max-height:calc(100vh - 190px);overflow:auto}
+#rvDlg .rv-meta{font-size:13px;color:var(--muted);background:var(--surface2);border-radius:10px;padding:9px 12px;margin-bottom:12px;line-height:1.6}
+#rvDlg .rv-ph{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}
+#rvDlg .rv-ph img{height:150px;border-radius:10px;object-fit:cover;background:var(--surface2);cursor:zoom-in}
+#rvDlg .rv-ph .msg{font-size:13px;color:var(--muted)}
+#rvDlg .ft{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-top:1px solid var(--border)}
+#rvDlg .ft input{flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--input-border);color:var(--text);border-radius:8px;padding:8px 10px;font:inherit;font-size:14px}
+.btn-ok{background:#16a34a;color:#fff}.btn-ok:hover{background:#15803d}
+.btn-no{background:#fff;color:#dc2626;border:1px solid #fca5a5}.btn-no:hover{background:#fef2f2}
+:root[data-theme="dark"] .btn-no{background:transparent}
+#rvDlg button[disabled]{opacity:.6;cursor:progress}
+@media (max-width:700px){ .pd-list{grid-template-columns:1fr} #rvDlg .ft input{flex-basis:100%} #rvDlg .ft .btn{flex:1;justify-content:center;white-space:nowrap} }
+@media print{ #panelPending,#rvDlg{display:none!important} }
 </style>
 </head>
 <body>
@@ -1110,6 +1146,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   <div class="tabbar" role="tablist" aria-label="มุมมอง">
     <button class="tab on" role="tab" data-view="list" aria-selected="true">📋 รายการ</button>
     <button class="tab" role="tab" data-view="form" aria-selected="false">📝 แบบฟอร์ม</button>
+    <button class="tab" role="tab" data-view="pending" aria-selected="false">⏳ รอตรวจสอบ<b class="pd-n" id="pdN" hidden></b></button>
   </div>
   <div class="nav-right">
     <a class="btn btn-reset nav-switch" href="index.html">🏠 หน้าแรก</a>
@@ -1235,6 +1272,29 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
       </div>
     </div>
   </div>
+
+  <!-- ===== รอตรวจสอบ (จากแบบฟอร์มสายตรวจ) ===== -->
+  <div id="panelPending" hidden>
+    <div class="cm-head">
+      <div>
+        <h2>⏳ รอตรวจสอบจากสายตรวจ</h2>
+        <div class="sub" id="pdSub">ตรวจแล้วกด ✅ ยืนยัน ข้อมูลจึงเข้าชีต "กลุ่มเสี่ยง" และแสดงในเว็บ</div>
+      </div>
+      <div class="pd-tools">
+        <button class="btn btn-reset" id="pdLink" type="button">🔗 คัดลอกลิงก์ฟอร์มสายตรวจ</button>
+        <button class="btn btn-reset" id="pdReload" type="button">🔄 รีเฟรช</button>
+      </div>
+    </div>
+    <div class="card" id="pdLock">
+      <div class="lock-card">
+        <div class="ic">🔒</div>
+        <h3>รายการรอตรวจสอบแสดงเฉพาะเจ้าหน้าที่</h3>
+        <p>ข้อมูลที่สายตรวจส่งมายังไม่เข้าชีต ต้องใส่รหัสเจ้าหน้าที่ก่อนจึงจะตรวจและยืนยันได้</p>
+        <button class="btn btn-staff" id="pdUnlock" type="button">🔓 ใส่รหัสเพื่อตรวจสอบ</button>
+      </div>
+    </div>
+    <div class="pd-list" id="pdList" hidden></div>
+  </div>
   <p class="cm-note" id="szFoot" style="text-align:center;margin-top:16px"></p>
 </main>
 <dialog id="pinDlg">
@@ -1250,6 +1310,38 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
     </div>
   </form>
   </div></div>
+</dialog>
+<dialog id="rvDlg" aria-labelledby="rvTitle">
+  <div class="hd"><span id="rvTitle">ตรวจสอบรายการ</span><button type="button" id="rvClose" aria-label="ปิด">✕</button></div>
+  <div class="bd">
+    <div class="rv-meta" id="rvMeta"></div>
+    <div class="rv-ph" id="rvPh"></div>
+    <form class="ff" id="rvForm" autocomplete="off" novalidate>
+      <div class="sec">🗓️ การบันทึก</div>
+      <label><span>วันที่บันทึก <span class="req">*</span></span><input type="date" id="rDate"></label>
+      <label><span>เวลาที่บันทึก</span><input type="time" id="rTime"></label>
+      <label><span>ประเภทกลุ่มเสี่ยง <span class="req">*</span></span><select id="rType"></select></label>
+      <label><span>ระดับความเสี่ยง <span class="req">*</span></span><select id="rLevel"></select></label>
+      <div class="sec">👤 ข้อมูลบุคคล</div>
+      <label><span>ชื่อ - สกุล <span class="req">*</span></span><input id="rName"></label>
+      <label><span>ชื่อเล่น</span><input id="rNick"></label>
+      <label><span>อายุ</span><input type="number" id="rAge" min="1" max="119"></label>
+      <label><span>เบอร์โทรศัพท์</span><input type="tel" id="rPhone"></label>
+      <label class="full"><span>เลขที่บัตรประชาชน</span><input id="rId" inputmode="numeric" maxlength="17"></label>
+      <label class="full"><span>ที่อยู่ปัจจุบัน</span><input id="rAddr"></label>
+      <label><span>สถานที่ทำงาน / สถานศึกษา</span><input id="rWork"></label>
+      <label><span>ระดับชั้นการศึกษา</span><input id="rEdu" list="eduList"></label>
+      <div class="sec">🚨 พฤติกรรม</div>
+      <label><span>อาวุธ / สิ่งของผิดกฎหมาย</span><input id="rWeapon" list="weaponList"></label>
+      <label><span>สถานที่ที่พบ / จับกุม</span><input id="rPlace"></label>
+      <label class="full"><span>ข้อหา / พฤติกรรมที่พบ</span><textarea id="rBehave"></textarea></label>
+    </form>
+  </div>
+  <div class="ft">
+    <input id="rvNote" placeholder="เหตุผล (ถ้าไม่อนุมัติ)" aria-label="เหตุผลที่ไม่อนุมัติ">
+    <button class="btn btn-no" id="rvNo" type="button">❌ ไม่อนุมัติ</button>
+    <button class="btn btn-ok" id="rvOk" type="button">✅ ยืนยันเข้าชีต</button>
+  </div>
 </dialog>
 <dialog id="phDlg" aria-labelledby="phTitle">
   <div class="hd"><span id="phTitle">รูปถ่ายประกอบ</span><button type="button" id="phClose" aria-label="ปิด">✕</button></div>
@@ -1536,13 +1628,110 @@ async function save(){
 }
 $('szForm').addEventListener('submit', e=>{ e.preventDefault(); save(); });
 
+
+/* ---------- รอตรวจสอบ (จากแบบฟอร์มสายตรวจ) ---------- */
+let PD = [], PD_CUR = null;
+const PIMG = {};
+function pdBadge(n){ const b = $('pdN'); b.hidden = !n; b.textContent = n > 99 ? '99+' : n; }
+const agoTH = iso=>{ const t = new Date(iso); if(isNaN(t)) return ''; const m = Math.round((Date.now()-t)/60000);
+  if(m < 1) return 'เมื่อสักครู่'; if(m < 60) return m + ' นาทีที่แล้ว'; const h = Math.round(m/60); if(h < 24) return h + ' ชม.ที่แล้ว';
+  return t.getDate() + ' ' + TH_M[t.getMonth()] + ' ' + String(t.getFullYear()+543).slice(-2) + ' ' + String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0'); };
+async function loadPending(){
+  if(!RISK_API) return;
+  if(!PIN){ $('pdLock').hidden = false; $('pdList').hidden = true; return; }
+  $('pdLock').hidden = true; $('pdList').hidden = false;
+  if(!PD.length) $('pdList').innerHTML = '<div class="pd-empty">⏳ กำลังโหลด…</div>';
+  try{
+    const j = await api({action:'pending', pin:PIN});
+    if(!j.ok){ if(j.auth) authFail(j, loadPending); else { $('pdList').innerHTML = ''; toast('⚠️ ' + (j.error||'โหลดไม่สำเร็จ')); } return; }
+    PD = j.rows || []; pdBadge(PD.length); renderPending();
+  }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+}
+function renderPending(){
+  $('pdSub').textContent = PD.length ? `${fmt(PD.length)} รายการรอตรวจ · ตรวจแล้วกด ✅ ยืนยัน ข้อมูลจึงเข้าชีต "กลุ่มเสี่ยง" และแสดงในเว็บ` : 'ตรวจแล้วกด ✅ ยืนยัน ข้อมูลจึงเข้าชีต "กลุ่มเสี่ยง" และแสดงในเว็บ';
+  if(!PD.length){ $('pdList').innerHTML = '<div class="pd-empty" style="grid-column:1/-1"><div class="ic">🎉</div>ไม่มีรายการรอตรวจสอบ</div>'; return; }
+  $('pdList').innerHTML = PD.map((p,i)=>{ const d = p.data || {};
+    return `<div class="pd-card reveal" style="--lv:${LV_COLOR[LV(d.level)]};animation-delay:${Math.min(i,12)*45}ms">
+      <div class="nm">${esc(d.name||'-')}${d.nick?` <small>(${esc(d.nick)})</small>`:''}</div>
+      <div class="tg"><span style="color:${LV_COLOR[LV(d.level)]}">● ${esc(d.level||'-')}</span><span>${esc(d.type||'-')}</span>${d.age?`<span>${esc(d.age)} ปี</span>`:''}${(p.files||[]).length?`<span>📷 ${p.files.length}</span>`:''}</div>
+      <div class="meta">👮 ${esc(p.by||'-')} · ${esc(agoTH(p.at))}<br>📅 ${d.date?dLabel(d.date):'-'}${d.place?` · 📍 ${esc(d.place)}`:''}</div>
+      <button class="btn btn-staff go" type="button" data-i="${i}">🔍 ตรวจสอบ</button></div>`; }).join('');
+  revealVisible();
+}
+$('pdList').addEventListener('click', e=>{ const b = e.target.closest('[data-i]'); if(b) openReview(+b.dataset.i); });
+$('pdUnlock').addEventListener('click', ()=>{ if(!needPin(loadPending)) loadPending(); });
+$('pdReload').addEventListener('click', ()=>{ if(!needPin(loadPending)) loadPending(); });
+$('pdLink').addEventListener('click', async ()=>{
+  const u = RISK_API + '?page=form';
+  try{ await navigator.clipboard.writeText(u); toast('📋 คัดลอกลิงก์ฟอร์มสายตรวจแล้ว ส่งทาง LINE ได้เลย'); }catch(_){ window.prompt('คัดลอกลิงก์นี้', u); }
+});
+function openReview(i){
+  const p = PD[i]; if(!p) return; PD_CUR = p; const d = p.data || {};
+  $('rvTitle').textContent = `ตรวจสอบ · ${d.name||''}`;
+  $('rvMeta').innerHTML = `👮 ส่งโดย <b>${esc(p.by||'-')}</b> · ${esc(agoTH(p.at))} · เลขอ้างอิง ${esc(p.id)}<br>แก้ไขข้อมูลด้านล่างได้ก่อนกดยืนยัน`;
+  const sel = (id, vals, cur, ph)=>{ const v = uniq([...(cur?[cur]:[]), ...vals]); $(id).innerHTML = (ph?`<option value="">${ph}</option>`:'') + v.map(x=>`<option${x===cur?' selected':''}>${esc(x)}</option>`).join(''); };
+  sel('rType', optsOf('type'), d.type, '— เลือกประเภท —');
+  sel('rLevel', optsOf('level').sort((a,b)=>'rygn'.indexOf(LV(a))-'rygn'.indexOf(LV(b))), d.level, '— เลือกระดับ —');
+  const set = (id, v)=>{ $(id).value = v==null ? '' : v; };
+  set('rDate', d.date); set('rTime', d.time); set('rName', d.name); set('rNick', d.nick); set('rAge', d.age); set('rPhone', d.phone);
+  set('rId', d.idno); $('rId').dispatchEvent(new Event('input')); set('rAddr', d.addr); set('rWork', d.work); set('rEdu', d.edu);
+  set('rWeapon', d.weapon); set('rPlace', d.place); set('rBehave', d.behave); $('rvNote').value = '';
+  $('rvDlg').showModal(); $('rvDlg').querySelector('.bd').scrollTop = 0;
+  loadReviewPhotos(p);
+}
+async function loadReviewPhotos(p){
+  const ids = [...new Set((p.files||[]).map(driveId).filter(Boolean))].slice(0, 4);
+  if(!ids.length){ $('rvPh').innerHTML = '<span class="msg">📷 ไม่มีรูปแนบ</span>'; return; }
+  $('rvPh').innerHTML = '<span class="msg">⏳ กำลังโหลดรูป…</span>';
+  const out = [];
+  for(const id of ids){
+    if(!(id in PIMG)){ try{ const j = await api({action:'pimg', pin:PIN, id}); PIMG[id] = j.ok ? `data:${j.mime};base64,${j.data}` : null; }catch(_){ PIMG[id] = null; } }
+    if(PIMG[id]) out.push(PIMG[id]);
+  }
+  if(PD_CUR !== p) return;
+  $('rvPh').innerHTML = out.length ? out.map(u=>`<img src="${u}" alt="รูปถ่ายประกอบ">`).join('') : '<span class="msg">โหลดรูปไม่ได้</span>';
+}
+$('rvPh').addEventListener('click', e=>{ const im = e.target.closest('img'); if(!im) return; $('phTitle').textContent = 'รูปถ่ายประกอบ'; $('phBody').innerHTML = `<img src="${im.src}" alt="">`; $('phDlg').showModal(); });
+$('rId').addEventListener('input', e=>{ const d = e.target.value.replace(/\D/g,'').slice(0,13); const p = [1,4,5,2,1]; let o = '', k = 0; for(const n of p){ if(k>=d.length) break; o += (o?'-':'') + d.slice(k, k+n); k += n; } e.target.value = o; });
+$('rvClose').addEventListener('click', ()=>{ PD_CUR = null; $('rvDlg').close(); });
+function reviewRow(){
+  const v = id=>$(id).value.trim();
+  return { date:v('rDate'), time:v('rTime'), type:v('rType'), level:v('rLevel'), name:v('rName'), nick:v('rNick'), age:v('rAge'),
+           phone:v('rPhone').replace(/\D/g,''), idno:v('rId').replace(/\D/g,''), addr:v('rAddr'), work:v('rWork'), edu:v('rEdu'),
+           weapon:v('rWeapon'), place:v('rPlace'), behave:v('rBehave') };
+}
+async function reviewAct(ok){
+  const p = PD_CUR; if(!p) return;
+  let body;
+  if(ok){
+    const row = reviewRow();
+    const miss = [['date','rDate','วันที่บันทึก'],['type','rType','ประเภทกลุ่มเสี่ยง'],['level','rLevel','ระดับความเสี่ยง'],['name','rName','ชื่อ - สกุล']].find(([k])=>!row[k]);
+    if(miss){ toast('กรุณากรอก ' + miss[2]); $(miss[1]).focus(); return; }
+    if(row.idno && row.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('rId').focus(); return; }
+    body = {action:'approve', pin:PIN, id:p.id, row};
+  } else body = {action:'reject', pin:PIN, id:p.id, note:$('rvNote').value.trim()};
+  const b = $(ok ? 'rvOk' : 'rvNo'), t = b.textContent; $('rvOk').disabled = $('rvNo').disabled = true; b.textContent = '⏳ กำลังบันทึก…';
+  try{
+    const j = await api(body);
+    if(!j.ok){ if(j.auth){ $('rvDlg').close(); authFail(j, loadPending); } else toast('⚠️ ' + (j.error||'ไม่สำเร็จ')); return; }
+    $('rvDlg').close(); PD_CUR = null;
+    toast(ok ? `✅ ยืนยันแล้ว · เข้าชีตแถวที่ ${j.row}${j.files?` · ${j.files} รูป`:''}` : '❌ ไม่อนุมัติรายการนี้แล้ว');
+    PD = PD.filter(x=>x!==p); pdBadge(PD.length); renderPending();
+    if(ok) await load(true);
+  }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+  finally{ $('rvOk').disabled = $('rvNo').disabled = false; b.textContent = t; }
+}
+$('rvOk').addEventListener('click', ()=>reviewAct(true));
+$('rvNo').addEventListener('click', ()=>reviewAct(false));
+
 /* ---------- สลับหน้าย่อย ---------- */
 let VIEW = 'list';
 function showView(v, push){
-  if(v!=='form') v = 'list'; VIEW = v;
-  $('panelForm').hidden = v!=='form'; $('panelList').hidden = v!=='list';
+  if(v!=='form' && v!=='pending') v = 'list'; VIEW = v;
+  $('panelForm').hidden = v!=='form'; $('panelList').hidden = v!=='list'; $('panelPending').hidden = v!=='pending';
+  if(v==='pending') loadPending();
   document.querySelectorAll('nav .tab').forEach(t=>{ const on = t.dataset.view===v; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
-  if(push) history.replaceState(null, '', v==='form' ? '#form' : location.pathname + location.search);
+  if(push) history.replaceState(null, '', v!=='list' ? '#' + v : location.pathname + location.search);
   window.scrollTo({top:0});
   if(v==='list' && R.length) render();
   if(R.length){ revealVisible(); playAnim(); }
@@ -1553,7 +1742,7 @@ showView(location.hash.slice(1));
 async function load(quiet){
   const j = await fetch(RISK_API + '?t=' + Date.now()).then(r=>r.json());
   if(!j.ok) throw new Error(j.error || 'อ่านข้อมูลไม่สำเร็จ');
-  R = j.rows || []; OPTS = j.opts || {};
+  R = j.rows || []; OPTS = j.opts || {}; pdBadge(j.pending || 0);
   const yrs = uniq(R.map(r=>r.date.slice(0,4))).sort().reverse(), mos = uniq(R.map(r=>ymOf(r.date))).sort().reverse();
   const el = $('fMonth'), cur = el.value;
   el.innerHTML = '<option value="">📅 ทุกช่วงเวลา</option>' + yrs.map(y=>`<optgroup label="ปี ${+y+543}"><option value="${y}">ทั้งปี ${+y+543}</option>${mos.filter(m=>m.startsWith(y)).map(m=>`<option value="${m}">${ymFull(m)}</option>`).join('')}</optgroup>`).join('');
