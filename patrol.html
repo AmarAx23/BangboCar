@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ฟอร์มสายตรวจ – สภ.บางบ่อ</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="patrol.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ฟอร์มสายตรวจ">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+(function(){ try{ if(localStorage.getItem('bangbo-theme')==='dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){} })();
+</script>
+<style>
+:root{
+  --bg:#f1f5f9; --surface:#fff; --surface2:#f8fafc; --border:#e2e8f0; --border-soft:#f1f5f9;
+  --text:#1e293b; --text-strong:#0f172a; --text-2:#334155; --muted:#64748b; --faint:#94a3b8;
+  --track:#f1f5f9; --input-border:#cbd5e1; --btn2:#e2e8f0; --btn2-hover:#cbd5e1; --btn2-text:#475569;
+  --accent:#1d4ed8; --accent-hover:#2563eb; --grid:rgba(0,0,0,.07); --shadow:0 1px 3px rgba(0,0,0,.04);
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --surface:#111a2e; --surface2:#0f172a; --border:#1e293b; --border-soft:#172036;
+  --text:#e2e8f0; --text-strong:#f8fafc; --text-2:#cbd5e1; --muted:#94a3b8; --faint:#64748b;
+  --track:#1e293b; --input-border:#334155; --btn2:#1e293b; --btn2-hover:#334155; --btn2-text:#cbd5e1;
+  --accent:#2563eb; --accent-hover:#3b82f6; --grid:rgba(255,255,255,.08); --shadow:none;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;transition:background .2s,color .2s}
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.nav-title{font-size:17px;font-weight:700;color:var(--text-strong)}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.nav-logo{width:44px;height:51px;flex-shrink:0;perspective:300px}
+.nav-coin{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:navSpin 6s linear infinite}
+.nav-coin .coin-face{filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+@keyframes navSpin{to{transform:rotateY(360deg)}}
+html.no-motion .nav-coin{animation:none}
+.logo-spin{position:relative;width:180px;height:209px;transform-style:preserve-3d;animation:logoSpin 3.25s ease-in-out infinite}
+.coin-face{position:absolute;inset:0;background:url(logo.webp) center/contain no-repeat;backface-visibility:hidden;-webkit-backface-visibility:hidden;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25))}
+.coin-face.back{transform:rotateY(180deg)}
+.nav-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.nav-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{padding:7px 16px;border-radius:8px;border:none;font-size:14px;font-family:'Prompt',sans-serif;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
+.btn-print{background:var(--accent);color:#fff}
+.btn-print:hover{background:var(--accent-hover)}
+.btn-reset{background:var(--btn2);color:var(--btn2-text)}
+.btn-reset:hover{background:var(--btn2-hover);color:var(--text)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.reveal{animation:fadeUp .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
+.theme-switch {
+  --toggle-size: 7px;
+  /* the size is adjusted using font-size,
+     this is not transform scale,
+     so you can choose any size */
+  --container-width: 5.625em;
+  --container-height: 2.5em;
+  --container-radius: 6.25em;
+  /* radius 0 - minecraft mode :) */
+  --container-light-bg: #3D7EAE;
+  --container-night-bg: #1D1F2C;
+  --circle-container-diameter: 3.375em;
+  --sun-moon-diameter: 2.125em;
+  --sun-bg: #ECCA2F;
+  --moon-bg: #C4C9D1;
+  --spot-color: #959DB1;
+  --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+  --stars-color: #fff;
+  --clouds-color: #F3FDFF;
+  --back-clouds-color: #AACADF;
+  --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17);
+}
+
+.theme-switch, .theme-switch *, .theme-switch *::before, .theme-switch *::after {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-size: var(--toggle-size);
+}
+
+.theme-switch__container {
+  width: var(--container-width);
+  height: var(--container-height);
+  background-color: var(--container-light-bg);
+  border-radius: var(--container-radius);
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+  box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+  position: relative;
+}
+
+.theme-switch__container::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  -webkit-box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+  box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+  border-radius: var(--container-radius)
+}
+
+.theme-switch__checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.theme-switch { position: relative; display: inline-block; flex-shrink: 0; }
+.theme-switch__checkbox:focus-visible + .theme-switch__container { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+.theme-switch__circle-container {
+  width: var(--circle-container-diameter);
+  height: var(--circle-container-diameter);
+  background-color: rgba(255, 255, 255, 0.1);
+  position: absolute;
+  left: var(--circle-container-offset);
+  top: var(--circle-container-offset);
+  border-radius: var(--container-radius);
+  -webkit-box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-transition: var(--circle-transition);
+  -o-transition: var(--circle-transition);
+  transition: var(--circle-transition);
+  pointer-events: none;
+}
+
+.theme-switch__sun-moon-container {
+  pointer-events: auto;
+  position: relative;
+  z-index: 2;
+  width: var(--sun-moon-diameter);
+  height: var(--sun-moon-diameter);
+  margin: auto;
+  border-radius: var(--container-radius);
+  background-color: var(--sun-bg);
+  -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+  box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+  -webkit-filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+  overflow: hidden;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+}
+
+.theme-switch__moon {
+  -webkit-transform: translateX(100%);
+  -ms-transform: translateX(100%);
+  transform: translateX(100%);
+  width: 100%;
+  height: 100%;
+  background-color: var(--moon-bg);
+  border-radius: inherit;
+  -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+  box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+  position: relative;
+}
+
+.theme-switch__spot {
+  position: absolute;
+  top: 0.75em;
+  left: 0.312em;
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: var(--container-radius);
+  background-color: var(--spot-color);
+  -webkit-box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+  box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+}
+
+.theme-switch__spot:nth-of-type(2) {
+  width: 0.375em;
+  height: 0.375em;
+  top: 0.937em;
+  left: 1.375em;
+}
+
+.theme-switch__spot:nth-last-of-type(3) {
+  width: 0.25em;
+  height: 0.25em;
+  top: 0.312em;
+  left: 0.812em;
+}
+
+.theme-switch__clouds {
+  width: 1.25em;
+  height: 1.25em;
+  background-color: var(--clouds-color);
+  border-radius: var(--container-radius);
+  position: absolute;
+  bottom: -0.625em;
+  left: 0.312em;
+  -webkit-box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+  box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+  -webkit-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  -o-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+}
+
+.theme-switch__stars-container {
+  position: absolute;
+  color: var(--stars-color);
+  top: -100%;
+  left: 0.312em;
+  width: 2.75em;
+  height: auto;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+}
+
+/* actions */
+
+.theme-switch__checkbox:checked + .theme-switch__container {
+  background-color: var(--container-night-bg);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
+  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter));
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
+  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em)
+}
+
+.theme-switch__circle-container:hover {
+  left: calc(var(--circle-container-offset) + 0.187em);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon {
+  -webkit-transform: translate(0);
+  -ms-transform: translate(0);
+  transform: translate(0);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds {
+  bottom: -4.062em;
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container {
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.cm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.cm-head h2{font-size:18px;color:var(--text-strong);margin:0}
+.cm-head .sub{font-size:13px;color:var(--muted);margin-top:4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.ff{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ff .full{grid-column:1/-1}
+.ff fieldset{border:0;padding:0;margin:0;display:contents}
+.ff .sec{grid-column:1/-1;font-size:13px;font-weight:700;color:var(--text-strong);margin-top:6px;padding-top:10px;border-top:1px dashed var(--border);display:flex;align-items:center;gap:6px}
+.ff .sec:first-child{border-top:0;margin-top:0;padding-top:0}
+.ff label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.ff label .req{color:#dc2626}
+.ff input,.ff select,.ff textarea{background:var(--surface2);border:1px solid var(--input-border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:14px;font-family:'Prompt',sans-serif;min-height:38px;width:100%;box-sizing:border-box;margin:0}
+.ff input:focus,.ff select:focus,.ff textarea:focus{outline:0;border-color:#3b82f6;background:var(--surface)}
+.ff textarea{min-height:64px;resize:vertical}
+.ff .priv{font-size:12px;color:#92400e;background:#fef3c7;border-radius:8px;padding:6px 10px}
+:root[data-theme="dark"] .ff .priv{background:#3a2f12;color:#f0c55a}
+.ff button[disabled]{opacity:.6;cursor:progress}
+.drop{grid-column:1/-1;border:2px dashed var(--input-border);border-radius:12px;padding:14px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--surface2)}
+.drop input{display:none}
+.thumbs{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.thumbs .th{position:relative;width:84px;height:84px;border-radius:10px;overflow:hidden;background:var(--surface2);display:grid;place-items:center;font-size:12px;color:var(--muted);border:1px solid var(--border)}
+.thumbs .th img{width:100%;height:100%;object-fit:cover}
+.thumbs .th button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:12px;cursor:pointer;line-height:1}
+.lvpick{display:flex;gap:8px;flex-wrap:wrap}
+.lvpick label{flex:1;min-width:92px;flex-direction:row!important;align-items:center;justify-content:center;gap:6px!important;border:2px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:14px!important;color:var(--text)!important;transition:border-color .15s,background .15s}
+.lvpick input{position:absolute;opacity:0;width:0;height:0}
+.lvpick label:has(input:checked).r{border-color:#dc2626;background:#fef2f2}
+.lvpick label:has(input:checked).y{border-color:#d97706;background:#fffbeb}
+.lvpick label:has(input:checked).g{border-color:#16a34a;background:#f0fdf4}
+:root[data-theme="dark"] .lvpick label:has(input:checked){background:var(--surface2)}
+.lvpick label:has(input:focus-visible){outline:2px solid #3b82f6;outline-offset:2px}
+.lvpick i{width:12px;height:12px;border-radius:50%}
+
+html,body{-webkit-text-size-adjust:100%}
+main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+.pt-badge{font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;background:#dbeafe;color:#1d4ed8;white-space:nowrap}
+:root[data-theme="dark"] .pt-badge{background:#1e3a8a;color:#bfdbfe}
+.card{margin-bottom:16px}
+.ff input,.ff select,.ff textarea{font-size:16px}
+/* iOS: ช่องวันที่/เวลาไม่ล้นกรอบ */
+.ff{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.ff label{min-width:0}
+.ff input[type=date],.ff input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;text-align:left;line-height:1.35;height:44px}
+.ff input::-webkit-date-and-time-value{text-align:left;margin:0}
+.ff input::-webkit-datetime-edit{padding:0}
+@media (max-width:700px){ nav{position:static} }
+@media (max-width:640px){ nav{padding:12px 16px} .ff{grid-template-columns:1fr} main{padding:16px 12px 40px} .ff{grid-template-columns:minmax(0,1fr)} }
+.send{width:100%;justify-content:center;padding:13px 16px;font-size:16px;border-radius:12px}
+.note{text-align:center;color:var(--faint);font-size:12.5px;margin-top:10px;line-height:1.6}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.done{text-align:center;padding:34px 18px}
+.done .ic{width:76px;height:76px;margin:0 auto 12px;border-radius:50%;background:#dcfce7;color:#16a34a;display:grid;place-items:center;font-size:40px;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+:root[data-theme="dark"] .done .ic{background:#14532d;color:#86efac}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.done h2{font-size:20px;color:var(--text-strong);margin-bottom:6px}.done p{color:var(--muted);line-height:1.6;margin-bottom:18px}
+@media (prefers-reduced-motion:reduce){ .reveal,.done .ic,.nav-coin{animation:none!important} }
+[hidden]{display:none!important}
+
+/* ===== เพิ่มลงหน้าจอโฮม ===== */
+.a2hs-btn{font-family:'Prompt',sans-serif;font-size:12.5px;font-weight:700;color:#fff;background:#2563eb;border:none;border-radius:999px;padding:7px 14px;cursor:pointer;box-shadow:0 6px 16px -6px rgba(37,99,235,.6);transition:transform .15s,background .2s;white-space:nowrap}
+.a2hs-btn:hover{background:#1d4ed8;transform:translateY(-1px)}
+#a2hsDlg{margin:auto;border:none;padding:0;background:transparent;width:min(380px,92vw);overflow:visible}
+#a2hsDlg[open]{animation:a2Pop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes a2Pop{0%{opacity:0;transform:scale(.8)}100%{opacity:1;transform:scale(1)}}
+#a2hsDlg::backdrop{background:rgba(15,23,42,.45);backdrop-filter:blur(3px)}
+.a2hs-box{position:relative;background:var(--surface);color:var(--text-strong);border-radius:18px;padding:26px 22px 20px;text-align:center;box-shadow:0 20px 45px rgba(15,23,42,.25)}
+.a2hs-x{position:absolute;top:10px;right:12px;background:none;border:none;font-size:18px;color:var(--faint);cursor:pointer}
+.a2hs-ico{width:64px;height:74px;margin:0 auto 8px;position:relative}
+.a2hs-title{font-size:17px;font-weight:700;margin-bottom:14px}
+.a2hs-steps{list-style:none;padding:0;margin:0;text-align:left;display:grid;gap:10px}
+.a2hs-steps li{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.45;color:var(--text)}
+.a2hs-n{flex:none;width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
+.a2hs-share{display:inline-block;vertical-align:-4px;width:18px;height:18px}
+.a2hs-note{font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo" role="img" aria-label="ตราสถานีตำรวจภูธรบางบ่อ"><div class="nav-coin"><div class="coin-face"></div><div class="coin-face back"></div></div></div>
+    <div>
+      <div class="nav-title">บันทึกกลุ่มเสี่ยง</div>
+      <div class="nav-sub">แบบฟอร์มสายตรวจ · สถานีตำรวจภูธรบางบ่อ</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <span class="pt-badge">🚓 สายตรวจ</span>
+    <button type="button" class="a2hs-btn" id="a2hsBtn" hidden>📲 เพิ่มลงหน้าจอโฮม</button>
+    <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
+      <input type="checkbox" class="theme-switch__checkbox" id="themeBtn" aria-label="โหมดมืด">
+      <div class="theme-switch__container">
+        <div class="theme-switch__clouds"></div>
+        <div class="theme-switch__stars-container">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545ZM56.8313 24.0069C56.0551 24.8503 55.1114 25.2995 54 25.3545C55.1114 25.4095 56.0551 25.8587 56.8313 26.7112C57.6075 27.5546 57.9956 28.563 57.9956 29.7273C57.9956 28.9572 58.172 28.2513 58.5248 27.5913C58.8864 26.9312 59.3716 26.3995 59.9802 26.0053C60.5976 25.602 61.2679 25.3911 62 25.3545C60.8798 25.2903 59.9361 24.8503 59.1599 24.0069C58.3837 23.1635 57.9956 22.1642 57.9956 21C57.9956 22.1642 57.6075 23.1635 56.8313 24.0069ZM81 25.3545C82.1114 25.2995 83.0551 24.8503 83.8313 24.0069C84.6075 23.1635 84.9956 22.1642 84.9956 21C84.9956 22.1642 85.3837 23.1635 86.1599 24.0069C86.9361 24.8503 87.8798 25.2903 89 25.3545C88.2679 25.3911 87.5976 25.602 86.9802 26.0053C86.3716 26.3995 85.8864 26.9312 85.5248 27.5913C85.172 28.2513 84.9956 28.9572 84.9956 29.7273C84.9956 28.563 84.6075 27.5546 83.8313 26.7112C83.0551 25.8587 82.1114 25.4095 81 25.3545ZM136 36.3545C137.111 36.2995 138.055 35.8503 138.831 35.0069C139.607 34.1635 139.996 33.1642 139.996 32C139.996 33.1642 140.384 34.1635 141.16 35.0069C141.936 35.8503 142.88 36.2903 144 36.3545C143.268 36.3911 142.598 36.602 141.98 37.0053C141.372 37.3995 140.886 37.9312 140.525 38.5913C140.172 39.2513 139.996 39.9572 139.996 40.7273C139.996 39.563 139.607 38.5546 138.831 37.7112C138.055 36.8587 137.111 36.4095 136 36.3545ZM101.831 49.0069C101.055 49.8503 100.111 50.2995 99 50.3545C100.111 50.4095 101.055 50.8587 101.831 51.7112C102.607 52.5546 102.996 53.563 102.996 54.7273C102.996 53.9572 103.172 53.2513 103.525 52.5913C103.886 51.9312 104.372 51.3995 104.98 51.0053C105.598 50.602 106.268 50.3911 107 50.3545C105.88 50.2903 104.936 49.8503 104.16 49.0069C103.384 48.1635 102.996 47.1642 102.996 46C102.996 47.1642 102.607 48.1635 101.831 49.0069Z" fill="currentColor"></path>
+      </svg>
+        </div>
+        <div class="theme-switch__circle-container">
+          <div class="theme-switch__sun-moon-container">
+            <div class="theme-switch__moon"><div class="theme-switch__spot"></div><div class="theme-switch__spot"></div><div class="theme-switch__spot"></div></div>
+          </div>
+        </div>
+      </div>
+    </label>
+  </div>
+</nav>
+<main>
+  <div class="cm-head">
+    <div>
+      <h2>📝 บันทึกกลุ่มเสี่ยง</h2>
+      <div class="sub">กรอกแล้วกด "ส่ง" ข้อมูลจะส่งให้เจ้าหน้าที่ตรวจสอบก่อนเข้าระบบ</div>
+    </div>
+  </div>
+  <form id="f" autocomplete="off" novalidate>
+    <div class="card">
+      <div class="ff">
+        <div class="sec">👮 ผู้บันทึก</div>
+        <label class="full"><span>ยศ ชื่อ - สกุล ผู้บันทึก <span class="req">*</span></span><input id="by" required placeholder="เช่น ส.ต.อ.สมชาย ใจดี" autocomplete="name"></label>
+        <div class="sec">🗓️ การบันทึก</div>
+        <label><span>วันที่บันทึก <span class="req">*</span></span><input type="date" id="date" required></label>
+        <label><span>เวลาที่บันทึก</span><input type="time" id="time"></label>
+        <label><span>ประเภทกลุ่มเสี่ยง <span class="req">*</span></span><select id="type" required></select></label>
+        <div class="full" style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)"><span>ระดับความเสี่ยง <span class="req" style="color:#dc2626">*</span></span>
+          <div class="lvpick" id="level" role="radiogroup" aria-label="ระดับความเสี่ยง"></div></div>
+        <div class="sec">👤 ข้อมูลบุคคล</div>
+        <label><span>ชื่อ - สกุล (ไม่ต้องใส่คำนำหน้า) <span class="req">*</span></span><input id="name" required placeholder="เช่น สมชาย ใจดี"></label>
+        <label><span>ชื่อเล่น</span><input id="nick"></label>
+        <label><span>อายุ</span><input type="number" id="age" min="1" max="119" inputmode="numeric"></label>
+        <label><span>เบอร์โทรศัพท์</span><input type="tel" id="phone" inputmode="tel" placeholder="0xx-xxx-xxxx"></label>
+        <label class="full"><span>เลขที่บัตรประชาชน</span><input id="idno" inputmode="numeric" maxlength="17" placeholder="13 หลัก"></label>
+        <label class="full"><span>ที่อยู่ปัจจุบัน</span><input id="addr" placeholder="บ้านเลขที่ หมู่ ตำบล อำเภอ จังหวัด"></label>
+        <label><span>ชื่อสถานที่ทำงาน / สถานศึกษา</span><input id="work"></label>
+        <label><span>ระดับชั้นการศึกษา</span><input id="edu" list="eduList" placeholder="เลือก หรือพิมพ์เอง"><datalist id="eduList"></datalist></label>
+        <div class="sec">🚨 พฤติกรรม</div>
+        <label><span>มีอาวุธประเภท / สิ่งของผิดกฎหมาย</span><input id="weapon" list="wList" placeholder="ว่างไว้ = ไม่มี"><datalist id="wList"><option value="มีด"><option value="ปืน"><option value="ยาเสพติด"></datalist></label>
+        <label><span>สถานที่ที่พบ / จับกุม</span><input id="place"></label>
+        <label class="full"><span>จับกุมข้อหา / พฤติกรรมที่พบ</span><textarea id="behave"></textarea></label>
+        <div class="sec">📷 รูปถ่ายประกอบ</div>
+        <label class="drop"><input type="file" id="files" accept="image/*" multiple>📷 แตะเพื่อถ่ายรูป / เลือกรูป · สูงสุด 4 รูป</label>
+        <div class="thumbs" id="thumbs"></div>
+        <div class="full priv">🔒 ข้อมูลจะส่งให้เจ้าหน้าที่ตรวจสอบก่อน ยังไม่เข้าระบบจนกว่าจะได้รับการยืนยัน · ส่งแล้วแก้ไขเองไม่ได้ ถ้ากรอกผิดให้แจ้งเจ้าหน้าที่</div>
+        <div class="hp" aria-hidden="true"><input id="hp" tabindex="-1" autocomplete="off"></div>
+      </div>
+    </div>
+    <div class="send-wrap"><button class="btn btn-print send" id="send" type="submit">📤 ส่งให้เจ้าหน้าที่ตรวจสอบ</button>
+    <div class="note">หน้านี้ใช้ส่งข้อมูลอย่างเดียว ไม่แสดงข้อมูลที่ส่งไปแล้ว</div></div>
+  </form>
+  <div class="card done" id="done" hidden>
+    <div class="ic">✓</div>
+    <h2>ส่งข้อมูลเรียบร้อย</h2>
+    <p>รอเจ้าหน้าที่ตรวจสอบและยืนยัน<br><span id="doneId" style="font-size:12.5px"></span></p>
+    <button class="btn btn-print send" id="again" type="button">➕ บันทึกรายการใหม่</button>
+  </div>
+</main>
+<dialog id="a2hsDlg" aria-labelledby="a2hsTitle">
+  <div class="a2hs-box">
+    <button type="button" class="a2hs-x" id="a2hsClose" aria-label="ปิด">✕</button>
+    <div class="a2hs-ico"><div class="coin-face"></div></div>
+    <div class="a2hs-title" id="a2hsTitle">เพิ่มฟอร์มสายตรวจลงหน้าจอโฮม</div>
+    <div id="a2hsBody"></div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $ = id=>document.getElementById(id);
+const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let tT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),3400); }
+const DEF = { type:['นักเรียนทะเลาะวิวาท','แข่งขันรถในทาง','ยาเสพติด','บุคคลเฝ้าระวัง','อื่นๆ'], level:['สีแดง','สีเหลือง','สีเขียว'],
+  edu:['ป.6','มัธยมศึกษาตอนต้น','มัธยมศึกษาตอนปลาย','ปวช.','ปวส.','กศน.','ปริญญาตรี','ไม่มี'] };
+const LV = t=>/แดง/.test(t)?'r':/เหลือง/.test(t)?'y':/เขียว/.test(t)?'g':'n';
+const LVC = {r:'#dc2626',y:'#d97706',g:'#16a34a',n:'#94a3b8'};
+const p2 = n=>String(n).padStart(2,'0');
+const today = ()=>{ const d=new Date(); return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); };
+const nowHM = ()=>{ const d=new Date(); return p2(d.getHours())+':'+p2(d.getMinutes()); };
+function fill(o){
+  const pick = k=>(o&&o[k]&&o[k].length)?o[k]:DEF[k];
+  const cur = $('type').value;
+  $('type').innerHTML = '<option value="">— เลือกประเภท —</option>' + pick('type').map(v=>`<option>${esc(v)}</option>`).join('');
+  if(cur) $('type').value = cur;
+  const lvs = pick('level').slice().sort((a,b)=>'rygn'.indexOf(LV(a))-'rygn'.indexOf(LV(b)));
+  $('level').innerHTML = lvs.map(v=>`<label class="${LV(v)}"><input type="radio" name="lv" value="${esc(v)}"><i style="background:${LVC[LV(v)]}"></i>${esc(v)}</label>`).join('');
+  $('eduList').innerHTML = pick('edu').map(v=>`<option value="${esc(v)}">`).join('');
+}
+fill(null);
+$('date').value = today(); $('time').value = nowHM();
+try{ $('by').value = localStorage.getItem('patrol-by') || ''; }catch(_){}
+/* ส่งข้อมูลผ่าน Apps Script ของชีตกลุ่มเสี่ยง (ตัวเดียวกับหน้า risk.html) · สายตรวจส่งได้อย่างเดียว อ่านข้อมูลไม่ได้ */
+const RISK_API = 'https://script.google.com/macros/s/AKfycbyl9CLikS0yYJ8hSHSGx4kB-jrb_TJsaIIRcsVXbyBv4IXx83rvVCOcW_dR3wAPEE9G/exec';
+fetch(RISK_API + '?t=' + Date.now()).then(r=>r.json()).then(j=>{ if(j && j.ok) fill(j.opts); }).catch(()=>{});
+
+$('idno').addEventListener('input', e=>{ const d=e.target.value.replace(/\D/g,'').slice(0,13), p=[1,4,5,2,1]; let o='',k=0; for(const n of p){ if(k>=d.length) break; o+=(o?'-':'')+d.slice(k,k+n); k+=n; } e.target.value=o; });
+
+function setTheme(t, save){
+  if(t==='dark') document.documentElement.setAttribute('data-theme','dark'); else document.documentElement.removeAttribute('data-theme');
+  $('themeBtn').checked = t==='dark';
+  if(save){ try{ localStorage.setItem('bangbo-theme', t); }catch(e){} }
+}
+$('themeBtn').addEventListener('change', e=>setTheme(e.target.checked ? 'dark' : 'light', true));
+$('themeBtn').checked = document.documentElement.getAttribute('data-theme')==='dark';
+const wantMotion = ()=>!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function reveal(){
+  if(!wantMotion()) return;
+  [...document.querySelectorAll('main .cm-head, main .card, main .priv-out, main .send-wrap')].filter(c=>c.offsetParent).forEach((c,i)=>{
+    c.classList.remove('reveal'); c.style.setProperty('--d', Math.min(i,14)*45+'ms'); void c.offsetWidth; c.classList.add('reveal'); });
+}
+reveal();
+
+let FILES = [];
+function shrink(file){
+  return new Promise((res,rej)=>{
+    const rd = new FileReader(); rd.onerror = ()=>rej(new Error('อ่านไฟล์ไม่ได้'));
+    rd.onload = ()=>{ const img = new Image();
+      img.onload = ()=>{ const k=Math.min(1,1600/Math.max(img.width,img.height)), c=document.createElement('canvas');
+        c.width=Math.round(img.width*k); c.height=Math.round(img.height*k); c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        const u=c.toDataURL('image/jpeg',.82); res({type:'image/jpeg',data:u.split(',')[1],url:u}); };
+      img.onerror = ()=>rej(new Error('เปิดรูปไม่ได้')); img.src = rd.result; };
+    rd.readAsDataURL(file);
+  });
+}
+function drawThumbs(){ $('thumbs').innerHTML = FILES.map((f,i)=>`<div class="th"><img src="${f.url}" alt=""><button type="button" data-i="${i}" aria-label="ลบรูป">✕</button></div>`).join(''); }
+$('files').addEventListener('change', async e=>{
+  for(const f of [...e.target.files]){
+    if(FILES.length>=4){ toast('แนบได้สูงสุด 4 รูป'); break; }
+    if(!/^image\//.test(f.type)) continue;
+    try{ FILES.push(await shrink(f)); }catch(err){ toast('⚠️ '+err.message); }
+  }
+  e.target.value=''; drawThumbs();
+});
+$('thumbs').addEventListener('click', e=>{ const b=e.target.closest('[data-i]'); if(b){ FILES.splice(+b.dataset.i,1); drawThumbs(); } });
+
+function row(){
+  const v = id=>$(id).value.trim();
+  return { by:v('by'), date:v('date'), time:v('time'), type:v('type'), level:(document.querySelector('#level input:checked')||{}).value||'',
+    name:v('name'), nick:v('nick'), age:v('age'), phone:v('phone').replace(/\D/g,''), idno:v('idno').replace(/\D/g,''),
+    addr:v('addr'), work:v('work'), edu:v('edu'), weapon:v('weapon'), place:v('place'), behave:v('behave'), hp:v('hp') };
+}
+$('f').addEventListener('submit', e=>{
+  e.preventDefault();
+  const r = row();
+  const miss = [['by','by','ชื่อผู้บันทึก'],['date','date','วันที่'],['type','type','ประเภทกลุ่มเสี่ยง'],['level','level','ระดับความเสี่ยง'],['name','name','ชื่อ - สกุล']].find(([k])=>!r[k]);
+  if(miss){ toast('กรุณากรอก '+miss[2]); const el=$(miss[1]); (el.querySelector('input')||el).focus(); return; }
+  if(r.idno && r.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('idno').focus(); return; }
+  try{ localStorage.setItem('patrol-by', r.by); }catch(_){}
+  const b = $('send'); b.disabled = true; b.textContent = FILES.length ? '⏳ กำลังอัปโหลดรูป…' : '⏳ กำลังส่ง…';
+  const reset = ()=>{ b.disabled = false; b.textContent = '📤 ส่งให้เจ้าหน้าที่ตรวจสอบ'; };
+  fetch(RISK_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'submit', row:r, files:FILES.map(f=>({type:f.type,data:f.data}))})})
+    .then(x=>x.json())
+    .then(res=>{
+      reset();
+      if(!res || !res.ok){ toast('⚠️ ' + (res && res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
+      $('f').hidden = true; $('done').hidden = false; $('doneId').textContent = 'เลขอ้างอิง ' + (res.id || '');
+      window.scrollTo({top:0,behavior:'smooth'}); reveal();
+    })
+    .catch(()=>{ reset(); toast('⚠️ เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); });
+});
+$('again').addEventListener('click', ()=>{
+  const keep = {by:$('by').value, date:$('date').value, type:$('type').value};
+  $('f').reset(); FILES=[]; drawThumbs();
+  $('by').value = keep.by; $('date').value = keep.date; $('time').value = nowHM(); $('type').value = keep.type;
+  $('done').hidden = true; $('f').hidden = false; window.scrollTo({top:0}); reveal(); $('name').focus();
+});
+
+/* ---------- เพิ่มลงหน้าจอโฮม (iPhone: บอกขั้นตอน · Android: ติดตั้งได้ถ้าเบราว์เซอร์รองรับ) ---------- */
+(function(){
+  const btn = $('a2hsBtn'), dlg = $('a2hsDlg'), body = $('a2hsBody');
+  const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  if(standalone) return;
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const inApp = /Line\/|FBAN|FBAV|Instagram|MicroMessenger/i.test(ua);
+  const isSafari = isIOS && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua) && !inApp;
+  let deferred = null;
+  const SHARE = '<svg class="a2hs-share" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>';
+  const step = (n, h)=>`<li><span class="a2hs-n">${n}</span><span>${h}</span></li>`;
+  function iosSteps(){
+    if(inApp) return `<ol class="a2hs-steps">${step(1,'กดปุ่ม <b>แชร์</b> หรือ <b>⋯</b> ของ LINE (มุมขวาล่าง/ขวาบน)')}${step(2,'เลือก <b>เปิดใน Safari</b> หรือ <b>เปิดในเบราว์เซอร์อื่น</b>')}${step(3,'ใน Safari กดปุ่ม 📲 นี้อีกครั้ง')}</ol><div class="a2hs-note">ตอนนี้เปิดอยู่ใน LINE ซึ่งเพิ่มลงหน้าจอโฮมไม่ได้ ต้องเปิดใน Safari ก่อน</div>`;
+    if(!isSafari) return `<ol class="a2hs-steps">${step(1,'เปิดลิงก์ฟอร์มนี้ด้วยแอป <b>Safari</b>')}${step(2,'แล้วกดปุ่ม 📲 นี้อีกครั้ง')}</ol><div class="a2hs-note">บน iPhone เพิ่มลงหน้าจอโฮมได้จาก Safari เท่านั้น</div>`;
+    return `<ol class="a2hs-steps">${step(1,`กดปุ่ม <b>แชร์</b> ${SHARE} ที่แถบของ Safari`)}${step(2,'เลื่อนลงแล้วเลือก <b>เพิ่มไปยังหน้าจอโฮม</b>')}${step(3,'ตั้งชื่อเช่น <b>ฟอร์มสายตรวจ</b> แล้วกด <b>เพิ่ม</b>')}</ol><div class="a2hs-note">ครั้งต่อไปแตะไอคอนบนหน้าจอโฮม ฟอร์มจะเปิดขึ้นทันที ไม่ต้องหาลิงก์ใน LINE</div>`;
+  }
+  function genericSteps(){
+    if(inApp) return `<ol class="a2hs-steps">${step(1,'กดเมนู <b>⋮</b> หรือ <b>⋯</b> มุมขวาบนของ LINE')}${step(2,'เลือก <b>เปิดในเบราว์เซอร์อื่น</b> หรือ <b>เปิดใน Chrome</b>')}${step(3,'ใน Chrome กดปุ่ม 📲 นี้อีกครั้ง')}</ol><div class="a2hs-note">ตอนนี้เปิดอยู่ใน LINE ซึ่งเพิ่มลงหน้าจอหลักไม่ได้</div>`;
+    return `<ol class="a2hs-steps">${step(1,'กดเมนู <b>⋮</b> มุมขวาบนของ Chrome')}${step(2,'เลือก <b>เพิ่มลงในหน้าจอหลัก</b>')}${step(3,'ตั้งชื่อเช่น <b>ฟอร์มสายตรวจ</b> แล้วกด <b>เพิ่ม</b>')}</ol>`;
+  }
+  window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferred = e; btn.hidden = false; });
+  if(isIOS || /Android/i.test(ua)) btn.hidden = false;
+  btn.addEventListener('click', async ()=>{
+    if(deferred){ deferred.prompt(); try{ await deferred.userChoice; }catch(e){} deferred = null; return; }
+    body.innerHTML = isIOS ? iosSteps() : genericSteps();
+    dlg.showModal();
+  });
+  $('a2hsClose').addEventListener('click', ()=>dlg.close());
+  dlg.addEventListener('click', e=>{ if(e.target === dlg) dlg.close(); });
+})();
+</script>
+</body>
+</html>
