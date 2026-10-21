@@ -824,6 +824,48 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 :root[data-theme="dark"] .ov-zc{border-color:rgba(255,255,255,.6)}
 @media (max-width:480px){ nav .tabbar{gap:8px} nav .tab{padding:.6em .4em;font-size:14px;white-space:nowrap} }
 @media print{ #ovPrint{display:none!important} .ov-poster{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+
+/* ===== แบบฟอร์มบันทึกสถานที่ ===== */
+.form-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px;align-items:start}
+@media (max-width:900px){ .form-grid{grid-template-columns:1fr} }
+.ff{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.ff .full{grid-column:1/-1}
+.ff .sec{grid-column:1/-1;font-size:13px;font-weight:700;color:var(--text-strong);margin-top:4px;padding-top:10px;border-top:1px dashed var(--border);display:flex;align-items:center;gap:6px}
+.ff .sec:first-child{border-top:0;margin-top:0;padding-top:0}
+.ff label,.ff .fl{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted);min-width:0}
+.ff .req{color:#dc2626}
+.ff input,.ff select,.ff textarea{background:var(--surface2);border:1px solid var(--input-border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:14px;font-family:'Prompt',sans-serif;min-height:38px;width:100%;box-sizing:border-box;margin:0;outline:none}
+.ff input:focus,.ff select:focus{border-color:#3b82f6;background:var(--surface)}
+.ff input[readonly]{opacity:.7}
+.ff .priv{font-size:12px;color:#92400e;background:#fef3c7;border-radius:8px;padding:6px 10px}
+:root[data-theme="dark"] .ff .priv{background:#3a2f12;color:#f0c55a}
+.ff .acts{display:flex;gap:10px;grid-column:1/-1;margin-top:6px;flex-wrap:wrap}
+.ff button[disabled]{opacity:.6;cursor:progress}
+.ff .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ff .three label span{font-weight:500}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{flex:1 1 auto;min-width:88px;flex-direction:row;align-items:center;justify-content:center;gap:7px;border:2px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:14px;color:var(--text);background:var(--surface2);user-select:none;transition:border-color .15s,background .15s}
+.seg input{position:absolute;opacity:0;width:0;height:0;min-height:0;padding:0}
+.seg label:has(input:checked){border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
+:root[data-theme="dark"] .seg label:has(input:checked){background:rgba(37,99,235,.18);color:#93c5fd}
+.seg label:has(input:focus-visible){outline:2px solid #3b82f6;outline-offset:2px}
+.seg.lv label:has(input[value="เขียว"]:checked){border-color:#16a34a;background:#f0fdf4;color:#15803d}
+.seg.lv label:has(input[value="เหลือง"]:checked){border-color:#d97706;background:#fffbeb;color:#b45309}
+.seg.lv label:has(input[value="แดง"]:checked){border-color:#dc2626;background:#fef2f2;color:#b91c1c}
+.seg.chk label:has(input:checked)::before{content:'✓';font-weight:800}
+.seg i{width:12px;height:12px;border-radius:50%}
+#pfType{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+#pfType label{min-width:0}
+#pickMap{height:460px;border-radius:10px;overflow:hidden;background:var(--track);z-index:0;cursor:crosshair}
+:root[data-theme="dark"] #pickMap .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
+.pick-tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+.th-pin{width:30px;height:30px;border-radius:50% 50% 50% 0;background:#dc2626;border:3px solid #fff;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.zone-out{font-size:13px;font-weight:700;color:var(--accent-hover);min-height:38px;display:flex;align-items:center;padding:0 10px;border-radius:8px;background:var(--surface2);border:1px dashed var(--input-border)}
+.zone-out.out{color:#dc2626}
+@media (max-width:640px){ .ff{grid-template-columns:minmax(0,1fr)} #pickMap{height:340px} }
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%)}
+@media print{ #panelForm{display:none!important} }
 </style>
 </head>
 <body>
@@ -841,6 +883,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
     <button class="tab" role="tab" data-view="overview" aria-selected="false">📊 ภาพรวม</button>
     <button class="tab on" role="tab" data-view="list" aria-selected="true">📋 รายชื่อ</button>
     <button class="tab" role="tab" data-view="map" aria-selected="false">🗺️ แผนที่</button>
+    <button class="tab" role="tab" data-view="form" aria-selected="false">📝 บันทึกสถานที่</button>
   </div>
   <div class="nav-right">
     <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
@@ -900,6 +943,47 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
     <details class="nopos" id="noPos" hidden><summary></summary><ul id="noPosList"></ul></details>
   </div>
   </div>
+  <div id="panelForm" hidden>
+  <div class="li-head"><h2>📝 บันทึกสถานที่ใหม่</h2><span class="li-note">บันทึกลงแท็บของประเภทนั้น และแท็บ "รวมข้อมูล" · ต้องใส่รหัสเจ้าหน้าที่</span></div>
+  <div class="form-grid">
+    <div class="card">
+      <form class="ff" id="pfForm" autocomplete="off" novalidate>
+        <div class="sec">🏷️ ประเภทสถานที่ <span class="req">*</span></div>
+        <div class="full seg" id="pfType" role="radiogroup" aria-label="ประเภทสถานที่"></div>
+        <div class="sec">📍 ข้อมูลสถานที่</div>
+        <label class="full"><span>ชื่อสถานที่ <span class="req">*</span></span><input type="text" id="pfName" placeholder="เช่น ร้านทองเยาวราช สาขาบางบ่อ"></label>
+        <label class="full"><span>ที่ตั้ง <span class="req">*</span></span><input type="text" id="pfAddr" placeholder="เช่น ถนนรัตนราช ม.1 ต.บางบ่อ อ.บางบ่อ จ.สมุทรปราการ"></label>
+        <div class="sec">📹 จำนวนกล้องวงจรปิด (ตัว)</div>
+        <div class="full three">
+          <label><span>ทั้งหมด</span><input type="number" id="pfCamAll" min="0" max="999" inputmode="numeric"></label>
+          <label><span>ใช้การได้</span><input type="number" id="pfCamOk" min="0" max="999" inputmode="numeric"></label>
+          <label><span>ใช้การไม่ได้</span><input type="number" id="pfCamBad" readonly tabindex="-1" placeholder="คำนวณให้"></label>
+        </div>
+        <div class="fl full"><span>เจ้าหน้าที่ รปภ.</span><div class="seg" id="pfGuard"><label><input type="radio" name="pfGuard" value="มี">มี</label><label><input type="radio" name="pfGuard" value="ไม่มี">ไม่มี</label></div></div>
+        <div class="full pf-x" hidden style="display:contents">
+          <div class="fl full"><span>สถานที่ตั้ง</span><div class="seg"><label><input type="radio" name="pfMall" value="ในห้าง">ในห้าง</label><label><input type="radio" name="pfMall" value="นอกห้าง">นอกห้าง</label></div></div>
+          <div class="fl full"><span>การป้องกัน (เลือกได้หลายข้อ)</span><div class="seg chk" id="pfProt"></div></div>
+          <div class="fl full"><span>จัดกลุ่มระดับความปลอดภัย</span><div class="seg lv"><label><input type="radio" name="pfLevel" value="เขียว"><i style="background:#16a34a"></i>เขียว</label><label><input type="radio" name="pfLevel" value="เหลือง"><i style="background:#d97706"></i>เหลือง</label><label><input type="radio" name="pfLevel" value="แดง"><i style="background:#dc2626"></i>แดง</label></div></div>
+        </div>
+        <div class="sec">👤 เจ้าของ / ผู้จัดการ</div>
+        <label><span>ชื่อเจ้าของ/ผู้จัดการ</span><input type="text" id="pfOwner" placeholder="ชื่อ-สกุล"></label>
+        <label><span>หมายเลขโทรศัพท์</span><input type="tel" id="pfPhone" inputmode="tel" placeholder="0xx-xxx-xxxx"></label>
+        <div class="full priv">🔒 ชื่อ/เบอร์เจ้าของ กล้อง รปภ. และระดับความปลอดภัย บันทึกลงชีตเท่านั้น หน้าเว็บทั่วไปแสดงเฉพาะชื่อสถานที่ ที่ตั้ง และแผนที่</div>
+        <div class="sec">🧭 ตำแหน่งที่ตั้ง</div>
+        <label><span>ละติจูด (Lat)</span><input type="text" id="pfLat" inputmode="decimal" placeholder="คลิกบนแผนที่"></label>
+        <label><span>ลองจิจูด (Lng)</span><input type="text" id="pfLng" inputmode="decimal" placeholder="คลิกบนแผนที่"></label>
+        <label class="full"><span>หรือวางลิงก์ Google Maps</span><input type="url" id="pfMap" placeholder="https://maps.app.goo.gl/…"></label>
+        <label><span>เขตตรวจ</span><span class="zone-out" id="pfZone">— ปักหมุดแล้วบอกให้เอง —</span></label>
+        <div class="acts"><button class="btn btn-print" type="submit" id="pfSave">💾 บันทึกสถานที่</button><button class="btn btn-reset" type="button" id="pfReset">ยกเลิก</button><button class="btn btn-reset" type="button" id="pfGeo">📍 ใช้ตำแหน่งปัจจุบัน</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <div class="card-title">📍 ปักหมุดตำแหน่งสถานที่</div>
+      <div id="pickMap"></div>
+      <div class="pick-tip">คลิกบนแผนที่ หรือลากหมุด เพื่อกรอกพิกัดอัตโนมัติ · วางพิกัด "13.58, 100.83" ในช่อง Lat ได้</div>
+    </div>
+  </div>
+  </div>
   <section id="secure" hidden>
     <div class="sec-head">
       <h2>🔒 ข้อมูลเฉพาะเจ้าหน้าที่</h2>
@@ -927,6 +1011,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   </div></div>
 </dialog>
 
+<div class="toast" id="toast" role="status"></div>
 <script>
 /* ===== ข้อมูลท้องถิ่น · ข้อมูลทั่วไปเปิดให้ทุกคน · ข้อมูลเชิงลึกต้องใส่รหัส (ตรวจที่ Apps Script ฝั่งเซิร์ฟเวอร์) ===== */
 const LOCAL_API = 'https://script.google.com/macros/s/AKfycbw2VRBIJNLuhaLTD53KgnLeKoYj42uP0uzo9rYSqmPxmKZOJJIsrl81oJZ2e9uIlr3b-Q/exec';   // ← URL เว็บแอป Apps Script ของชีตข้อมูลท้องถิ่น (ลงท้าย /exec)
@@ -1050,9 +1135,10 @@ function playOverview(head){
 $('ovPrint').addEventListener('click', ()=>print());
 /* ---------- สลับมุมมอง ภาพรวม / รายชื่อ / แผนที่ ---------- */
 function showView(v, push){
-  if(!['overview','list','map'].includes(v)) v = 'overview';
+  if(!['overview','list','map','form'].includes(v)) v = 'overview';
   const isMap = v === 'map';
-  $('panelOverview').hidden = v !== 'overview'; $('ovPrint').hidden = v !== 'overview'; $('panelList').hidden = v !== 'list'; $('panelMap').hidden = !isMap;
+  $('panelOverview').hidden = v !== 'overview'; $('ovPrint').hidden = v !== 'overview'; $('panelList').hidden = v !== 'list'; $('panelMap').hidden = !isMap; $('panelForm').hidden = v !== 'form';
+  if(v === 'form') setTimeout(initPick, 30);
   if(v !== 'list') $('secure').hidden = true; else if(S.full) $('secure').hidden = false;
   document.querySelectorAll('nav .tab').forEach(t => { const on = t.dataset.view === v; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
   if(isMap && liMap) setTimeout(()=>{ liMap.invalidateSize(); if(S.type && pinLayer.getLayers().length) liMap.fitBounds(pinLayer.getBounds(), {padding:[30,30], maxZoom:15}); else if(areaBounds) liMap.fitBounds(areaBounds, {padding:[16,16]}); }, 30);
@@ -1106,7 +1192,7 @@ $('lockBtn').addEventListener('click', ()=>{
   if(!LOCAL_API){ alertMsg('ยังไม่ได้เชื่อมต่อ Apps Script ของชีตข้อมูลท้องถิ่น'); return; }
   $('pinErr').textContent=''; $('pinInput').value=''; pinDlg.showModal(); setTimeout(()=>$('pinInput').focus(), 50);
 });
-$('pinClose').addEventListener('click', ()=>pinDlg.close());
+$('pinClose').addEventListener('click', ()=>{ pendingPlace = null; pinDlg.close(); });
 pinDlg.addEventListener('click', e=>{ if(e.target===pinDlg) pinDlg.close(); });
 $('pinForm').addEventListener('submit', async e=>{
   e.preventDefault();
@@ -1116,11 +1202,82 @@ $('pinForm').addEventListener('submit', async e=>{
     const res = await fetch(LOCAL_API, { method:'POST', body: JSON.stringify({ action:'full', pin }) });
     const j = await res.json();
     if(!j.ok) throw new Error(j.error || 'รหัสไม่ถูกต้อง');
-    S.pin = pin; S.full = j; pinDlg.close(); showSecure(true);
+    S.pin = pin; S.full = j; pinDlg.close();
+    if(pendingPlace){ const r = pendingPlace; pendingPlace = null; sendPlace(r); } else showSecure(true);
   }catch(err){
     $('pinErr').textContent = err.message === 'Failed to fetch' ? 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง' : err.message;
     const box = $('pinForm'); box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
   }finally{ btn.disabled = false; }
+});
+
+
+/* ---------- แบบฟอร์มบันทึกสถานที่ (POST action:'add' · ต้องใส่รหัส · ตรวจที่ Apps Script) ---------- */
+const PF_TYPES = ['ร้านทอง','ธนาคาร','ร้านสะดวกซื้อ','ปั้มน้ำมัน','โรงเรียน','วัด','โรงแรม'];
+const PF_EXTRA = new Set(['ร้านทอง','ปั้มน้ำมัน']);        // แท็บที่มี สถานที่ตั้ง / การป้องกัน / ระดับความปลอดภัย
+const PF_PROT = ['ลูกกรงดัด','ประตูอัตโนมัติ','สัญญาณเตือนภัย','กล้องวงจรปิด','เจ้าหน้าที่ รปภ.','การประกันภัย'];
+const PF_ZCOL = {'เขตตรวจที่ 1':'#FFD600','เขตตรวจที่ 2':'#795548','เขตตรวจที่ 3':'#F48FB1'};
+let pendingPlace = null, pmap = null, pmark = null;
+let toastT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3400); }
+$('pfType').innerHTML = PF_TYPES.map(t=>`<label><input type="radio" name="pfType" value="${esc(t)}">${ICON[t]||'📍'} ${esc(t)}</label>`).join('');
+$('pfProt').innerHTML = PF_PROT.map((t,i)=>`<label><input type="checkbox" value="${i+1}">(${i+1}) ${esc(t)}</label>`).join('');
+const pfVal = n => (document.querySelector(`#pfForm input[name="${n}"]:checked`)||{}).value || '';
+function pfSyncType(){ const x = PF_EXTRA.has(pfVal('pfType')); document.querySelector('#pfForm .pf-x').hidden = !x; document.querySelector('#pfForm .pf-x').style.display = x ? 'contents' : 'none'; }
+$('pfType').addEventListener('change', pfSyncType); pfSyncType();
+function pfCam(){ const a=parseInt($('pfCamAll').value,10), o=parseInt($('pfCamOk').value,10); $('pfCamBad').value = (a>=0 && o>=0) ? Math.max(0,a-o) : ''; }
+['pfCamAll','pfCamOk'].forEach(id=>$(id).addEventListener('input', pfCam));
+const pfInZone = (lat,lng) => { const z = AREA.find(z=>{ let ins=false; const c=z.c; for(let i=0,j=c.length-1;i<c.length;j=i++){ const [xi,yi]=c[i],[xj,yj]=c[j]; if(((yi>lat)!==(yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) ins=!ins; } return ins; }); return z ? z.name : 'นอกเขต'; };
+function initPick(){
+  if(!window.L) return;
+  if(pmap){ pmap.invalidateSize(); return; }
+  pmap = L.map('pickMap',{maxZoom:18,minZoom:10});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(pmap);
+  const zl = L.featureGroup(AREA.map(z=>{ const c=PF_ZCOL[z.name]||'#2563eb'; return L.polygon(z.c.map(([x,y])=>[y,x]),{color:c,weight:2.5,fillOpacity:.08,fillColor:c,interactive:false}); })).addTo(pmap);
+  pmap.fitBounds(zl.getBounds(),{padding:[10,10]});
+  pmap.on('click', e=>setPick(e.latlng.lat, e.latlng.lng));
+}
+function setPick(lat,lng,pan){
+  $('pfLat').value = lat.toFixed(6); $('pfLng').value = lng.toFixed(6);
+  const z = pfInZone(lat,lng), zo = $('pfZone'); zo.textContent = z; zo.classList.toggle('out', z==='นอกเขต');
+  if(!pmap) return;
+  if(!pmark){ pmark = L.marker([lat,lng],{draggable:true,icon:L.divIcon({className:'',html:'<div class="th-pin"></div>',iconSize:[30,30],iconAnchor:[15,34]})}).addTo(pmap); pmark.on('dragend',e=>{ const p=e.target.getLatLng(); setPick(p.lat,p.lng); }); }
+  else pmark.setLatLng([lat,lng]);
+  if(pan) pmap.setView([lat,lng],16);
+}
+function pfLL(){ const m = String($('pfLat').value).match(/(-?\d{1,2}\.\d+)\s*[,\s]\s*(-?\d{2,3}\.\d+)/); if(m){ $('pfLat').value=m[1]; $('pfLng').value=m[2]; } const a=parseFloat($('pfLat').value), b=parseFloat($('pfLng').value); if(isFinite(a)&&isFinite(b)) setPick(a,b,true); }
+$('pfLat').addEventListener('change', pfLL); $('pfLng').addEventListener('change', pfLL);
+$('pfMap').addEventListener('change', ()=>{ const u=$('pfMap').value; const m=u.match(/@(-?\d{1,2}\.\d+),(-?\d{2,3}\.\d+)/) || u.match(/[?&](?:q|query|ll)=(-?\d{1,2}\.\d+),\s*(-?\d{2,3}\.\d+)/) || u.match(/!3d(-?\d{1,2}\.\d+)!4d(-?\d{2,3}\.\d+)/); if(m) setPick(+m[1], +m[2], true); });
+$('pfGeo').addEventListener('click', ()=>{ if(!navigator.geolocation) return toast('อุปกรณ์นี้ไม่รองรับการหาตำแหน่ง'); navigator.geolocation.getCurrentPosition(p=>setPick(p.coords.latitude,p.coords.longitude,true), ()=>toast('หาตำแหน่งไม่ได้ ลองคลิกบนแผนที่แทน'), {enableHighAccuracy:true,timeout:10000}); });
+function pfClear(){ $('pfForm').reset(); pfSyncType(); if(pmark){ pmap.removeLayer(pmark); pmark=null; } const zo=$('pfZone'); zo.textContent='— ปักหมุดแล้วบอกให้เอง —'; zo.classList.remove('out'); }
+$('pfReset').addEventListener('click', pfClear);
+function pfRow(){
+  const v = id=>$(id).value.trim();
+  const r = { type:pfVal('pfType'), name:v('pfName'), addr:v('pfAddr'), camAll:v('pfCamAll'), camOk:v('pfCamOk'), camBad:v('pfCamBad'), guard:pfVal('pfGuard'),
+    owner:v('pfOwner'), phone:v('pfPhone').replace(/\D/g,''), lat:parseFloat(v('pfLat')), lng:parseFloat(v('pfLng')), map:v('pfMap') };
+  if(PF_EXTRA.has(r.type)){ r.mall = pfVal('pfMall'); r.level = pfVal('pfLevel'); r.prot = [...document.querySelectorAll('#pfProt input:checked')].map(i=>+i.value); }
+  if(!r.type){ toast('กรุณาเลือกประเภทสถานที่'); return null; }
+  if(!r.name){ toast('กรุณากรอกชื่อสถานที่'); $('pfName').focus(); return null; }
+  if(!r.addr){ toast('กรุณากรอกที่ตั้ง'); $('pfAddr').focus(); return null; }
+  if(+r.camOk > +r.camAll && r.camAll!==''){ toast('กล้องที่ใช้การได้ มากกว่าจำนวนทั้งหมด'); $('pfCamOk').focus(); return null; }
+  if(!isFinite(r.lat) && !r.map && !confirm('ยังไม่ได้ปักหมุดตำแหน่ง สถานที่นี้จะไม่แสดงบนแผนที่ — บันทึกต่อหรือไม่?')) return null;
+  return r;
+}
+async function sendPlace(row){
+  const btn = $('pfSave'); btn.disabled = true; btn.textContent = '⏳ กำลังบันทึก…';
+  try{
+    const j = await fetch(LOCAL_API, {method:'POST', body: JSON.stringify({action:'add', pin:S.pin, row})}).then(r=>r.json());
+    if(!j.ok){ if(j.auth || /รหัส/.test(j.error||'')){ S.pin=''; S.full=null; pendingPlace=row; $('pinErr').textContent=j.error||'รหัสไม่ถูกต้อง'; $('pinInput').value=''; pinDlg.showModal(); } else toast('⚠️ '+(j.error||'บันทึกไม่สำเร็จ')); return; }
+    pfClear(); toast(`✅ บันทึกแล้ว · แท็บ "${j.tab}" แถวที่ ${j.row}${j.sumRow?' + รวมข้อมูล':''}`);
+    if(S.full){ try{ S.full = await fetch(LOCAL_API,{method:'POST',body:JSON.stringify({action:'full',pin:S.pin})}).then(r=>r.json()); }catch(_){} }
+    load();
+  }catch(e){ toast('⚠️ ส่งข้อมูลไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
+  finally{ btn.disabled = false; btn.textContent = '💾 บันทึกสถานที่'; }
+}
+$('pfForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const row = pfRow(); if(!row) return;
+  if(!LOCAL_API) return toast('⚠️ ยังไม่ได้เชื่อมต่อ Apps Script');
+  if(!S.pin){ pendingPlace = row; $('pinErr').textContent=''; $('pinInput').value=''; pinDlg.showModal(); setTimeout(()=>$('pinInput').focus(),50); return; }
+  sendPlace(row);
 });
 
 function alertMsg(t){ const m = $('liMsg'); m.textContent = t; m.hidden = !t; }
