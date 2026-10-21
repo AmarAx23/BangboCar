@@ -1130,6 +1130,15 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 #rvDlg button[disabled]{opacity:.6;cursor:progress}
 @media (max-width:700px){ .pd-list{grid-template-columns:1fr} #rvDlg .ft input{flex-basis:100%} #rvDlg .ft .btn{flex:1;justify-content:center;white-space:nowrap} }
 @media print{ #panelPending,#rvDlg{display:none!important} }
+/* ช่องเลขบัตร + ติ๊ก "ไม่ทราบ" */
+.ff .idf{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.id-row{display:flex;gap:8px;align-items:stretch}
+.id-row > input{flex:1;min-width:0}
+.id-row > input:disabled{opacity:.55;cursor:not-allowed}
+.ff label.unk{flex:none;flex-direction:row;align-items:center;gap:7px;padding:0 14px;min-height:38px;border:1px solid var(--input-border);border-radius:8px;background:var(--surface2);cursor:pointer;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;user-select:none;transition:border-color .15s,background .15s,color .15s}
+.ff label.unk input{width:17px;height:17px;min-height:0;margin:0;padding:0;accent-color:#2563eb;cursor:pointer;flex:none}
+.ff label.unk:has(input:checked){border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
+:root[data-theme="dark"] .ff label.unk:has(input:checked){background:rgba(37,99,235,.18);color:#93c5fd}
 </style>
 </head>
 <body>
@@ -1244,7 +1253,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
           <label><span>ชื่อเล่น</span><input type="text" id="iNick"></label>
           <label><span>อายุ</span><input type="number" id="iAge" min="1" max="119" inputmode="numeric"></label>
           <label><span>เบอร์โทรศัพท์</span><input type="tel" id="iPhone" inputmode="tel" placeholder="0xx-xxx-xxxx"></label>
-          <label class="full"><span>เลขที่บัตรประชาชน</span><input type="text" id="iId" inputmode="numeric" maxlength="17" placeholder="13 หลัก"></label>
+          <div class="full idf"><span>เลขที่บัตรประชาชน</span><div class="id-row"><input type="text" id="iId" inputmode="numeric" maxlength="17" placeholder="13 หลัก" aria-label="เลขที่บัตรประชาชน"><label class="unk"><input type="checkbox" id="iIdUnk">ไม่ทราบ</label></div></div>
           <label class="full"><span>ที่อยู่ปัจจุบัน</span><input type="text" id="iAddr" placeholder="บ้านเลขที่ หมู่ ตำบล อำเภอ จังหวัด"></label>
           <label><span>ชื่อสถานที่ทำงาน / สถานศึกษา</span><input type="text" id="iWork" list="workList"><datalist id="workList"></datalist></label>
           <label><span>ระดับชั้นการศึกษา</span><input type="text" id="iEdu" list="eduList" placeholder="เลือก หรือพิมพ์เอง"><datalist id="eduList"></datalist></label>
@@ -1327,7 +1336,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
       <label><span>ชื่อเล่น</span><input id="rNick"></label>
       <label><span>อายุ</span><input type="number" id="rAge" min="1" max="119"></label>
       <label><span>เบอร์โทรศัพท์</span><input type="tel" id="rPhone"></label>
-      <label class="full"><span>เลขที่บัตรประชาชน</span><input id="rId" inputmode="numeric" maxlength="17"></label>
+      <div class="full idf"><span>เลขที่บัตรประชาชน</span><div class="id-row"><input id="rId" inputmode="numeric" maxlength="17" placeholder="13 หลัก" aria-label="เลขที่บัตรประชาชน"><label class="unk"><input type="checkbox" id="rIdUnk">ไม่ทราบ</label></div></div>
       <label class="full"><span>ที่อยู่ปัจจุบัน</span><input id="rAddr"></label>
       <label><span>สถานที่ทำงาน / สถานศึกษา</span><input id="rWork"></label>
       <label><span>ระดับชั้นการศึกษา</span><input id="rEdu" list="eduList"></label>
@@ -1392,7 +1401,7 @@ const nowHM = ()=>{ const n = new Date(); return String(n.getHours()).padStart(2
 const ageBand = a=>a==null ? 'ไม่ระบุ' : a<=15 ? 'ไม่เกิน 15 ปี' : a<=18 ? '16 – 18 ปี' : a<=25 ? '19 – 25 ปี' : '26 ปีขึ้นไป';
 const AGE_ORDER = ['ไม่เกิน 15 ปี','16 – 18 ปี','19 – 25 ปี','26 ปีขึ้นไป','ไม่ระบุ'];
 const fmtPhone = p=>{ p = String(p||''); return p.length===10 ? p.slice(0,3)+'-'+p.slice(3,6)+'-'+p.slice(6) : p; };
-const maskId = s=>{ s = String(s||''); return s.length===13 ? 'x-xxxx-xxxxx-' + s.slice(10,12) + '-' + s.slice(12) : (s ? '•••' + s.slice(-4) : ''); };
+const maskId = s=>{ s = String(s||''); if(/ไม่ทราบ/.test(s)) return 'บัตร: ไม่ทราบ'; return s.length===13 ? 'x-xxxx-xxxxx-' + s.slice(10,12) + '-' + s.slice(12) : (s ? '•••' + s.slice(-4) : ''); };
 
 async function api(body){
   return fetch(RISK_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body)}).then(r=>r.json());
@@ -1601,10 +1610,21 @@ $('iFiles').addEventListener('change', e=>{ addFiles(e.target.files); e.target.v
 $('drop').addEventListener('drop', e=>{ if(e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
 $('iReset').addEventListener('click', ()=>{ FILES = []; drawThumbs(); setTimeout(()=>{ $('iDate').value = todayISO(); $('iTime').value = nowHM(); }, 0); });
 $('iId').addEventListener('input', e=>{ const d = e.target.value.replace(/\D/g,'').slice(0,13); const p = [1,4,5,2,1]; let o = '', k = 0; for(const n of p){ if(k>=d.length) break; o += (o?'-':'') + d.slice(k, k+n); k += n; } e.target.value = o; });
+
+/* ติ๊ก "ไม่ทราบ" เลขบัตรประชาชน */
+function bindUnk(inpId, cbId){
+  const inp = $(inpId), cb = $(cbId);
+  const sync = ()=>{ inp.disabled = cb.checked; if(cb.checked){ inp.value = ''; inp.placeholder = 'ไม่ทราบ'; } else inp.placeholder = '13 หลัก'; };
+  cb.addEventListener('change', ()=>{ sync(); if(!cb.checked) inp.focus(); });
+  if(inp.form) inp.form.addEventListener('reset', ()=>setTimeout(sync, 0));
+  return sync;
+}
+bindUnk('iId','iIdUnk');
+const syncRUnk = bindUnk('rId','rIdUnk');
 function formRow(){
   const v = id=>$(id).value.trim();
   return { date:v('iDate'), time:v('iTime'), type:v('iType'), level:(document.querySelector('#iLevel input:checked')||{}).value||'',
-           name:v('iName'), nick:v('iNick'), age:v('iAge'), phone:v('iPhone').replace(/\D/g,''), idno:v('iId').replace(/\D/g,''),
+           name:v('iName'), nick:v('iNick'), age:v('iAge'), phone:v('iPhone').replace(/\D/g,''), idno:$('iIdUnk').checked ? 'ไม่ทราบ' : v('iId').replace(/\D/g,''),
            addr:v('iAddr'), work:v('iWork'), edu:v('iEdu'), weapon:v('iWeapon'), place:v('iPlace'), behave:v('iBehave') };
 }
 async function save(){
@@ -1612,7 +1632,7 @@ async function save(){
   const row = formRow();
   const miss = [['date','iDate','วันที่บันทึก'],['type','iType','ประเภทกลุ่มเสี่ยง'],['level','iLevel','ระดับความเสี่ยง'],['name','iName','ชื่อ - สกุล']].find(([k])=>!row[k]);
   if(miss){ toast('กรุณากรอก ' + miss[2]); const el = $(miss[1]); (el.querySelector('input')||el).focus(); return; }
-  if(row.idno && row.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('iId').focus(); return; }
+  if(row.idno && row.idno!=='ไม่ทราบ' && row.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('iId').focus(); return; }
   if(needPin(save)) return;
   const btn = $('iSave'); btn.disabled = true; btn.textContent = FILES.length ? '⏳ กำลังอัปโหลด…' : '⏳ กำลังบันทึก…';
   try{
@@ -1674,7 +1694,7 @@ function openReview(i){
   sel('rLevel', optsOf('level').sort((a,b)=>'rygn'.indexOf(LV(a))-'rygn'.indexOf(LV(b))), d.level, '— เลือกระดับ —');
   const set = (id, v)=>{ $(id).value = v==null ? '' : v; };
   set('rDate', d.date); set('rTime', d.time); set('rName', d.name); set('rNick', d.nick); set('rAge', d.age); set('rPhone', d.phone);
-  set('rId', d.idno); $('rId').dispatchEvent(new Event('input')); set('rAddr', d.addr); set('rWork', d.work); set('rEdu', d.edu);
+  const unk = /ไม่ทราบ/.test(d.idno||''); $('rIdUnk').checked = unk; syncRUnk(); if(!unk){ set('rId', d.idno); $('rId').dispatchEvent(new Event('input')); } set('rAddr', d.addr); set('rWork', d.work); set('rEdu', d.edu);
   set('rWeapon', d.weapon); set('rPlace', d.place); set('rBehave', d.behave); $('rvNote').value = '';
   $('rvDlg').showModal(); $('rvDlg').querySelector('.bd').scrollTop = 0;
   loadReviewPhotos(p);
@@ -1697,7 +1717,7 @@ $('rvClose').addEventListener('click', ()=>{ PD_CUR = null; $('rvDlg').close(); 
 function reviewRow(){
   const v = id=>$(id).value.trim();
   return { date:v('rDate'), time:v('rTime'), type:v('rType'), level:v('rLevel'), name:v('rName'), nick:v('rNick'), age:v('rAge'),
-           phone:v('rPhone').replace(/\D/g,''), idno:v('rId').replace(/\D/g,''), addr:v('rAddr'), work:v('rWork'), edu:v('rEdu'),
+           phone:v('rPhone').replace(/\D/g,''), idno:$('rIdUnk').checked ? 'ไม่ทราบ' : v('rId').replace(/\D/g,''), addr:v('rAddr'), work:v('rWork'), edu:v('rEdu'),
            weapon:v('rWeapon'), place:v('rPlace'), behave:v('rBehave') };
 }
 async function reviewAct(ok){
@@ -1707,7 +1727,7 @@ async function reviewAct(ok){
     const row = reviewRow();
     const miss = [['date','rDate','วันที่บันทึก'],['type','rType','ประเภทกลุ่มเสี่ยง'],['level','rLevel','ระดับความเสี่ยง'],['name','rName','ชื่อ - สกุล']].find(([k])=>!row[k]);
     if(miss){ toast('กรุณากรอก ' + miss[2]); $(miss[1]).focus(); return; }
-    if(row.idno && row.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('rId').focus(); return; }
+    if(row.idno && row.idno!=='ไม่ทราบ' && row.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('rId').focus(); return; }
     body = {action:'approve', pin:PIN, id:p.id, row};
   } else body = {action:'reject', pin:PIN, id:p.id, note:$('rvNote').value.trim()};
   const b = $(ok ? 'rvOk' : 'rvNo'), t = b.textContent; $('rvOk').disabled = $('rvNo').disabled = true; b.textContent = '⏳ กำลังบันทึก…';
