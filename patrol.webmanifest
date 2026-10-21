@@ -1,0 +1,16 @@
+{
+  "name": "ฟอร์มสายตรวจ สภ.บางบ่อ",
+  "short_name": "ฟอร์มสายตรวจ",
+  "description": "แบบฟอร์มบันทึกกลุ่มเสี่ยง สำหรับสายตรวจ",
+  "lang": "th",
+  "id": "./patrol.html",
+  "start_url": "./patrol.html",
+  "scope": "./patrol.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#ffffff",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
