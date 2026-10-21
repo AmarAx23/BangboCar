@@ -1662,7 +1662,7 @@ $('pdList').addEventListener('click', e=>{ const b = e.target.closest('[data-i]'
 $('pdUnlock').addEventListener('click', ()=>{ if(!needPin(loadPending)) loadPending(); });
 $('pdReload').addEventListener('click', ()=>{ if(!needPin(loadPending)) loadPending(); });
 $('pdLink').addEventListener('click', async ()=>{
-  const u = RISK_API + '?page=form';
+  const u = location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, '') + 'patrol.html';
   try{ await navigator.clipboard.writeText(u); toast('📋 คัดลอกลิงก์ฟอร์มสายตรวจแล้ว ส่งทาง LINE ได้เลย'); }catch(_){ window.prompt('คัดลอกลิงก์นี้', u); }
 });
 function openReview(i){
