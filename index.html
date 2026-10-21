@@ -2413,7 +2413,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const c=document
 
 
 // ===== แบบฟอร์มบันทึกเหตุรถหาย → Apps Script ของชีตรถหาย (ต้องใส่รหัส · ตรวจที่สคริปต์) =====
-const THEFT_API = '';   // ← URL เว็บแอป Apps Script ของชีตรถหาย (ลงท้าย /exec)
+const THEFT_API = 'https://script.google.com/macros/s/AKfycbwl0Y7siW8vwmKn8ofBrJf7ImflPfKVS9kLhpzb6JXF8D4tZuaXTIg574yw1-As5XA/exec';   // ← URL เว็บแอป Apps Script ของชีตรถหาย (ลงท้าย /exec)
 const $f = id=>document.getElementById(id);
 let toastT; function toast(m){ const t=$f('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3400); }
 const p2 = n=>String(n).padStart(2,'0');
