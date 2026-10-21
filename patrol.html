@@ -339,6 +339,15 @@ main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
 .a2hs-n{flex:none;width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
 .a2hs-share{display:inline-block;vertical-align:-4px;width:18px;height:18px}
 .a2hs-note{font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+/* ช่องเลขบัตร + ติ๊ก "ไม่ทราบ" */
+.ff .idf{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.id-row{display:flex;gap:8px;align-items:stretch}
+.id-row > input{flex:1;min-width:0}
+.id-row > input:disabled{opacity:.55;cursor:not-allowed}
+.ff label.unk{flex:none;flex-direction:row;align-items:center;gap:7px;padding:0 14px;min-height:38px;border:1px solid var(--input-border);border-radius:8px;background:var(--surface2);cursor:pointer;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;user-select:none;transition:border-color .15s,background .15s,color .15s}
+.ff label.unk input{width:17px;height:17px;min-height:0;margin:0;padding:0;accent-color:#2563eb;cursor:pointer;flex:none}
+.ff label.unk:has(input:checked){border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
+:root[data-theme="dark"] .ff label.unk:has(input:checked){background:rgba(37,99,235,.18);color:#93c5fd}
 </style>
 </head>
 <body>
@@ -394,7 +403,7 @@ main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
         <label><span>ชื่อเล่น</span><input id="nick"></label>
         <label><span>อายุ</span><input type="number" id="age" min="1" max="119" inputmode="numeric"></label>
         <label><span>เบอร์โทรศัพท์</span><input type="tel" id="phone" inputmode="tel" placeholder="0xx-xxx-xxxx"></label>
-        <label class="full"><span>เลขที่บัตรประชาชน</span><input id="idno" inputmode="numeric" maxlength="17" placeholder="13 หลัก"></label>
+        <div class="full idf"><span>เลขที่บัตรประชาชน</span><div class="id-row"><input id="idno" inputmode="numeric" maxlength="17" placeholder="13 หลัก" aria-label="เลขที่บัตรประชาชน"><label class="unk"><input type="checkbox" id="idnoUnk">ไม่ทราบ</label></div></div>
         <label class="full"><span>ที่อยู่ปัจจุบัน</span><input id="addr" placeholder="บ้านเลขที่ หมู่ ตำบล อำเภอ จังหวัด"></label>
         <label><span>ชื่อสถานที่ทำงาน / สถานศึกษา</span><input id="work"></label>
         <label><span>ระดับชั้นการศึกษา</span><input id="edu" list="eduList" placeholder="เลือก หรือพิมพ์เอง"><datalist id="eduList"></datalist></label>
@@ -472,6 +481,15 @@ function reveal(){
 }
 reveal();
 
+/* ติ๊ก "ไม่ทราบ" เลขบัตรประชาชน */
+function bindUnk(inpId, cbId){
+  const inp = $(inpId), cb = $(cbId);
+  const sync = ()=>{ inp.disabled = cb.checked; if(cb.checked){ inp.value = ''; inp.placeholder = 'ไม่ทราบ'; } else inp.placeholder = '13 หลัก'; };
+  cb.addEventListener('change', ()=>{ sync(); if(!cb.checked) inp.focus(); });
+  if(inp.form) inp.form.addEventListener('reset', ()=>setTimeout(sync, 0));
+  return sync;
+}
+bindUnk('idno','idnoUnk');
 let FILES = [];
 function shrink(file){
   return new Promise((res,rej)=>{
@@ -498,7 +516,7 @@ $('thumbs').addEventListener('click', e=>{ const b=e.target.closest('[data-i]');
 function row(){
   const v = id=>$(id).value.trim();
   return { by:v('by'), date:v('date'), time:v('time'), type:v('type'), level:(document.querySelector('#level input:checked')||{}).value||'',
-    name:v('name'), nick:v('nick'), age:v('age'), phone:v('phone').replace(/\D/g,''), idno:v('idno').replace(/\D/g,''),
+    name:v('name'), nick:v('nick'), age:v('age'), phone:v('phone').replace(/\D/g,''), idno:$('idnoUnk').checked ? 'ไม่ทราบ' : v('idno').replace(/\D/g,''),
     addr:v('addr'), work:v('work'), edu:v('edu'), weapon:v('weapon'), place:v('place'), behave:v('behave'), hp:v('hp') };
 }
 $('f').addEventListener('submit', e=>{
@@ -506,7 +524,7 @@ $('f').addEventListener('submit', e=>{
   const r = row();
   const miss = [['by','by','ชื่อผู้บันทึก'],['date','date','วันที่'],['type','type','ประเภทกลุ่มเสี่ยง'],['level','level','ระดับความเสี่ยง'],['name','name','ชื่อ - สกุล']].find(([k])=>!r[k]);
   if(miss){ toast('กรุณากรอก '+miss[2]); const el=$(miss[1]); (el.querySelector('input')||el).focus(); return; }
-  if(r.idno && r.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('idno').focus(); return; }
+  if(r.idno && r.idno!=='ไม่ทราบ' && r.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('idno').focus(); return; }
   try{ localStorage.setItem('patrol-by', r.by); }catch(_){}
   const b = $('send'); b.disabled = true; b.textContent = FILES.length ? '⏳ กำลังอัปโหลดรูป…' : '⏳ กำลังส่ง…';
   const reset = ()=>{ b.disabled = false; b.textContent = '📤 ส่งให้เจ้าหน้าที่ตรวจสอบ'; };
