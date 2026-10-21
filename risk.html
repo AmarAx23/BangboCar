@@ -780,22 +780,34 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @keyframes cmIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){ .cm-in{animation:none} .rp-bar i{transition:none} }
 @media (max-width:700px){ .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))} .kpi-val{font-size:24px} .kpi .ring{width:42px;height:42px} .wk-sel{min-width:0;flex:1} .st{min-width:54px} .st .tg{white-space:normal;font-size:10.5px;line-height:1.3} .mx td{padding:8px 4px} .mx td.task{min-width:120px;font-size:13px} .wh{table-layout:auto} .wh th.wk{white-space:normal;min-width:120px} .wh td{min-width:46px} }
-#pinDlg{padding:0;border:none;background:transparent;box-shadow:none;width:min(400px,92vw);overflow:visible}
-#pinDlg::backdrop{background:rgba(15,23,42,.45);backdrop-filter:blur(4px)}
-#pinDlg .login-box{position:relative;padding:40px;background:#fff;box-shadow:0 20px 45px rgba(15,23,42,.25);border:1px solid #e2e8f0;border-radius:10px;text-align:left}
-#pinDlg .lg-title{color:#0f172a;font-size:20px;font-weight:700;margin-bottom:4px}
-#pinDlg .lg-sub{color:#64748b;font-size:13px;margin-bottom:34px;line-height:1.5}
-#pinDlg .lg-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer}
-#pinDlg .user-box{position:relative}
-#pinDlg .user-box input{width:100%;padding:10px 0;font-size:16px;color:#0f172a;margin-bottom:24px;border:none;border-bottom:1px solid #94a3b8;outline:none;background:transparent;font-family:inherit;letter-spacing:3px;border-radius:0}
-#pinDlg .user-box label{position:absolute;top:0;left:0;padding:10px 0;font-size:16px;color:#64748b;pointer-events:none;transition:.5s}
-#pinDlg .user-box input:focus~label,#pinDlg .user-box input:valid~label{top:-20px;color:#2563eb;font-size:12px}
-#pinDlg .lg-err{min-height:20px;color:#dc2626;font-size:13px}
-#pinDlg .lg-send{position:relative;display:inline-block;padding:10px 22px;color:#0f172a;font-size:16px;font-weight:600;font-family:inherit;background:transparent;border:none;cursor:pointer;overflow:hidden;transition:.5s;margin-top:18px;letter-spacing:1px}
-#pinDlg .lg-send:hover,#pinDlg .lg-send:focus-visible{background:#16a34a;color:#fff;border-radius:5px;outline:none;box-shadow:0 0 5px #22c55e,0 0 20px rgba(34,197,94,.6)}
-#pinDlg .lg-send:disabled{opacity:.6;cursor:progress}
-#pinDlg .lg-send span{position:absolute;display:block;bottom:2px;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,#16a34a);animation:lgRun 2s linear infinite}
+/* PIN dialog — based on "silent-liger-75" by yashasvi9199 on Uiverse.io (MIT) */
+#pinDlg{padding:0;border:none;background:transparent;box-shadow:none;width:min(380px,92vw);max-width:none;overflow:visible;color:#fff}
+#pinDlg[open]{margin:auto;animation:pinPop .45s cubic-bezier(.34,1.56,.64,1)}
+#pinDlg::backdrop{background:rgba(2,6,23,.6);backdrop-filter:blur(4px)}
+#pinDlg[open]::backdrop{animation:pinFade .3s ease}
+#pinDlg .pl-card{background-image:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);border-radius:22px;padding:2px;transition:all .3s}
+#pinDlg .pl-card:hover{box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
+#pinDlg .pl-card2{border-radius:20px;transition:all .2s}
+#pinDlg .pl-card2:hover{transform:scale(.98)}
+#pinDlg .pl-form{display:flex;flex-direction:column;gap:10px;padding:0 2em .4em;background:#171717;border-radius:25px;transition:.4s ease-in-out;text-align:center}
+#pinDlg .lg-title{margin:1.6em 0 0;color:#fff;font-size:1.2em;font-weight:700}
+#pinDlg .lg-sub{color:#9ca3af;font-size:12.5px;line-height:1.55;margin-bottom:.8em}
+#pinDlg .pl-field{display:flex;align-items:center;justify-content:center;gap:.5em;border-radius:25px;padding:.6em .9em;border:none;outline:none;color:#fff;background:#171717;box-shadow:inset 2px 5px 10px rgb(5,5,5)}
+#pinDlg .pl-field:focus-within{box-shadow:inset 2px 5px 10px rgb(5,5,5),0 0 0 1px rgba(0,255,117,.45)}
+#pinDlg .pl-icon{height:1.3em;width:1.3em;flex:none;fill:#fff}
+#pinDlg .pl-input{background:none;border:none;outline:none;width:100%;color:#d3d3d3;font-size:16px;font-family:inherit;letter-spacing:3px;padding:0}
+#pinDlg .pl-input::placeholder{color:#6b7280;letter-spacing:normal}
+#pinDlg .lg-err{min-height:18px;color:#f87171;font-size:13px}
+#pinDlg .pl-btns{display:flex;justify-content:center;flex-direction:row;margin-top:.6em;margin-bottom:2.2em;gap:.5em}
+#pinDlg .pl-b1,#pinDlg .pl-b2{padding:.5em 1.1em;border-radius:5px;border:none;outline:none;transition:.4s ease-in-out;background-color:#252525;color:#fff;font-family:inherit;font-size:15px;cursor:pointer}
+#pinDlg .pl-b1{padding:.5em 1.6em}
+#pinDlg .pl-b1:hover,#pinDlg .pl-b1:focus-visible{background-color:#000;color:#00ff75}
+#pinDlg .pl-b2:hover,#pinDlg .pl-b2:focus-visible{background-color:#000;color:#fff}
+#pinDlg .pl-b1:disabled{opacity:.6;cursor:progress}
 #pinDlg .login-box.shake{animation:lgShake .4s}
+@keyframes pinPop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
+@keyframes pinFade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#pinDlg[open],#pinDlg[open]::backdrop{animation:none}}
 @keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%)}
@@ -1226,17 +1238,18 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   <p class="cm-note" id="szFoot" style="text-align:center;margin-top:16px"></p>
 </main>
 <dialog id="pinDlg">
-  <form class="login-box" id="pinForm" method="dialog" autocomplete="off">
-    <button type="button" class="lg-close" id="pinClose" aria-label="ปิด">✕</button>
+  <div class="pl-card"><div class="pl-card2">
+  <form class="pl-form login-box" id="pinForm" method="dialog" autocomplete="off">
     <div class="lg-title">🔒 ยืนยันเจ้าหน้าที่</div>
     <div class="lg-sub">ใส่รหัสเพื่อดูรายชื่อ / บันทึก<br>(ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์)</div>
-    <div class="user-box">
-      <input type="password" id="pinInput" required inputmode="numeric" autocomplete="off">
-      <label for="pinInput">รหัสผ่าน</label>
-    </div>
+    <div class="pl-field"><svg class="pl-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><input type="password" class="pl-input" id="pinInput" required inputmode="numeric" autocomplete="off" placeholder="รหัสผ่าน" aria-label="รหัสผ่าน"></div>
     <div class="lg-err" id="pinErr"></div>
-    <button type="submit" class="lg-send"><span></span>ยืนยัน</button>
+    <div class="pl-btns">
+      <button type="submit" class="pl-b1">ยืนยัน</button>
+      <button type="button" class="pl-b2" id="pinClose">ยกเลิก</button>
+    </div>
   </form>
+  </div></div>
 </dialog>
 <dialog id="phDlg" aria-labelledby="phTitle">
   <div class="hd"><span id="phTitle">รูปถ่ายประกอบ</span><button type="button" id="phClose" aria-label="ปิด">✕</button></div>
