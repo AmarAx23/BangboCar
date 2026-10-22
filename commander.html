@@ -957,6 +957,15 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @media print{ .ck-week,.ck-week *{animation:none!important} }
 @media print{ .ck-months,#ckNow{display:none!important} .ck-week{break-inside:avoid;box-shadow:none} .ck-side{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
 @media print{ .wk-bar,.nav-right{display:none!important} .cm-in{animation:none} .rp-bar i{transition:none} }
+/* ===== ปุ่มบันทึกภาพสัปดาห์ (PNG ความละเอียดสูง) ===== */
+.ck-week{position:relative}
+.ck-snap{position:absolute;top:-14px;right:14px;z-index:4;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text-strong);font:600 12.5px 'Prompt',sans-serif;cursor:pointer;box-shadow:0 4px 12px -4px rgba(15,23,42,.35);opacity:.92;transition:transform .15s,opacity .15s,background .15s}
+.ck-snap:hover{opacity:1;transform:translateY(-1px);background:#2563eb;color:#fff;border-color:#2563eb}
+.ck-snap:disabled{cursor:progress;opacity:.7}
+.ck-week.snapping *,.ck-week.snapping{animation:none!important;transition:none!important}
+.ck-week.snapping .ck-tbl-wrap{overflow:visible!important}
+@media print{ .ck-snap{display:none!important} }
+@media (max-width:700px){ .ck-snap .tx{display:none} .ck-snap{padding:0 10px} }
 </style>
 </head>
 <body>
@@ -1234,7 +1243,7 @@ function renderCheck(noAnim){
   $('ckSub').textContent = `${fmt(list.length)} สัปดาห์${CKM?` · ${CKM}`:''}${CMD_API?'':' · ติ๊กในชีตแล้วกดรีเฟรชหน้านี้เพื่อดูผลล่าสุด'}`;
   let k = 0, wn = 0; const dir = CK_DIR; CK_DIR = '';
   $('ckWeeks').innerHTML = list.map(({w,i})=>{ const ph = phase(w), s = stats(w);
-    return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}${dir&&!noAnim?' from-'+dir:''}" id="ckw${i}" style="--wd:${Math.min(wn++,6)*90}ms"><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
+    return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}${dir&&!noAnim?' from-'+dir:''}" id="ckw${i}" style="--wd:${Math.min(wn++,6)*90}ms"><button class="ck-snap" type="button" data-snap="${i}" title="บันทึกภาพ PNG ความละเอียดสูง สำหรับรายงาน" aria-label="บันทึกภาพสัปดาห์นี้">📷<span class="tx"> บันทึกภาพ</span></button><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
       `<div class="ck-tbl-wrap"><table class="ck-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${roleHtml(r.name)}</th>`).join('')}</tr></thead><tbody>` +
       w.tasks.map((t,ti)=>`<tr style="--rd:${ti*45}ms"><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><span class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%20)*20}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}">${NEON_IN}</span></span></td>`; }).join('')}</tr>`).join('') +
       `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
@@ -1266,6 +1275,43 @@ async function tick(p){
   }catch(err){ c.done = prev; renderCheck(true); toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ const e2 = document.querySelector(`.cb[data-w="${p.w}"][data-t="${p.t}"][data-r="${p.r}"]`); if(e2) e2.classList.remove('busy'); }
 }
+
+/* ---------- บันทึกภาพสัปดาห์เป็น PNG (ความละเอียด 3 เท่า) สำหรับรายงาน ---------- */
+let h2iP = null;
+function loadH2I(){
+  if(window.htmlToImage) return Promise.resolve();
+  return h2iP || (h2iP = new Promise((res, rej)=>{ const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'; sc.onload = res; sc.onerror = ()=>{ h2iP = null; rej(new Error('load')); }; document.head.appendChild(sc); }));
+}
+let fontCSSP = null;   // ฟอนต์ Prompt (ไทย+อังกฤษ) ฝังลงภาพ — ไม่งั้นภาพจะใช้ฟอนต์สำรอง
+function snapFontCSS(){
+  const toData = u=>fetch(u).then(r=>r.blob()).then(b=>new Promise(res=>{ const fr = new FileReader(); fr.onload = ()=>res(fr.result); fr.readAsDataURL(b); }));
+  return fontCSSP || (fontCSSP = fetch('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap').then(r=>r.text()).then(async css=>{
+    const out = [];
+    for(const b of css.split(/(?=\/\* )/).filter(b=>/\/\* (thai|latin) \*\//.test(b))){ const m = b.match(/url\((https:[^)]+)\)/); out.push(m ? b.replace(m[1], await toData(m[1])) : b); }
+    return out.join('\n');
+  }).catch(()=>{ fontCSSP = null; return undefined; }));
+}
+async function snapWeek(i, btn){
+  const sec = $('ckw'+i); if(!sec) return;
+  const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = '⏳<span class="tx"> กำลังสร้างภาพ…</span>';
+  try{
+    const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
+    try{ await document.fonts.ready; }catch(_){}
+    sec.classList.add('snapping');
+    const bg = getComputedStyle(document.body).backgroundColor || '#ffffff';
+    const opt = { pixelRatio: 3, backgroundColor: bg, fontEmbedCSS: fontCSS,
+      filter: n => !(n.classList && n.classList.contains('ck-snap')),
+      style: { margin: '0', transform: 'none' } };
+    await htmlToImage.toPng(sec, opt);                 // รอบแรกให้ฟอนต์/รูปโหลดครบ (Safari)
+    const url = await htmlToImage.toPng(sec, opt);
+    const w = W[i] || {};
+    const name = ('CHECKLIST ' + (w.label || 'สัปดาห์') + ' ' + (w.month || '')).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_').trim() + '.png';
+    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    toast('📷 บันทึกภาพแล้ว · ' + name);
+  }catch(err){ toast('⚠️ บันทึกภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+  finally{ sec.classList.remove('snapping'); btn.disabled = false; btn.innerHTML = old; }
+}
+$('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.ck-snap'); if(b){ e.stopPropagation(); snapWeek(+b.dataset.snap, b); } });
 $('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
 $('ckWeeks').addEventListener('keydown', e=>{ if((e.key===' '||e.key==='Enter') && e.target.classList.contains('can')){ e.preventDefault(); e.target.click(); } });
 $('ckMonths').addEventListener('change', e=>{ if(e.target.id!=='ckMonthSel') return; CKM = e.target.value; renderCheck(); window.scrollTo({top:0}); });
