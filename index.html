@@ -1136,7 +1136,7 @@ if(!/[?&](from|to)=/.test(location.search) && !location.hash) document.getElemen
           <div class="sec">📍 สถานที่ / ผู้เสียหาย</div>
           <label class="full"><span>สถานที่เกิดเหตุ <span class="req">*</span></span><input type="text" id="tPlace" placeholder="เช่น หน้าร้าน… ม.2 ต.บางบ่อ อ.บางบ่อ จ.สมุทรปราการ"></label>
           <label><span>ชื่อสถานที่ สำหรับสถิติ <span class="req">*</span></span><input type="text" id="tStatPlace" list="statPlaceList" placeholder="เลือกสถานที่ที่มีอยู่ หรือพิมพ์ชื่อใหม่"><datalist id="statPlaceList"></datalist><span class="st-hint" id="tStatHint"></span></label>
-          <label><span>ประเภทสถานที่เกิดเหตุ</span><select id="tPlaceType"><option value="">— เลือก (เฉพาะสถานที่ใหม่) —</option></select></label>
+          <label><span>ประเภทสถานที่เกิดเหตุ</span><input type="text" id="tPlaceType" list="placeTypeList" placeholder="เลือก หรือพิมพ์ประเภทใหม่ (เฉพาะสถานที่ใหม่)"><datalist id="placeTypeList"></datalist></label>
           <label><span>ผู้เสียหาย</span><input type="text" id="tVictim" placeholder="ชื่อ-สกุล"></label>
           <label><span>เบอร์โทรผู้เสียหาย</span><input type="tel" id="tPhone" inputmode="tel" placeholder="0xx-xxx-xxxx"></label>
           <div class="sec">🧭 พิกัด</div>
@@ -2432,9 +2432,7 @@ function fillTheftLists(){
   const locs=(TOP_LOCATIONS||[]);
   $f('statPlaceList').innerHTML=locs.map(l=>`<option value="${esc(l.location)}">`).join('');
   const types=[...new Set(['หอพัก / ที่พัก / บ้านพัก','ริมถนนสาธารณะ','สถานประกอบการ / บริษัท','วัด',...locs.map(l=>l.type).filter(Boolean)])];
-  const cur=$f('tPlaceType').value;
-  $f('tPlaceType').innerHTML='<option value="">— เลือก (เฉพาะสถานที่ใหม่) —</option>'+types.map(t=>`<option>${esc(t)}</option>`).join('');
-  if(cur) $f('tPlaceType').value=cur;
+  $f('placeTypeList').innerHTML=types.map(t=>`<option value="${esc(t)}">`).join('');
   statHint();
 }
 
@@ -2444,7 +2442,7 @@ function statHint(){
   const h=$f('tStatHint'), v=$f('tStatPlace').value.trim(), f=statFind();
   if(!v){ h.textContent=''; h.className='st-hint'; if($f('tPlaceType').dataset.auto){ $f('tPlaceType').value=''; delete $f('tPlaceType').dataset.auto; } $f('tPlaceType').disabled=false; return; }
   if(f){ h.textContent=`✓ มีอยู่แล้ว (${f.count} ครั้ง) → บันทึกแล้วจะเป็น ${f.count+1}`; h.className='st-hint old'; $f('tPlaceType').value=f.type||''; $f('tPlaceType').disabled=true; $f('tPlaceType').dataset.auto='1'; }
-  else { h.textContent='＋ สถานที่ใหม่ → กรุณาเลือกประเภทสถานที่'; h.className='st-hint new'; if($f('tPlaceType').dataset.auto){ $f('tPlaceType').value=''; delete $f('tPlaceType').dataset.auto; } $f('tPlaceType').disabled=false; }
+  else { h.textContent='＋ สถานที่ใหม่ → เลือกหรือพิมพ์ประเภทสถานที่'; h.className='st-hint new'; if($f('tPlaceType').dataset.auto){ $f('tPlaceType').value=''; delete $f('tPlaceType').dataset.auto; } $f('tPlaceType').disabled=false; }
 }
 $f('tStatPlace').addEventListener('input', statHint);
 $f('tPlace').addEventListener('blur', ()=>{ if(!$f('tStatPlace').value.trim() && $f('tPlace').value.trim()){ $f('tStatPlace').value=$f('tPlace').value.trim(); statHint(); } });
@@ -2478,12 +2476,12 @@ $f('tReset').addEventListener('click', clearTheft);
 function theftRow(){
   const v=id=>$f(id).value.trim();
   const r={date:v('tDate'),time:v('tTime'),range:$f('tRange').checked,date2:v('tDate2'),time2:v('tTime2'),brand:v('tBrand'),model:v('tModel'),color:v('tColor'),
-    plate:v('tPlate'),prov:v('tProv'),noPlate:$f('tNoPlate').checked,place:v('tPlace'),statPlace:v('tStatPlace'),placeType:$f('tPlaceType').value,victim:v('tVictim'),phone:v('tPhone').replace(/\D/g,''),
+    plate:v('tPlate'),prov:v('tProv'),noPlate:$f('tNoPlate').checked,place:v('tPlace'),statPlace:v('tStatPlace'),placeType:$f('tPlaceType').value.trim().replace(/\s+/g,' '),victim:v('tVictim'),phone:v('tPhone').replace(/\D/g,''),
     lat:parseFloat(v('tLat')),lng:parseFloat(v('tLng')),acc:v('tAcc')};
   const miss=[['date','tDate','วันที่เกิดเหตุ'],['brand','tBrand','ยี่ห้อ'],['model','tModel','รุ่น'],['place','tPlace','สถานที่เกิดเหตุ']].find(([k])=>!r[k]);
   if(miss){ toast('กรุณากรอก '+miss[2]); $f(miss[1]).focus(); return null; }
   if(!r.statPlace){ toast('กรุณากรอกชื่อสถานที่ สำหรับสถิติ'); $f('tStatPlace').focus(); return null; }
-  if(!statFind() && !r.placeType){ toast('สถานที่ใหม่ — กรุณาเลือกประเภทสถานที่เกิดเหตุ'); $f('tPlaceType').focus(); return null; }
+  if(!statFind() && !r.placeType){ toast('สถานที่ใหม่ — กรุณาเลือกหรือพิมพ์ประเภทสถานที่เกิดเหตุ'); $f('tPlaceType').focus(); return null; }
   if(r.range && !r.date2){ toast('กรุณาระบุ "ถึงวันที่"'); $f('tDate2').focus(); return null; }
   if(r.range && (r.date2+' '+r.time2) < (r.date+' '+r.time)){ toast('ช่วงเวลาไม่ถูกต้อง: "ถึง" ต้องอยู่หลัง "ตั้งแต่"'); $f('tDate2').focus(); return null; }
   if(!isFinite(r.lat)||!isFinite(r.lng)){ toast('กรุณาคลิกแผนที่เพื่อปักหมุดจุดเกิดเหตุ'); return null; }
