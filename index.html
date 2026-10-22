@@ -76,6 +76,11 @@ html.no-motion .nav-coin{animation:none}
 .hc-card:hover::after{opacity:1}
 .hc-card:focus-visible{outline:3px solid #3b82f6;outline-offset:3px}
 .hc-ico{font-size:52px;line-height:1}
+/* ตัวเลขแดง: รายการรอตรวจสอบจากสายตรวจ */
+.hc-pd{position:absolute;top:12px;right:12px;display:inline-flex;align-items:center;gap:4px;min-width:28px;height:28px;padding:0 10px;border-radius:99px;background:#dc2626;color:#fff;font-size:13px;font-weight:700;box-shadow:0 4px 12px -4px rgba(220,38,38,.7);animation:hcPulse 2.4s ease-in-out infinite;z-index:2}
+.hc-pd[hidden]{display:none}
+@keyframes hcPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.45)}50%{box-shadow:0 0 0 7px rgba(220,38,38,0)}}
+@media (prefers-reduced-motion:reduce){ .hc-pd{animation:none} }
 .hc-name{font-size:20px;font-weight:700;color:var(--text-strong)}
 .hc-desc{font-size:13px;color:var(--muted)}
 .hc-stat{font-size:13px;font-weight:600;color:var(--accent-hover);min-height:1.2em}
@@ -828,6 +833,7 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
         <span class="hc-stat" id="hcLeaveStat">งานป้องกันปราบปราม</span>
       </a>
       <a class="hc-card" id="hcLocal" href="localinfo.html">
+        <span class="hc-pd" id="hcLocalPd" data-go="localinfo.html#pending" hidden></span>
         <span class="hc-ico">📍</span>
         <span class="hc-name">ข้อมูลท้องถิ่น</span>
         <span class="hc-desc">ร้านทอง ธนาคาร ร้านสะดวกซื้อ ปั๊มน้ำมัน โรงเรียน วัด โรงแรม</span>
@@ -857,6 +863,7 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
         <span class="hc-stat">รายการ · แบบฟอร์ม</span>
       </a>
       <a class="hc-card" id="hcRisk" href="risk.html">
+        <span class="hc-pd" id="hcRiskPd" data-go="risk.html#pending" hidden></span>
         <span class="hc-ico">⚠️</span>
         <span class="hc-name">กลุ่มเสี่ยง</span>
         <span class="hc-desc">ข้อมูลบุคคลและกลุ่มเสี่ยงในพื้นที่ แยกระดับความเสี่ยง</span>
@@ -1545,7 +1552,16 @@ function setChooserStat(){
     if(!j || !j.ok || !Array.isArray(j.rows)) return;
     const types = new Set(j.rows.map(r=>r.type).filter(Boolean));
     document.getElementById('hcLocalStat').textContent = `${j.rows.length} แห่ง · ${types.size} ประเภท`;
+    hcPending('hcLocalPd', j.pending);
   }).catch(()=>{});
+  // กลุ่มเสี่ยง: จำนวนรายการรอตรวจสอบจากสายตรวจ (ตัวเลขอย่างเดียว)
+  const RISK_API = 'https://script.google.com/macros/s/AKfycbyl9CLikS0yYJ8hSHSGx4kB-jrb_TJsaIIRcsVXbyBv4IXx83rvVCOcW_dR3wAPEE9G/exec';
+  fetch(RISK_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{ if(j && j.ok) hcPending('hcRiskPd', j.pending); }).catch(()=>{});
+  function hcPending(id, n){
+    const b = document.getElementById(id); n = Number(n) || 0;
+    b.hidden = !n; b.textContent = '⏳ ' + (n > 99 ? '99+' : n); b.title = `รอตรวจสอบ ${n} รายการ — กดเพื่อไปตรวจ`;
+  }
+  document.querySelectorAll('.hc-pd[data-go]').forEach(b=>b.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); location.href = b.dataset.go; }));
 })();
 async function loadData(isAutoRefresh){
   const statusEl = document.getElementById('syncStatus');
