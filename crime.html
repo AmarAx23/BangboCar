@@ -1226,7 +1226,9 @@ function parseTheft(resp){
   return out;
 }
 let THEFT_ERR=false;
-async function loadTheft(){ try{ return parseTheft(await gvizJSONP(THEFT_SHEET,THEFT_GID)); }catch(e){ THEFT_ERR=true; return []; } }
+/* ข้อมูลรถหายอ่านผ่าน Apps Script ของชีตรถหาย (ไม่มีชื่อ/เบอร์ผู้เสียหาย) */
+const THEFT_API='https://script.google.com/macros/s/AKfycbwl0Y7siW8vwmKn8ofBrJf7ImflPfKVS9kLhpzb6JXF8D4tZuaXTIg574yw1-As5XA/exec';
+async function loadTheft(){ try{ const j=await fetch(THEFT_API+'?t='+Date.now()).then(r=>r.json()); if(!j.ok) throw new Error(j.error||''); if(!Array.isArray(j.main)) return parseTheft(await gvizJSONP(THEFT_SHEET,THEFT_GID)); return parseTheft({table:{rows:(j.main||[]).map(r=>({c:r.map(v=>({v}))}))}}); }catch(e){ THEFT_ERR=true; return []; } }
 function theftGroup(){
   let g=GROUPS.find(g=>/รถหาย|ลักรถ|รถจักรยานยนต์หาย/.test(g.name));
   if(!g){ g={no:0,name:'รถหาย',short:'รถหาย',ic:'🛵',c:'#0ea5e9',ext:true}; GROUPS.splice(GROUPS.indexOf(OTHER),0,g); GROUPS.forEach((x,i)=>x.no=i+1); GBY=Object.fromEntries(GROUPS.map(x=>[x.no,x])); }
