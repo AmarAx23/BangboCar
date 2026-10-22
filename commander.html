@@ -1104,7 +1104,16 @@ const TASK_IC = [[/ประชุม/,'🗣️'],[/อบรม|ปล่อย
 const taskIcon = t=>{ const m = TASK_IC.find(([re])=>re.test(t)); return m ? m[1] : '📋'; };
 const toAr = s=>String(s==null?'':s).replace(/[๐-๙]/g,d=>'๐๑๒๓๔๕๖๗๘๙'.indexOf(d));
 
+/* อ่านเช็คลิสต์ผ่าน Apps Script ของชีต "POLICE 4.0" (ชีตตั้งเป็น "จำกัด" ได้) · แปลงเป็นรูปแบบเดียวกับ gviz */
 function loadJSONP(){
+  const ctl = window.AbortController ? new AbortController() : null; if(ctl) setTimeout(()=>ctl.abort(), 60000);
+  return fetch(CMD_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
+    if(j && j.ok && !Array.isArray(j.rows)) return loadGviz_();   // Apps Script ยังเป็นเวอร์ชันเก่า → อ่านจากชีตแบบเดิม
+    if(!j || !j.ok) throw new Error((j && j.error) || 'โหลดข้อมูลไม่สำเร็จ');
+    return {table:{rows:j.rows.map(r=>({c:r.map(v=>v == null ? null : {v})}))}};
+  }).catch(e=>{ throw new Error(e.name === 'AbortError' ? 'หมดเวลารอข้อมูล' : e.message === 'Failed to fetch' ? 'โหลดข้อมูลไม่สำเร็จ' : e.message); });
+}
+function loadGviz_(){
   return new Promise((resolve, reject)=>{
     const cb = 'gvizCB_' + Date.now() + '_' + Math.floor(Math.random()*1e6); let done = false;
     const sc = document.createElement('script');
