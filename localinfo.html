@@ -1278,7 +1278,7 @@ $('pfFields').addEventListener('input', ()=>{
 $('pfFields').addEventListener('click', e=>{ const inp = e.target.closest('label') && e.target.closest('label').querySelector('input[type=radio]'); if(!inp || e.target!==inp) return; if(inp.dataset.was==='1'){ inp.checked=false; inp.dataset.was=''; } else { $('pfFields').querySelectorAll(`input[name="${inp.name}"]`).forEach(x=>x.dataset.was=''); inp.dataset.was='1'; } });
 const pfInZone = (lat,lng) => { const z = AREA.find(z=>{ let ins=false; const c=z.c; for(let i=0,j=c.length-1;i<c.length;j=i++){ const [xi,yi]=c[i],[xj,yj]=c[j]; if(((yi>lat)!==(yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) ins=!ins; } return ins; }); return z ? z.name : 'นอกเขต'; };
 function initPick(){
-  pfLoadSchema();
+  if(!PF_TABS.length) pfLoadSchema();   // โหลดครั้งเดียว — สลับแท็บไปมาแล้วข้อมูลที่กรอกไว้ไม่หาย
   if(!window.L) return;
   if(pmap){ pmap.invalidateSize(); return; }
   pmap = L.map('pickMap',{maxZoom:18,minZoom:10});
