@@ -1529,8 +1529,26 @@ function showView(v, push){
 document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click', ()=>showView(t.dataset.view, true)));
 showView(location.hash.slice(1));
 
-async function load(quiet){
-  const j = await fetch(ARREST_API + '?t=' + Date.now()).then(r=>r.json());
+
+/* ---------- ข้อมูลทั่วไป: แสดงชุดล่าสุดที่จำไว้ในเครื่องทันที แล้วอัปเดตเมื่อข้อมูลใหม่จาก Apps Script มาถึง ----------
+   เก็บเฉพาะข้อมูลที่ทุกคนดูได้ (ไม่มีข้อมูลที่ต้องใส่รหัส) · fresh=true = ข้ามของที่จำไว้ (หลังบันทึก/ยืนยัน) */
+function pubGet(key, url, fresh, onFresh){
+  const k = 'bb-pub:' + key, strip = j => JSON.stringify(Object.assign({}, j, {updated:0, _at:0}));
+  let c = null; if(!fresh){ try{ c = JSON.parse(localStorage.getItem(k) || 'null'); }catch(_){} }
+  const ctl = window.AbortController ? new AbortController() : null; if(ctl) setTimeout(()=>ctl.abort(), 60000);
+  const net = fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
+    if(j && j.ok){ try{ localStorage.setItem(k, JSON.stringify({at:Date.now(), j:j})); }catch(_){} } return j; });
+  if(c && c.j && c.j.ok && Date.now() - c.at < 30*864e5){
+    net.then(j=>{ if(j && j.ok) onFresh(j, strip(j) !== strip(c.j)); }).catch(()=>{ if(onFresh.fail) onFresh.fail(); });
+    return Promise.resolve(Object.assign({}, c.j, {_at:c.at}));
+  }
+  return net;
+}
+const STALE_TAG = '⏳ กำลังอัปเดตข้อมูลล่าสุด… · ';
+const hmTH = t => new Date(t).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+function szFresh(){ const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG,'').replace(/อัปเดต [^·]*?น\./, 'อัปเดต ' + hmTH(Date.now()) + ' น.'); }
+async function load(quiet, pre){
+  const j = pre || await pubGet('arrest', ARREST_API, quiet, Object.assign((f, changed)=>{ if(changed) load(true, f).then(()=>{ revealVisible(); }).catch(()=>{}); else szFresh(); }, {fail:()=>{ const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG, '⚠️ โหลดข้อมูลล่าสุดไม่สำเร็จ แสดงข้อมูลที่จำไว้ · '); }}));
   if(!j.ok) throw new Error(j.error || 'อ่านข้อมูลไม่สำเร็จ');
   R = (j.rows || []).map(r=>({...r, cats: r.cats && r.cats.length ? r.cats : ['อื่น ๆ']}));
   const yrs = uniq(R.map(r=>r.when.slice(0,4))).sort().reverse(), mos = uniq(R.map(r=>ymOf(r.when))).sort().reverse();
@@ -1544,7 +1562,7 @@ async function load(quiet){
   render();
   $('szTitle').textContent = `ทั้งหมด ${fmt(R.length)} รายการ · ข้อมูลจากชีต "ผลการจับกุม"`;
   $('szSub').textContent = `สถานีตำรวจภูธรบางบ่อ · ${fmt(R.length)} รายการ`;
-  $('szFoot').textContent = `อัปเดต ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. · หน้าทั่วไปแสดงเฉพาะสถิติ ไม่แสดงข้อมูลผู้ถูกจับกุม`;
+  $('szFoot').textContent = `${j._at ? STALE_TAG : ''}อัปเดต ${hmTH(j._at || Date.now())} น. · หน้าทั่วไปแสดงเฉพาะสถิติ ไม่แสดงข้อมูลผู้ถูกจับกุม`;
 }
 (async function boot(){
   fillForm(); drawThumbs();
