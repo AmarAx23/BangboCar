@@ -1304,15 +1304,23 @@ let afterPin = null;
 let PF_TABS = [], PF_TAB = null, pendingPlace = null, pmap = null, pmark = null;
 let toastT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3600); }
 const pfLabel = t => t.label || t.tab;
+/* รายการประเภท + หัวคอลัมน์: แสดงชุดที่จำไว้ทันที แล้วเช็กกับชีตทุกครั้ง ถ้าหัวคอลัมน์เปลี่ยน → ช่องกรอกเปลี่ยนตาม (ค่าที่กรอกอยู่ย้ายตามชื่อคอลัมน์) */
 async function pfLoadSchema(force){
   if(!LOCAL_API) return;
-  if(!force){ try{ const c = JSON.parse(sessionStorage.getItem('li-schema')||'null'); if(c && c.length){ pfSetTabs(c); return; } }catch(_){} }
+  let cached = null; try{ cached = JSON.parse(localStorage.getItem('li-schema') || 'null'); }catch(_){}
+  if(!force && cached && cached.length && !PF_TABS.length) pfSetTabs(cached);
   try{
     const j = await fetch(LOCAL_API, {method:'POST', body: JSON.stringify({action:'schema'})}).then(r=>r.json());
     if(!j.ok || !j.tabs) throw new Error(j.error||'');
-    try{ sessionStorage.setItem('li-schema', JSON.stringify(j.tabs)); }catch(_){}
-    pfSetTabs(j.tabs);
-  }catch(e){ $('pfFields').innerHTML = '<div class="pf-msg err">⚠️ โหลดรายการประเภทไม่ได้ — ต้องอัปเดต Apps Script ของชีตข้อมูลท้องถิ่น (ไฟล์ LocalAdd + doPost) แล้ว Deploy เวอร์ชันใหม่</div>'; }
+    try{ localStorage.setItem('li-schema', JSON.stringify(j.tabs)); }catch(_){}
+    if(!PF_TABS.length || JSON.stringify(j.tabs) !== JSON.stringify(PF_TABS)) pfApplyTabs(j.tabs);
+  }catch(e){ if(!PF_TABS.length) $('pfFields').innerHTML = '<div class="pf-msg err">⚠️ โหลดรายการประเภทไม่ได้ — ตรวจสอบอินเทอร์เน็ต หรือ Apps Script ของชีตข้อมูลท้องถิ่น แล้วลองใหม่</div>'; }
+}
+function pfApplyTabs(tabs){
+  const keep = PF_TAB ? PF_TAB.tab : '', byKey = {};
+  if(PF_TAB){ const cur = pfCollectLoose($('pfFields')); PF_TAB.cols.forEach(c=>{ if(cur[c.i] != null) byKey[c.group+'›'+c.name] = cur[c.i]; }); }
+  pfSetTabs(tabs);
+  if(keep){ pfPick(keep); if(PF_TAB){ const v = {}; PF_TAB.cols.forEach(c=>{ const x = byKey[c.group+'›'+c.name]; if(x != null) v[c.i] = x; }); pfFill($('pfFields'), v); } }
 }
 function pfSetTabs(tabs){
   PF_TABS = tabs;
