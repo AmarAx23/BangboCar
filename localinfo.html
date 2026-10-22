@@ -1427,7 +1427,7 @@ async function sendPlace(row){
     if(!j.ok){ if(j.auth || /รหัส/.test(j.error||'')){ S.pin=''; S.full=null; pendingPlace=row; $('pinErr').textContent=j.error||'รหัสไม่ถูกต้อง'; $('pinInput').value=''; pinDlg.showModal(); } else toast('⚠️ '+(j.error||'บันทึกไม่สำเร็จ')); return; }
     pfClear(true); toast(`✅ บันทึกแล้ว · แท็บ "${String(j.tab).trim()}" แถวที่ ${j.row}${j.sumRow?' + รวมข้อมูล':''}`);
     if(S.full){ try{ S.full = await fetch(LOCAL_API,{method:'POST',body:JSON.stringify({action:'full',pin:S.pin})}).then(r=>r.json()); }catch(_){} }
-    load();
+    load(null, true);
   }catch(e){ toast('⚠️ ส่งข้อมูลไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
   finally{ btn.disabled = false; btn.textContent = '💾 บันทึกสถานที่'; }
 }
@@ -1556,27 +1556,44 @@ async function reviewAct(ok){
     $('rvDlg').close(); PD_CUR = null;
     toast(ok ? `✅ ยืนยันแล้ว · แท็บ "${String(j.tab||'').trim()}" แถวที่ ${j.row}${j.sumRow?' + รวมข้อมูล':''}` : '❌ ไม่อนุมัติรายการนี้แล้ว');
     PD = PD.filter(x=>x!==p); pdBadge(PD.length); renderPending();
-    if(ok){ if(S.full){ try{ const f = await api({action:'full', pin:S.pin}); if(f.ok) S.full = f; }catch(_){} } load(); }
+    if(ok){ if(S.full){ try{ const f = await api({action:'full', pin:S.pin}); if(f.ok) S.full = f; }catch(_){} } load(null, true); }
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ $('rvOk').disabled = $('rvNo').disabled = false; b.textContent = t; }
 }
 $('rvOk').addEventListener('click', ()=>reviewAct(true));
 $('rvNo').addEventListener('click', ()=>reviewAct(false));
 
+/* ---------- ข้อมูลทั่วไป: แสดงชุดล่าสุดที่จำไว้ในเครื่องทันที แล้วอัปเดตเมื่อข้อมูลใหม่จาก Apps Script มาถึง ----------
+   เก็บเฉพาะข้อมูลที่ทุกคนดูได้ (ไม่มีข้อมูลที่ต้องใส่รหัส) · fresh=true = ข้ามของที่จำไว้ (หลังบันทึก/ยืนยัน) */
+function pubGet(key, url, fresh, onFresh){
+  const k = 'bb-pub:' + key, strip = j => JSON.stringify(Object.assign({}, j, {updated:0, _at:0}));
+  let c = null; if(!fresh){ try{ c = JSON.parse(localStorage.getItem(k) || 'null'); }catch(_){} }
+  const ctl = window.AbortController ? new AbortController() : null; if(ctl) setTimeout(()=>ctl.abort(), 60000);
+  const net = fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
+    if(j && j.ok){ try{ localStorage.setItem(k, JSON.stringify({at:Date.now(), j:j})); }catch(_){} } return j; });
+  if(c && c.j && c.j.ok && Date.now() - c.at < 30*864e5){
+    net.then(j=>{ if(j && j.ok) onFresh(j, strip(j) !== strip(c.j)); }).catch(()=>{ if(onFresh.fail) onFresh.fail(); });
+    return Promise.resolve(Object.assign({}, c.j, {_at:c.at}));
+  }
+  return net;
+}
+const STALE_TAG = '⏳ กำลังอัปเดตข้อมูลล่าสุด… · ';
+const hmTH = t => new Date(t).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+function liFresh(){ const e = $('liFoot'); e.textContent = e.textContent.replace(STALE_TAG,''); }
 function alertMsg(t){ const m = $('liMsg'); m.textContent = t; m.hidden = !t; }
-async function load(){
+async function load(pre, fresh){
   if(!LOCAL_API){
     alertMsg('ยังไม่ได้เชื่อมต่อข้อมูล: ต้องติดตั้ง Apps Script ในชีต "ข้อมูลท้องถิ่น 2569" แล้วใส่ URL ในไฟล์ localinfo.html (LOCAL_API)');
     renderTypes(); renderTable(); return;
   }
   $('liSub').textContent = 'สถานีตำรวจภูธรบางบ่อ · กำลังโหลดข้อมูล…';
   try{
-    const j = await fetch(LOCAL_API).then(r=>r.json());
+    const j = pre || await pubGet('local', LOCAL_API, fresh, Object.assign((f, changed)=>{ if(changed) load(f); else { liFresh(); if(typeof f.pending === 'number') pdBadge(f.pending); } }, {fail:()=>{ const e = $('liFoot'); e.textContent = e.textContent.replace(STALE_TAG, '⚠️ โหลดข้อมูลล่าสุดไม่สำเร็จ แสดงข้อมูลที่จำไว้ · '); }}));
     if(!j.ok) throw new Error(j.error || 'โหลดข้อมูลไม่สำเร็จ');
     S.rows = j.rows || [];
     if(typeof j.pending === 'number') pdBadge(j.pending);
     $('liSub').textContent = `สถานีตำรวจภูธรบางบ่อ · ${fmt(S.rows.length)} แห่ง`;
-    $('liFoot').textContent = 'ข้อมูลจากชีต "ข้อมูลท้องถิ่น 2569" · หน้านี้แสดงเฉพาะข้อมูลทั่วไป ข้อมูลเจ้าของ/ความปลอดภัยต้องใส่รหัส';
+    $('liFoot').textContent = (j._at ? STALE_TAG : '') + 'ข้อมูลจากชีต "ข้อมูลท้องถิ่น 2569" · หน้านี้แสดงเฉพาะข้อมูลทั่วไป ข้อมูลเจ้าของ/ความปลอดภัยต้องใส่รหัส';
     alertMsg('');
   }catch(err){ alertMsg('โหลดข้อมูลไม่สำเร็จ: ' + err.message); $('liSub').textContent = 'สถานีตำรวจภูธรบางบ่อ'; }
   renderTypes(); renderTable(); renderOverview();
