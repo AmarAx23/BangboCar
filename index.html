@@ -1540,27 +1540,36 @@ function setChooserStat(){
   // leave system: how many requests are waiting for approval (same Apps Script the leave site reads)
   const LEAVE_API = 'https://script.google.com/macros/s/AKfycbyvA77uO7cWUb0Z_Q2sEXd2McXqDoR2Zd0675n2kVjHGIIAq5OHEC2h9nfyMNeNeVry/exec';
   const ctl = window.AbortController ? new AbortController() : null;
-  if(ctl) setTimeout(()=>ctl.abort(), 12000);
+  if(ctl) setTimeout(()=>ctl.abort(), 30000);   // Apps Script บางครั้งตอบช้า 20–40 วิ
+  // แสดงตัวเลขรอบก่อน (จำไว้ในเครื่อง) ระหว่างรอข้อมูลใหม่
+  let HUB = {}; try{ HUB = JSON.parse(localStorage.getItem('bb-hub') || '{}') || {}; }catch(_){}
+  const hubSave = (k, v)=>{ HUB[k] = v; try{ localStorage.setItem('bb-hub', JSON.stringify(HUB)); }catch(_){} };
+  if(HUB.leave) document.getElementById('hcLeaveStat').textContent = HUB.leave;
+  if(HUB.local) document.getElementById('hcLocalStat').textContent = HUB.local;
   fetch(LEAVE_API + '?year=', ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
     if(!j || !j.ok || !Array.isArray(j.rows)) return;
     const wait = j.rows.filter(r=>r.status==='รออนุมัติ').length;
-    document.getElementById('hcLeaveStat').textContent = `ปีงบฯ ${j.year||''} · ${j.rows.length} รายการ` + (wait ? ` · รออนุมัติ ${wait}` : '');
+    const t = `ปีงบฯ ${j.year||''} · ${j.rows.length} รายการ` + (wait ? ` · รออนุมัติ ${wait}` : '');
+    document.getElementById('hcLeaveStat').textContent = t; hubSave('leave', t);
   }).catch(()=>{});
   // local info: public list only (names of places + type) — no owner/phone/security data
   const LOCAL_API = 'https://script.google.com/macros/s/AKfycbw2VRBIJNLuhaLTD53KgnLeKoYj42uP0uzo9rYSqmPxmKZOJJIsrl81oJZ2e9uIlr3b-Q/exec';
   fetch(LOCAL_API, ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
     if(!j || !j.ok || !Array.isArray(j.rows)) return;
     const types = new Set(j.rows.map(r=>r.type).filter(Boolean));
-    document.getElementById('hcLocalStat').textContent = `${j.rows.length} แห่ง · ${types.size} ประเภท`;
-    hcPending('hcLocalPd', j.pending);
+    const t = `${j.rows.length} แห่ง · ${types.size} ประเภท`;
+    document.getElementById('hcLocalStat').textContent = t; hubSave('local', t);
+    hcPending('hcLocalPd', j.pending); hubSave('localPd', Number(j.pending) || 0);
   }).catch(()=>{});
   // กลุ่มเสี่ยง: จำนวนรายการรอตรวจสอบจากสายตรวจ (ตัวเลขอย่างเดียว)
   const RISK_API = 'https://script.google.com/macros/s/AKfycbyl9CLikS0yYJ8hSHSGx4kB-jrb_TJsaIIRcsVXbyBv4IXx83rvVCOcW_dR3wAPEE9G/exec';
-  fetch(RISK_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{ if(j && j.ok) hcPending('hcRiskPd', j.pending); }).catch(()=>{});
+  fetch(RISK_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{ if(j && j.ok){ hcPending('hcRiskPd', j.pending); hubSave('riskPd', Number(j.pending) || 0); } }).catch(()=>{});
   function hcPending(id, n){
     const b = document.getElementById(id); n = Number(n) || 0;
     b.hidden = !n; b.textContent = '⏳ ' + (n > 99 ? '99+' : n); b.title = `รอตรวจสอบ ${n} รายการ — กดเพื่อไปตรวจ`;
   }
+  if(HUB.localPd) hcPending('hcLocalPd', HUB.localPd);
+  if(HUB.riskPd) hcPending('hcRiskPd', HUB.riskPd);
   document.querySelectorAll('.hc-pd[data-go]').forEach(b=>b.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); location.href = b.dataset.go; }));
 })();
 async function loadData(isAutoRefresh){
