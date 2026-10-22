@@ -526,13 +526,18 @@ const SC_KEY = 'survey-schema';
 async function pfLoadSchema(){
   let cached = null;
   try{ const c = JSON.parse(localStorage.getItem(SC_KEY)||'null'); if(c && c.tabs && c.tabs.length){ cached = c; pfSetTabs(c.tabs); } }catch(_){}
-  if(cached && Date.now() - cached.at < 6*3600*1000) return;           // ใช้ของเดิมได้ 6 ชม. (เปิดเร็ว แม้เน็ตช้า)
+  // แสดงชุดที่จำไว้ก่อน (เปิดเร็ว แม้เน็ตช้า) แล้วเช็กกับชีตทุกครั้ง → หัวคอลัมน์เปลี่ยน ช่องกรอกเปลี่ยนตาม
   try{
     const j = await fetch(LOCAL_API, {method:'POST', body: JSON.stringify({action:'schema'})}).then(r=>r.json());
     if(!j.ok || !j.tabs) throw new Error(j.error||'');
     try{ localStorage.setItem(SC_KEY, JSON.stringify({at:Date.now(), tabs:j.tabs})); }catch(_){}
     const keep = PF_TAB ? PF_TAB.tab : '';
-    if(!cached || JSON.stringify(cached.tabs) !== JSON.stringify(j.tabs)){ const vals = PF_TAB ? pfCollectLoose() : null; pfSetTabs(j.tabs); if(keep){ pfPick(keep); if(vals) pfFill($('pfFields'), vals); } }
+    if(!PF_TABS.length || JSON.stringify(PF_TABS) !== JSON.stringify(j.tabs)){
+      const byKey = {};   // ค่าที่กรอกอยู่ → ย้ายตามชื่อหัวคอลัมน์ (คอลัมน์ถูกแทรก/ย้ายก็ไม่ผิดช่อง)
+      if(PF_TAB){ const cur = pfCollectLoose(); PF_TAB.cols.forEach(c=>{ if(cur[c.i] != null) byKey[c.group+'›'+c.name] = cur[c.i]; }); }
+      pfSetTabs(j.tabs);
+      if(keep){ pfPick(keep); if(PF_TAB){ const v = {}; PF_TAB.cols.forEach(c=>{ const x = byKey[c.group+'›'+c.name]; if(x != null) v[c.i] = x; }); pfFill($('pfFields'), v); } }
+    }
   }catch(e){ if(!cached) $('pfFields').innerHTML = '<div class="pf-msg err">⚠️ โหลดรายการประเภทไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้านี้</div>'; }
 }
 function pfCollectLoose(){ const f = {}; $('pfFields').querySelectorAll('input[data-i]').forEach(x=>{ if(x.value.trim()!=='') f[x.dataset.i] = x.value.trim(); }); $('pfFields').querySelectorAll('input[data-mark]:checked').forEach(x=>f[x.dataset.mark] = '/'); return f; }
