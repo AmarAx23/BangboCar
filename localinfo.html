@@ -1024,7 +1024,18 @@ $('liSearchLbl').setAttribute('aria-hidden','true'); $('liSearch').setAttribute(
 
 const S = { rows: [], type: '', q: '', pin: '', full: null, sheet: '' };
 
-function typeIcon(t){ return ICON[t] || '📍'; }
+const ICON_RULES = [  // ไอคอนตามคำในชื่อแท็บ (เรียงจากเฉพาะ → กว้าง)
+  [/คล้ายกับสถานบริการ/,'🎤'],[/สถานบริการ/,'🍸'],[/ตกแต่ง.*(จยย|จักรยานยนต์)/,'✨'],[/ตกแต่ง/,'🚘'],
+  [/คิว.*(จยย|จักรยานยนต์)/,'🛵'],[/คิว.*ตู้/,'🚐'],[/TAXI|แท็กซี่|สามล้อ/i,'🚕'],[/จักรยาน(?!ยนต์)/,'🚲'],[/จยย|จักรยานยนต์/,'🏍️'],
+  [/เต็นท์รถ/,'🚙'],[/รถยนต์/,'🚗'],[/เครื่องประดับ/,'💎'],[/ทอง/,'💍'],[/จำนำ/,'🏷️'],[/ศูนย์การค้า|ห้าง/,'🛍️'],
+  [/ภาพยนตร์|โรงหนัง/,'🎬'],[/ของเก่า/,'🏺'],[/ราชการ|รัฐวิสาหกิจ/,'🏛️'],[/พยาบาล|โรงพยาบาล|คลินิก/,'🏥'],
+  [/สมาคม|มูลนิธิ|ชมรม/,'🤝'],[/สถานทูต|กงสุล/,'🏳️'],[/ตลาด/,'🧺'],[/สวนสนุก/,'🎡'],[/ไร่|เกษตร/,'🌾'],[/สวนสาธารณะ|สวนสัตว์/,'🌳'],
+  [/กัญชา/,'🌿'],[/นวด/,'💆'],[/อาหาร|ภัตตาคาร/,'🍜'],[/สะพาน/,'🌉'],[/ชุมชน/,'🏘️'],[/หอพัก|อพาร์ท|คอนโด/,'🏢'],[/ที่พัก/,'🏠'],
+  [/ท่าเรือ/,'⛴️'],[/รถไฟ|ขนส่ง/,'🚉'],[/สนามบิน/,'✈️'],[/ฟาร์ม/,'🐄'],[/สนาม/,'🏟️'],[/มรดก/,'🏯'],[/เขื่อน|ฝาย|อ่างเก็บน้ำ|บึง/,'💧'],
+  [/โรงงาน|นิคม/,'🏭'],[/โกดัง|คลังสินค้า/,'📦'],[/มหาวิทยาลัย|วิทยาลัย/,'🎓'],[/มัสยิด/,'🕌'],[/โบสถ์|ศาลเจ้า|ศาสนสถาน/,'⛪'],
+  [/ธนาคาร/,'🏦'],[/สะดวกซื้อ/,'🏪'],[/ปั[้๊]ม/,'⛽'],[/โรงเรียน/,'🏫'],[/วัด/,'🛕'],[/โรงแรม|รีสอร์ท/,'🏨']
+];
+function typeIcon(t){ t = String(t||'').trim(); if(ICON[t]) return ICON[t]; const r = ICON_RULES.find(([re])=>re.test(t)); return r ? r[1] : '📍'; }
 function renderTypes(){
   const counts = new Map();
   S.rows.forEach(r=>counts.set(r.type, (counts.get(r.type)||0)+1));
@@ -1221,7 +1232,7 @@ function pfSetTabs(tabs){
   $('pfTabCount').textContent = `(${tabs.length} แท็บ)`;
   const quick = PF_QUICK.map(q=>tabs.find(t=>t.tab.trim()===q || t.tab.replace(/[ั้๊]/g,'')===q.replace(/[ั้๊]/g,''))).filter(Boolean);
   $('pfType').innerHTML = quick.map(t=>`<label><input type="radio" name="pfType" value="${esc(t.tab)}">${typeIcon(pfLabel(t))} ${esc(pfLabel(t))}</label>`).join('');
-  $('pfTab').innerHTML = '<option value="">— เลือกประเภท —</option>' + tabs.map(t=>`<option value="${esc(t.tab)}">${esc(t.tab.trim())}</option>`).join('');
+  $('pfTab').innerHTML = '<option value="">— เลือกประเภท —</option>' + tabs.map(t=>`<option value="${esc(t.tab)}">${typeIcon(t.tab)} ${esc(t.tab.trim())}</option>`).join('');
   $('pfFields').innerHTML = '<div class="pf-msg">👆 เลือกประเภทสถานที่ แล้วช่องกรอกจะขึ้นตามหัวคอลัมน์ของแท็บนั้น</div>';
 }
 function pfPick(tab){
@@ -1235,7 +1246,7 @@ $('pfTab').addEventListener('change', ()=>pfPick($('pfTab').value));
 function pfRender(){
   const t = PF_TAB; if(!t){ $('pfFields').innerHTML = '<div class="pf-msg">👆 เลือกประเภทสถานที่ แล้วช่องกรอกจะขึ้นตามหัวคอลัมน์ของแท็บนั้น</div>'; return; }
   const cols = t.cols.filter(c=>c.name!=='ลำดับ' && c.name!=='ตำแหน่งที่ตั้ง');
-  let html = `<div class="sec">📍 ${esc(t.tab.trim())}</div>`, i = 0;
+  let html = `<div class="sec">${typeIcon(t.tab)} ${esc(t.tab.trim())}</div>`, i = 0;
   while(i < cols.length){
     const c = cols[i];
     if(!c.group){
