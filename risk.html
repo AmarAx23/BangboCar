@@ -1098,6 +1098,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 /* ===== รอตรวจสอบ (จากแบบฟอร์มสายตรวจ) ===== */
 .tab .pd-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:4px;border-radius:99px;background:#dc2626;color:#fff;font-size:11.5px;font-weight:700;animation:pdPulse 2.4s ease-in-out infinite}
 .tab .pd-n[hidden]{display:none}
+.tab .pd-n.z{animation:none}
 @keyframes pdPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.45)}50%{box-shadow:0 0 0 6px rgba(220,38,38,0)}}
 .pd-tools{display:flex;gap:8px;flex-wrap:wrap}
 #pdLock[hidden],#pdList[hidden]{display:none!important}
@@ -1653,7 +1654,7 @@ $('szForm').addEventListener('submit', e=>{ e.preventDefault(); save(); });
 /* ---------- รอตรวจสอบ (จากแบบฟอร์มสายตรวจ) ---------- */
 let PD = [], PD_CUR = null;
 const PIMG = {};
-function pdBadge(n){ const b = $('pdN'); b.hidden = !n; b.textContent = n > 99 ? '99+' : n; }
+function pdBadge(n){ const b = $('pdN'); n = Number(n) || 0; b.hidden = false; b.textContent = n > 99 ? '99+' : n; b.classList.toggle('z', !n); b.title = `รอตรวจสอบ ${n} รายการ`; }
 const agoTH = iso=>{ const t = new Date(iso); if(isNaN(t)) return ''; const m = Math.round((Date.now()-t)/60000);
   if(m < 1) return 'เมื่อสักครู่'; if(m < 60) return m + ' นาทีที่แล้ว'; const h = Math.round(m/60); if(h < 24) return h + ' ชม.ที่แล้ว';
   return t.getDate() + ' ' + TH_M[t.getMonth()] + ' ' + String(t.getFullYear()+543).slice(-2) + ' ' + String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0'); };
