@@ -791,6 +791,10 @@ body.form-mode .controls,body.form-mode .kpi-row,body.form-mode .print-header,bo
 @keyframes pinFade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){#pinDlg[open],#pinDlg[open]::backdrop{animation:none}}
 @keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+/* ชื่อ/เบอร์ผู้เสียหาย: แสดงเฉพาะเจ้าหน้าที่ (ใส่รหัส) */
+body:not(.th-staff) .col-vic{display:none}
+body.th-staff #vicBtn{display:none}
+#vicBtn{font-size:12.5px;padding:6px 12px;margin-left:auto}
 </style>
 </head>
 <body>
@@ -1165,6 +1169,7 @@ if(!/[?&](from|to)=/.test(location.search) && !location.hash) document.getElemen
     <div class="table-header">
       <h3>รายการเหตุทั้งหมด</h3>
       <span id="tableCount" style="font-size:12px;color:var(--muted)"></span>
+      <button class="btn btn-reset" id="vicBtn" type="button" title="ชื่อและเบอร์ผู้เสียหายแสดงเฉพาะเจ้าหน้าที่">🔒 แสดงชื่อผู้เสียหาย</button>
     </div>
     <div class="tbl-wrap">
       <table>
@@ -1175,7 +1180,7 @@ if(!/[?&](from|to)=/.test(location.search) && !location.hash) document.getElemen
             <th data-sort="date">วันที่/เวลาเกิดเหตุ<span class="arrow"></span></th>
             <th data-sort="model">รุ่นรถ<span class="arrow"></span></th>
             <th data-sort="location">สถานที่เกิดเหตุ<span class="arrow"></span></th>
-            <th data-sort="victim">ผู้เสียหาย<span class="arrow"></span></th>
+            <th data-sort="victim" class="col-vic">ผู้เสียหาย<span class="arrow"></span></th>
             <th data-sort="timeslot">ช่วงเวลา<span class="arrow"></span></th>
           </tr>
         </thead>
@@ -1572,22 +1577,41 @@ function setChooserStat(){
   if(HUB.riskPd) hcPending('hcRiskPd', HUB.riskPd);
   document.querySelectorAll('.hc-pd[data-go]').forEach(b=>b.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); location.href = b.dataset.go; }));
 })();
+/* อ่านข้อมูลรถหายผ่าน Apps Script (ชีตตั้งเป็น "จำกัด" ได้)
+   ทั่วไป = ไม่มีชื่อ/เบอร์ผู้เสียหาย · ใส่รหัสเจ้าหน้าที่แล้ว = มีคอลัมน์ผู้เสียหาย */
+var VIC_ASK = false;
+async function theftFetch(){
+  let pin = ''; try{ pin = sessionStorage.getItem('theft-pin') || ''; }catch(_){}
+  let j = null;
+  if(pin){
+    try{ j = await fetch(THEFT_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'full', pin})}).then(r=>r.json()); }catch(_){ j = null; }
+    if(j && !j.ok && j.auth){ try{ sessionStorage.removeItem('theft-pin'); }catch(_){} if(typeof PIN !== 'undefined') PIN = ''; if(VIC_ASK){ const m = j.error || 'รหัสไม่ถูกต้อง'; setTimeout(()=>{ VIC_WANT = true; openPin(m); }, 0); } }
+    if(j && !j.ok) j = null;
+  }
+  VIC_ASK = false;
+  if(!j) j = await fetch(THEFT_API + '?t=' + Date.now()).then(r=>r.json());
+  if(j && j.ok && !Array.isArray(j.main)){   // Apps Script ยังเป็นเวอร์ชันเก่า → อ่านจากชีตแบบเดิม (ใช้ได้เฉพาะตอนชีตยังเปิดแชร์)
+    const [m, l] = await Promise.all([loadSheetJSONP(SHEET_GID_MAIN), loadSheetJSONP(SHEET_GID_LOCATIONS).catch(()=>null)]);
+    return [m, l, false];
+  }
+  if(!j || !j.ok) throw new Error((j && j.error) || 'โหลดข้อมูลไม่สำเร็จ');
+  const g = rows => ({table:{rows:(rows || []).map(r=>({c:r.map(v=>({v}))}))}});
+  return [g(j.main), g(j.loc), !!j.full];
+}
 async function loadData(isAutoRefresh){
   const statusEl = document.getElementById('syncStatus');
   try{
     if(statusEl && !isAutoRefresh) statusEl.innerHTML = '<span class="live-dot busy"></span>กำลังซิงก์ข้อมูล...';
     quietRender = !!isAutoRefresh;
-    const [gvizMain, gvizLoc] = await Promise.all([
-      loadSheetJSONP(SHEET_GID_MAIN),
-      loadSheetJSONP(SHEET_GID_LOCATIONS).catch(err => { console.error('location tab load failed:', err); return null; })
-    ]);
+    const [gvizMain, gvizLoc, isStaff] = await theftFetch();
+    document.body.classList.toggle('th-staff', isStaff);
     const rows = parseSheetRows(gvizMain);
     if(rows.length === 0) throw new Error('ไม่พบข้อมูลในชีท');
     applyData(rows, gvizLoc ? parseLocationRows(gvizLoc) : []);
     const now = new Date();
     const stamp = now.toLocaleString('th-TH', {dateStyle:'long', timeStyle:'short'});
     const footerEl = document.getElementById('footerUpdated');
-    if(footerEl) footerEl.textContent = `ข้อมูล ณ วันที่ ${stamp} · สถานีตำรวจภูธรบางบ่อ (ซิงก์อัตโนมัติจาก Google Sheet)`;
+    if(footerEl) footerEl.textContent = `ข้อมูล ณ วันที่ ${stamp} · สถานีตำรวจภูธรบางบ่อ (ซิงก์อัตโนมัติจาก Google Sheet)${isStaff ? '' : ' · ชื่อ/เบอร์ผู้เสียหายแสดงเฉพาะเจ้าหน้าที่'}`;
     if(statusEl) statusEl.innerHTML = `<span class="live-dot" title="ซิงก์สดจาก Google Sheet ทุก 1 นาที"></span>อัปเดตล่าสุด ${now.toLocaleTimeString('th-TH')}`;
     quietRender = false;
     if(!firstRevealDone){
@@ -2515,8 +2539,10 @@ function theftRow(){
 let PIN=''; try{ PIN=sessionStorage.getItem('theft-pin')||''; }catch(_){}
 let pendingRow=null;
 function openPin(err){ $f('pinErr').textContent=err||''; $f('pinInput').value=''; $f('pinDlg').showModal(); setTimeout(()=>$f('pinInput').focus(),50); if(err){ const b=$f('pinForm'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
-$f('pinClose').addEventListener('click',()=>{ pendingRow=null; $f('pinDlg').close(); });
-$f('pinForm').addEventListener('submit',e=>{ e.preventDefault(); const v=$f('pinInput').value.trim(); if(!v) return; PIN=v; try{ sessionStorage.setItem('theft-pin',PIN); }catch(_){} $f('pinDlg').close(); if(pendingRow){ const r=pendingRow; pendingRow=null; sendTheft(r); } });
+$f('pinClose').addEventListener('click',()=>{ pendingRow=null; VIC_WANT=false; $f('pinDlg').close(); });
+$f('pinForm').addEventListener('submit',e=>{ e.preventDefault(); const v=$f('pinInput').value.trim(); if(!v) return; PIN=v; try{ sessionStorage.setItem('theft-pin',PIN); }catch(_){} $f('pinDlg').close(); if(pendingRow){ const r=pendingRow; pendingRow=null; sendTheft(r); } else if(VIC_WANT){ VIC_WANT=false; VIC_ASK=true; loadData(); } });
+var VIC_WANT = false;
+document.getElementById('vicBtn').addEventListener('click', ()=>{ VIC_WANT = true; pendingRow = null; openPin(); });
 async function sendTheft(row){
   const btn=$f('tSave'); btn.disabled=true; btn.textContent='⏳ กำลังบันทึก…';
   try{
@@ -2611,7 +2637,7 @@ function renderTable(data){
       <td style="font-size:12px;max-width:200px">${r.dow!==null?`<span class="dow-tag">วัน${DOW_LABELS[r.dow]}</span><br>`:''}${esc(r.date_raw)}</td>
       <td>${modelBadge(r.model)}${r.plate?`<br><span style="font-size:12px;color:var(--faint);margin-top:3px;display:inline-block">🔖 ${esc(r.plate)}</span>`:''}</td>
       <td><div class="loc-text" title="${esc(r.location)}">${esc(r.location)}</div></td>
-      <td><span style="font-size:15px;color:var(--text-2)">${esc(name)}</span>${phone?`<br><span style="font-size:13px;color:#3b82f6">📞 ${esc(phone)}</span>`:''}</td>
+      <td class="col-vic"><span style="font-size:15px;color:var(--text-2)">${esc(name)}</span>${phone?`<br><span style="font-size:13px;color:#3b82f6">📞 ${esc(phone)}</span>`:''}</td>
       <td style="font-size:14px;white-space:nowrap;color:var(--muted)">${esc(r.timeslot)}</td>
     </tr>`;
   }).join('');
