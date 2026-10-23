@@ -917,6 +917,14 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @media (max-width:700px){ .pd-list{grid-template-columns:1fr} #rvDlg .ft input{flex-basis:100%} #rvDlg .ft .btn{flex:1;justify-content:center;white-space:nowrap} }
 @media (max-width:640px){ nav .tabbar{flex-wrap:wrap;gap:8px} nav .tab{flex:1 1 30%} }
 @media print{ #panelPending,#rvDlg{display:none!important} }
+/* เตือนข้อมูลอาจซ้ำ (รอตรวจสอบ) */
+.pd-card .tg span.dup{color:#b91c1c;background:#fee2e2}
+:root[data-theme="dark"] .pd-card .tg span.dup{color:#fca5a5;background:rgba(220,38,38,.18)}
+.rv-dup{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:10px;padding:9px 12px;margin-bottom:12px;font-size:13px;line-height:1.6}
+.rv-dup b{display:block;margin-bottom:2px}
+.rv-dup ul{margin:0;padding-left:18px}
+:root[data-theme="dark"] .rv-dup{background:rgba(220,38,38,.12);border-color:#7f1d1d;color:#fecaca}
+.rv-dup[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -1051,6 +1059,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   <div class="hd"><span id="rvTitle">ตรวจสอบรายการ</span><button type="button" id="rvClose" aria-label="ปิด">✕</button></div>
   <div class="bd">
     <div class="rv-meta" id="rvMeta"></div>
+    <div class="rv-dup" id="rvDup" hidden></div>
     <form class="ff" id="rvForm" autocomplete="off" novalidate>
       <label class="full"><span>ประเภทสถานที่ (แท็บ) <span class="req">*</span></span><select id="rvTab"></select></label>
       <div id="rvFields"></div>
@@ -1469,6 +1478,25 @@ async function loadPending(){
     PD = j.rows || []; pdBadge(PD.length); renderPending();
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
 }
+/* ---------- เตือนข้อมูลอาจซ้ำ: ชื่อตรงกัน หรือพิกัดห่างไม่เกิน 25 ม. (เทียบกับสถานที่ในชีต และรายการรอตรวจอื่น) ---------- */
+const nzN = s=>String(s||'').toLowerCase().replace(/[\s\-–—_.,()'"“”\/]+/g,'');
+const distM = (a,b,c,d)=>{ const R=6371000, r=Math.PI/180, x=(d-b)*r*Math.cos((a+c)/2*r), y=(c-a)*r; return Math.sqrt(x*x+y*y)*R; };
+function pdDupes(p){
+  const r = p.row || {}, n = pdName(p), key = nzN(n.name), lat = parseFloat(r.lat), lng = parseFloat(r.lng), out = [];
+  const hasLL = r.lat !== '' && isFinite(lat) && isFinite(lng);
+  S.rows.forEach(x=>{
+    const same = key && key !== '-' && nzN(x.name) === key;
+    const d = hasLL && x.lat != null ? distM(lat, lng, +x.lat, +x.lng) : Infinity;
+    if(same) out.push(`มีในชีตแล้ว: "${x.name}" (${x.type||'-'})${x.addr?' · '+x.addr:''}`);
+    else if(d <= 25) out.push(`อยู่ห่างจาก "${x.name}" (${x.type||'-'}) ประมาณ ${Math.round(d)} ม.`);
+  });
+  PD.forEach(q=>{ if(q === p) return; const m = pdName(q), qr = q.row || {}, ql = parseFloat(qr.lat), qg = parseFloat(qr.lng);
+    const same = key && key !== '-' && nzN(m.name) === key;
+    const near = hasLL && qr.lat !== '' && isFinite(ql) && isFinite(qg) && distM(lat, lng, ql, qg) <= 25;
+    if(same || near) out.push(`ซ้ำกับรายการรอตรวจอื่น: "${m.name}" (ส่งโดย ${q.by||'-'})${near && !same ? ' · ตำแหน่งใกล้กัน' : ''}`); });
+  return out.slice(0, 6);
+}
+function showDupes(list){ const b = $('rvDup'); b.hidden = !list.length; b.innerHTML = list.length ? '<b>⚠️ ข้อมูลนี้อาจซ้ำ — ตรวจก่อนกดยืนยัน</b><ul>' + list.map(x=>'<li>'+esc(x)+'</li>').join('') + '</ul>' : ''; }
 function pdName(p){ const r = p.row || {}, t = PF_TABS.find(x=>x.tab===r.tab); const f = r.fields || {};
   const ci = n => t ? (t.cols.find(c=>c.name===n)||{}).i : (n==='ชื่อสถานที่' ? 1 : 2);
   return { name: f[ci('ชื่อสถานที่')] || '-', addr: f[ci('ที่ตั้ง')] || '' }; }
@@ -1478,7 +1506,7 @@ function renderPending(){
   $('pdList').innerHTML = PD.map((p,i)=>{ const r = p.row || {}, n = pdName(p), ll = isFinite(parseFloat(r.lat)) && r.lat!=='';
     return `<div class="pd-card${reduceMotion?'':' reveal'}" style="--d:${Math.min(i,12)*45}ms">
       <div class="nm">${esc(n.name)}</div>
-      <div class="tg"><span>${typeIcon(r.tab)} ${esc(String(r.tab||'-').trim())}</span>${ll?`<span>📍 ${esc(pfInZone(+r.lat,+r.lng))}</span>`:(r.map?'<span>🔗 มีลิงก์แผนที่</span>':'<span class="no">ยังไม่มีพิกัด</span>')}</div>
+      <div class="tg">${pdDupes(p).length?'<span class="dup">⚠️ อาจซ้ำ</span>':''}<span>${typeIcon(r.tab)} ${esc(String(r.tab||'-').trim())}</span>${ll?`<span>📍 ${esc(pfInZone(+r.lat,+r.lng))}</span>`:(r.map?'<span>🔗 มีลิงก์แผนที่</span>':'<span class="no">ยังไม่มีพิกัด</span>')}</div>
       <div class="meta">👮 ${esc(p.by||'-')} · ${esc(agoTH(p.at))}${n.addr?`<br>🏠 ${esc(n.addr)}`:''}</div>
       ${p.msg?`<div class="msg">💬 ${esc(p.msg)}</div>`:''}
       <button class="btn btn-print go" type="button" data-i="${i}">🔍 ตรวจสอบ</button></div>`; }).join('');
@@ -1537,6 +1565,7 @@ async function openReview(i){
   if(!PF_TABS.length){ toast('⏳ กำลังโหลดรายการประเภท…'); await pfLoadSchema(); if(!PF_TABS.length) return; }
   $('rvTitle').textContent = 'ตรวจสอบ · ' + pdName(p).name;
   $('rvMeta').innerHTML = `👮 ส่งโดย <b>${esc(p.by||'-')}</b> · ${esc(agoTH(p.at))} · เลขอ้างอิง ${esc(p.id)}<br>แก้ไขข้อมูลด้านล่างได้ก่อนกดยืนยัน${p.msg?`<span class="msg">💬 หมายเหตุจากสายตรวจ: ${esc(p.msg)}</span>`:''}`;
+  showDupes(pdDupes(p));
   $('rvTab').innerHTML = (PF_TABS.some(t=>t.tab===r.tab) ? '' : '<option value="">— เลือกประเภท —</option>') + PF_TABS.map(t=>`<option value="${esc(t.tab)}"${t.tab===r.tab?' selected':''}>${typeIcon(t.tab)} ${esc(t.tab.trim())}</option>`).join('');
   rvRenderTab(r.tab, r.fields || {});
   $('rvLat').value = ''; $('rvLng').value = ''; $('rvMapLink').value = r.map || ''; $('rvNote').value = '';
@@ -1605,6 +1634,7 @@ async function load(pre, fresh){
     alertMsg('');
   }catch(err){ alertMsg('โหลดข้อมูลไม่สำเร็จ: ' + err.message); $('liSub').textContent = 'สถานีตำรวจภูธรบางบ่อ'; }
   renderTypes(); renderTable(); renderOverview();
+  if(typeof PD !== 'undefined' && PD.length) renderPending();   // ข้อมูลในชีตมาแล้ว → เช็กข้อมูลซ้ำอีกรอบ
   if(!reduceMotion) [...document.querySelectorAll('.kpi, .card')].forEach((c,i)=>{ c.style.setProperty('--d', Math.min(i,10)*50+'ms'); c.classList.add('reveal'); });
 }
 load();
