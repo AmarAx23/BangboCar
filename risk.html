@@ -1141,6 +1141,14 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ff label.unk input{width:17px;height:17px;min-height:0;margin:0;padding:0;accent-color:#2563eb;cursor:pointer;flex:none}
 .ff label.unk:has(input:checked){border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
 :root[data-theme="dark"] .ff label.unk:has(input:checked){background:rgba(37,99,235,.18);color:#93c5fd}
+/* เตือนข้อมูลอาจซ้ำ (รอตรวจสอบ) */
+.pd-card .tg span.dup{color:#b91c1c;background:#fee2e2}
+:root[data-theme="dark"] .pd-card .tg span.dup{color:#fca5a5;background:rgba(220,38,38,.18)}
+.rv-dup{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:10px;padding:9px 12px;margin-bottom:12px;font-size:13px;line-height:1.6}
+.rv-dup b{display:block;margin-bottom:2px}
+.rv-dup ul{margin:0;padding-left:18px}
+:root[data-theme="dark"] .rv-dup{background:rgba(220,38,38,.12);border-color:#7f1d1d;color:#fecaca}
+.rv-dup[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -1326,6 +1334,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   <div class="hd"><span id="rvTitle">ตรวจสอบรายการ</span><button type="button" id="rvClose" aria-label="ปิด">✕</button></div>
   <div class="bd">
     <div class="rv-meta" id="rvMeta"></div>
+    <div class="rv-dup" id="rvDup" hidden></div>
     <div class="rv-ph" id="rvPh"></div>
     <form class="ff" id="rvForm" autocomplete="off" novalidate>
       <div class="sec">🗓️ การบันทึก</div>
@@ -1652,8 +1661,29 @@ $('szForm').addEventListener('submit', e=>{ e.preventDefault(); save(); });
 
 
 /* ---------- รอตรวจสอบ (จากแบบฟอร์มสายตรวจ) ---------- */
-let PD = [], PD_CUR = null;
+let PD = [], PD_CUR = null, EXIST = null;
 const PIMG = {};
+/* ---------- เตือนข้อมูลอาจซ้ำ: เทียบกับรายชื่อในชีต (โหมดเจ้าหน้าที่) และรายการรอตรวจอื่น ---------- */
+const nzP = s=>String(s||'').replace(/^\s*(นางสาว|นาย|นาง|น\.ส\.|ด\.ช\.|ด\.ญ\.|เด็กชาย|เด็กหญิง)\s*/,'').replace(/\s+/g,'').toLowerCase();
+const dg = s=>String(s||'').replace(/\D/g,'');
+async function ensureExist(){
+  if(EXIST) return;
+  if(STAFF){ EXIST = Object.values(STAFF); return; }
+  try{ const s = await api({action:'full', pin:PIN}); if(s.ok) EXIST = s.rows || []; }catch(_){}
+}
+function pdDupes(p){
+  const d = p.data || {}, nm = nzP(d.name), id = dg(d.idno), ph = dg(d.phone), out = [];
+  const chk = (x, label)=>{ const why = [];
+    if(id.length === 13 && dg(x.idno) === id) why.push('เลขบัตรประชาชน');
+    if(nm && nzP(x.name) === nm) why.push('ชื่อ - สกุล');
+    if(ph.length >= 9 && dg(x.phone) === ph) why.push('เบอร์โทร');
+    if(why.length) out.push(label + ' — ตรงกัน: ' + why.join(', ')); };
+  (EXIST || []).forEach(x=>chk(x, `มีในชีตแล้ว (แถว ${x.row}) ${x.name||''}`));
+  PD.forEach(q=>{ if(q === p) return; const e = q.data || {}; chk(e, `ซ้ำกับรายการรอตรวจอื่น: ${e.name||''} (ส่งโดย ${q.by||'-'})`); });
+  return out.slice(0, 6);
+}
+function showDupes(list){ const b = $('rvDup'); b.hidden = !list.length; b.innerHTML = list.length ? '<b>⚠️ ข้อมูลนี้อาจซ้ำ — ตรวจก่อนกดยืนยัน</b><ul>' + list.map(x=>'<li>'+esc(x)+'</li>').join('') + '</ul>' : ''; }
+
 function pdBadge(n){ const b = $('pdN'); n = Number(n) || 0; b.hidden = false; b.textContent = n > 99 ? '99+' : n; b.classList.toggle('z', !n); b.title = `รอตรวจสอบ ${n} รายการ`; }
 const agoTH = iso=>{ const t = new Date(iso); if(isNaN(t)) return ''; const m = Math.round((Date.now()-t)/60000);
   if(m < 1) return 'เมื่อสักครู่'; if(m < 60) return m + ' นาทีที่แล้ว'; const h = Math.round(m/60); if(h < 24) return h + ' ชม.ที่แล้ว';
@@ -1667,6 +1697,7 @@ async function loadPending(){
     const j = await api({action:'pending', pin:PIN});
     if(!j.ok){ if(j.auth) authFail(j, loadPending); else { $('pdList').innerHTML = ''; toast('⚠️ ' + (j.error||'โหลดไม่สำเร็จ')); } return; }
     PD = j.rows || []; pdBadge(PD.length); renderPending();
+    if(PD.length && !EXIST){ await ensureExist(); renderPending(); }
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
 }
 function renderPending(){
@@ -1675,7 +1706,7 @@ function renderPending(){
   $('pdList').innerHTML = PD.map((p,i)=>{ const d = p.data || {};
     return `<div class="pd-card reveal" style="--lv:${LV_COLOR[LV(d.level)]};animation-delay:${Math.min(i,12)*45}ms">
       <div class="nm">${esc(d.name||'-')}${d.nick?` <small>(${esc(d.nick)})</small>`:''}</div>
-      <div class="tg"><span style="color:${LV_COLOR[LV(d.level)]}">● ${esc(d.level||'-')}</span><span>${esc(d.type||'-')}</span>${d.age?`<span>${esc(d.age)} ปี</span>`:''}${(p.files||[]).length?`<span>📷 ${p.files.length}</span>`:''}</div>
+      <div class="tg">${pdDupes(p).length?'<span class="dup">⚠️ อาจซ้ำ</span>':''}<span style="color:${LV_COLOR[LV(d.level)]}">● ${esc(d.level||'-')}</span><span>${esc(d.type||'-')}</span>${d.age?`<span>${esc(d.age)} ปี</span>`:''}${(p.files||[]).length?`<span>📷 ${p.files.length}</span>`:''}</div>
       <div class="meta">👮 ${esc(p.by||'-')} · ${esc(agoTH(p.at))}<br>📅 ${d.date?dLabel(d.date):'-'}${d.place?` · 📍 ${esc(d.place)}`:''}</div>
       <button class="btn btn-staff go" type="button" data-i="${i}">🔍 ตรวจสอบ</button></div>`; }).join('');
   revealVisible();
@@ -1691,6 +1722,7 @@ function openReview(i){
   const p = PD[i]; if(!p) return; PD_CUR = p; const d = p.data || {};
   $('rvTitle').textContent = `ตรวจสอบ · ${d.name||''}`;
   $('rvMeta').innerHTML = `👮 ส่งโดย <b>${esc(p.by||'-')}</b> · ${esc(agoTH(p.at))} · เลขอ้างอิง ${esc(p.id)}<br>แก้ไขข้อมูลด้านล่างได้ก่อนกดยืนยัน`;
+  showDupes(pdDupes(p));
   const sel = (id, vals, cur, ph)=>{ const v = uniq([...(cur?[cur]:[]), ...vals]); $(id).innerHTML = (ph?`<option value="">${ph}</option>`:'') + v.map(x=>`<option${x===cur?' selected':''}>${esc(x)}</option>`).join(''); };
   sel('rType', optsOf('type'), d.type, '— เลือกประเภท —');
   sel('rLevel', optsOf('level').sort((a,b)=>'rygn'.indexOf(LV(a))-'rygn'.indexOf(LV(b))), d.level, '— เลือกระดับ —');
@@ -1739,7 +1771,7 @@ async function reviewAct(ok){
     $('rvDlg').close(); PD_CUR = null;
     toast(ok ? `✅ ยืนยันแล้ว · เข้าชีตแถวที่ ${j.row}${j.files?` · ${j.files} รูป`:''}` : '❌ ไม่อนุมัติรายการนี้แล้ว');
     PD = PD.filter(x=>x!==p); pdBadge(PD.length); renderPending();
-    if(ok) await load(true);
+    if(ok){ EXIST = null; await load(true); if(PD.length){ await ensureExist(); renderPending(); } }
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ $('rvOk').disabled = $('rvNo').disabled = false; b.textContent = t; }
 }
