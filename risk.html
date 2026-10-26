@@ -1149,25 +1149,6 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .rv-dup ul{margin:0;padding-left:18px}
 :root[data-theme="dark"] .rv-dup{background:rgba(220,38,38,.12);border-color:#7f1d1d;color:#fecaca}
 .rv-dup[hidden]{display:none}
-/* ---------- Page Transition: เปลี่ยนหน้าแบบ "การ์ดขยาย" (หน้าแรก ↔ หน้าย่อย) ----------
-   การ์ดที่กดในหน้าแรก = ชิ้น "hero" → ขยายต่อเนื่องไปเป็นหัวข้อของหน้าใหม่ · เบราว์เซอร์ที่ไม่รองรับเปลี่ยนหน้าแบบเดิม */
-@view-transition{navigation:auto}
-::view-transition-group(hero){animation-duration:.42s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
-::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
-@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
-/* ---------- Page Transition: หัวข้อหน้า = ชิ้น "hero" (รับการ์ดที่ขยายมาจากหน้าแรก) · สลับแท็บ = เลื่อนข้างตามทิศ ---------- */
-#panelList .cm-head,#panelForm .cm-head,#panelPending .cm-head{view-transition-name:hero}
-html.vt-tab main{view-transition-name:pane}
-html.vt-tab #panelList .cm-head,html.vt-tab #panelForm .cm-head,html.vt-tab #panelPending .cm-head{view-transition-name:none}
-html.vt-tab::view-transition-old(root),html.vt-tab::view-transition-new(root){animation:none}
-html.vt-tab::view-transition-old(pane){animation:.3s cubic-bezier(.2,.8,.2,1) both vtOutL}
-html.vt-tab::view-transition-new(pane){animation:.3s cubic-bezier(.2,.8,.2,1) both vtInR}
-html.vt-tab.vt-rev::view-transition-old(pane){animation-name:vtOutR}
-html.vt-tab.vt-rev::view-transition-new(pane){animation-name:vtInL}
-@keyframes vtOutL{to{transform:translateX(-24%);opacity:0}}
-@keyframes vtInR{from{transform:translateX(40%);opacity:0}}
-@keyframes vtOutR{to{transform:translateX(24%);opacity:0}}
-@keyframes vtInL{from{transform:translateX(-40%);opacity:0}}
 /* ---------- Skeleton loading: กล่องเทาแสงวิ่ง (เปิดครั้งแรก) · ข้อมูลเดิมจาง+แสงวิ่ง (กำลังอัปเดต) ---------- */
 :root{--skg:linear-gradient(90deg,var(--border) 25%,color-mix(in srgb,var(--border),#fff 45%) 45%,var(--border) 65%)}
 :root[data-theme="dark"]{--skg:linear-gradient(90deg,var(--border) 25%,color-mix(in srgb,var(--border),#fff 12%) 45%,var(--border) 65%)}
@@ -1191,6 +1172,12 @@ html.vt-tab.vt-rev::view-transition-new(pane){animation-name:vtInL}
 @keyframes skUp{from{opacity:0;transform:translateY(8px)}}
 .sz-tbl tr.sk-tr td{padding-top:12px;padding-bottom:12px}
 @media (prefers-reduced-motion:reduce){.skb,.mcol .c i.skb,.sk-msg .dot,.sk-card,.sk-stale .kpi::before,.sk-stale .sz-grid .card::before{animation:none}}
+/* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
+html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:tabFade .28s ease both}
+@keyframes tabFade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
 </head>
 <body>
@@ -1852,16 +1839,7 @@ function showView(v, push){
   if(v==='list' && R.length) render();
   if(R.length){ revealVisible(); playAnim(); }
 }
-const VIEWS = ['list', 'form', 'pending'];
-function switchView(v){                                         // สลับแท็บแบบเลื่อนข้าง (ไปขวา = แท็บถัดไป)
-  if(v === VIEW) return;
-  const de = document.documentElement;
-  if(!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return showView(v, true);
-  de.classList.add('vt-tab'); de.classList.toggle('vt-rev', VIEWS.indexOf(v) < VIEWS.indexOf(VIEW));
-  const tr = document.startViewTransition(()=>showView(v, true));
-  tr.finished.finally(()=>de.classList.remove('vt-tab', 'vt-rev'));
-}
-document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click', ()=>switchView(t.dataset.view)));
+document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click', ()=>showView(t.dataset.view, true)));
 showView(location.hash.slice(1));
 
 
@@ -1931,5 +1909,6 @@ async function load(quiet, pre){
   }
 })();
 </script>
+<script>/* สลับแท็บ: เนื้อหาจางเข้า */document.addEventListener('click',e=>{ if(e.target.closest('[data-view]')) document.documentElement.classList.add('tabbed'); },true);</script>
 </body>
 </html>
