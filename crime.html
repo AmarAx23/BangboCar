@@ -971,6 +971,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
+<script src="fx.js"></script>
 </head>
 <body>
 <nav>
@@ -1583,7 +1584,7 @@ $('csvBtn').onclick=()=>{
 
 /* ---------- บันทึกเหตุ ---------- */
 let pmap,pmark;
-function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3200); }
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3200);  BB.toastHaptic(m); }
 function setPick(lat,lng,pan){ $('iLat').value=lat.toFixed(6); $('iLng').value=lng.toFixed(6); const z=zoneOf(lat,lng); $('pickZone').textContent='→ '+z; $('pickZone').style.color=z==='นอกเขต'?'#dc2626':'';
   if(z!=='นอกเขต') $('iZone').value=z;
   const g=groupOf($('iGroup').value);
@@ -1681,7 +1682,8 @@ let DEF_DAYS=30;
 (async function boot(){
   const h0=location.hash.slice(1); if(h0==='form'||h0==='report') showView(h0);
   setNow();
-  await loadData();
+  if(CRIME_API){ BB.skelCards($('viewDash'), true); BB.skelMap($('crMap'), '🗺️ กำลังโหลดแผนที่และจุดเกิดเหตุ…'); }   // skeleton (fx.js)
+  try{ await loadData(); } finally { BB.skelCardsOff(); }
   // ข้อมูลจริงยังน้อย → เปิดมาเป็นช่วง 90 วัน
   if(LIVE && INC.filter(r=>r.t>TODAY-30*DAY).length<20) DEF_DAYS=90;
   document.querySelectorAll('#quick button').forEach(x=>x.classList.toggle('on',x.dataset.d===String(DEF_DAYS)));
