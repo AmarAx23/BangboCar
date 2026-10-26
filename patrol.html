@@ -320,6 +320,8 @@ main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
 :root[data-theme="dark"] .done .ic{background:#14532d;color:#86efac}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
 .done h2{font-size:20px;color:var(--text-strong);margin-bottom:6px}.done p{color:var(--muted);line-height:1.6;margin-bottom:18px}
+.done.queued .ic{background:#fef3c7;color:#b45309}
+:root[data-theme="dark"] .done.queued .ic{background:#3a2f12;color:#f0c55a}
 @media (prefers-reduced-motion:reduce){ .reveal,.done .ic,.nav-coin{animation:none!important} }
 [hidden]{display:none!important}
 
@@ -356,6 +358,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
 <script src="fx.js"></script>
+<script src="outbox.js"></script>
 </head>
 <body>
 <nav>
@@ -429,9 +432,9 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
     <div class="note">หน้านี้ใช้ส่งข้อมูลอย่างเดียว ไม่แสดงข้อมูลที่ส่งไปแล้ว</div></div>
   </form>
   <div class="card done" id="done" hidden>
-    <div class="ic">✓</div>
-    <h2>ส่งข้อมูลเรียบร้อย</h2>
-    <p>รอเจ้าหน้าที่ตรวจสอบและยืนยัน<br><span id="doneId" style="font-size:12.5px"></span></p>
+    <div class="ic" id="doneIc">✓</div>
+    <h2 id="doneH">ส่งข้อมูลเรียบร้อย</h2>
+    <p><span id="doneP">รอเจ้าหน้าที่ตรวจสอบและยืนยัน</span><br><span id="doneId" style="font-size:12.5px"></span></p>
     <button class="btn btn-print send" id="again" type="button">➕ บันทึกรายการใหม่</button>
   </div>
 </main>
@@ -469,7 +472,8 @@ $('date').value = today(); $('time').value = nowHM();
 try{ $('by').value = localStorage.getItem('patrol-by') || ''; }catch(_){}
 /* ส่งข้อมูลผ่าน Apps Script ของชีตกลุ่มเสี่ยง (ตัวเดียวกับหน้า risk.html) · สายตรวจส่งได้อย่างเดียว อ่านข้อมูลไม่ได้ */
 const RISK_API = 'https://script.google.com/macros/s/AKfycbyl9CLikS0yYJ8hSHSGx4kB-jrb_TJsaIIRcsVXbyBv4IXx83rvVCOcW_dR3wAPEE9G/exec';
-fetch(RISK_API + '?t=' + Date.now()).then(r=>r.json()).then(j=>{ if(j && j.ok) fill(j.opts); }).catch(()=>{});
+try{ const o = JSON.parse(localStorage.getItem('patrol-opts') || 'null'); if(o) fill(o); }catch(_){}       // ตัวเลือกที่จำไว้ (ใช้ตอนไม่มีสัญญาณ)
+fetch(RISK_API + '?t=' + Date.now()).then(r=>r.json()).then(j=>{ if(j && j.ok){ fill(j.opts); try{ localStorage.setItem('patrol-opts', JSON.stringify(j.opts)); }catch(_){} } }).catch(()=>{});
 
 $('idno').addEventListener('input', e=>{ const d=e.target.value.replace(/\D/g,'').slice(0,13), p=[1,4,5,2,1]; let o='',k=0; for(const n of p){ if(k>=d.length) break; o+=(o?'-':'')+d.slice(k,k+n); k+=n; } e.target.value=o; });
 
@@ -533,24 +537,34 @@ $('f').addEventListener('submit', e=>{
   if(miss){ toast('กรุณากรอก '+miss[2]); const el=$(miss[1]); (el.querySelector('input')||el).focus(); return; }
   if(r.idno && r.idno!=='ไม่ทราบ' && r.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('idno').focus(); return; }
   try{ localStorage.setItem('patrol-by', r.by); }catch(_){}
-  const b = $('send'); b.disabled = true; b.textContent = FILES.length ? '⏳ กำลังอัปโหลดรูป…' : '⏳ กำลังส่ง…';
-  const reset = ()=>{ b.disabled = false; b.textContent = '📤 ส่งให้เจ้าหน้าที่ตรวจสอบ'; };
-  fetch(RISK_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'submit', row:r, files:FILES.map(f=>({type:f.type,data:f.data}))})})
-    .then(x=>x.json())
+  const b = $('send'); b.disabled = true; b.textContent = !BBQ.online() ? '💾 กำลังเก็บไว้ในเครื่อง…' : FILES.length ? '⏳ กำลังอัปโหลดรูป…' : '⏳ กำลังส่ง…';
+  const cid = BBQ.newId(); r.cid = cid;
+  OBX.submit({cid, url:RISK_API, body:{action:'submit', row:r, files:FILES.map(f=>({type:f.type,data:f.data}))}, label:r.name + ' · ' + r.type, files:FILES.length})
     .then(res=>{
-      reset();
-      if(!res || !res.ok){ toast('⚠️ ' + (res && res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
-      BB.haptic('ok'); $('f').hidden = true; $('done').hidden = false; $('doneId').textContent = 'เลขอ้างอิง ' + (res.id || '');
-      window.scrollTo({top:0,behavior:'smooth'}); reveal();
-    })
-    .catch(()=>{ reset(); toast('⚠️ เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); });
+      b.disabled = false; b.textContent = SEND_LABEL; OBX.draw();
+      if(!res.ok && !res.queued){ toast('⚠️ ' + (res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
+      showDone(res);
+    });
 });
+const SEND_LABEL = '📤 ส่งให้เจ้าหน้าที่ตรวจสอบ';
+function showDone(res){
+  const q = !!res.queued;
+  BB.haptic('ok'); $('f').hidden = true; $('done').hidden = false; $('done').classList.toggle('queued', q);
+  $('doneIc').textContent = q ? '💾' : '✓';
+  $('doneH').textContent = q ? 'บันทึกไว้ในเครื่องแล้ว' : 'ส่งข้อมูลเรียบร้อย';
+  $('doneP').textContent = q ? 'สัญญาณไม่พอส่ง ระบบจะส่งให้เองเมื่อกลับมามีสัญญาณ ไม่ต้องกรอกใหม่' : 'รอเจ้าหน้าที่ตรวจสอบและยืนยัน';
+  $('doneId').textContent = q ? 'ดูรายการที่รอส่งได้ที่กล่องด้านบน · อย่าล้างข้อมูลเบราว์เซอร์ก่อนส่งเสร็จ' : 'เลขอ้างอิง ' + (res.id || '');
+  window.scrollTo({top:0,behavior:'smooth'}); reveal();
+}
 $('again').addEventListener('click', ()=>{
   const keep = {by:$('by').value, date:$('date').value, type:$('type').value};
   $('f').reset(); FILES=[]; drawThumbs();
   $('by').value = keep.by; $('date').value = keep.date; $('time').value = nowHM(); $('type').value = keep.type;
-  $('done').hidden = true; $('f').hidden = false; window.scrollTo({top:0}); reveal(); $('name').focus();
+  $('done').hidden = true; $('f').hidden = false; OBX.draw(); window.scrollTo({top:0}); reveal(); $('name').focus();
 });
+/* กล่องรอส่ง: ไม่มีสัญญาณ → เก็บไว้ในเครื่อง แล้วส่งให้เองเมื่อกลับมาออนไลน์ (outbox.js) */
+const OBX = BBQ.ui({kind:'patrol', mount:$('f'), btn:$('send'), label:SEND_LABEL, toast});
+BBQ.installSW('./patrol');
 
 /* ---------- เพิ่มลงหน้าจอโฮม (iPhone: บอกขั้นตอน · Android: ติดตั้งได้ถ้าเบราว์เซอร์รองรับ) ---------- */
 (function(){
