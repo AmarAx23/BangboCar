@@ -916,6 +916,13 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 #rvDlg button[disabled]{opacity:.6;cursor:progress}
 @media (max-width:700px){ .pd-list{grid-template-columns:1fr} #rvDlg .ft input{flex-basis:100%} #rvDlg .ft .btn{flex:1;justify-content:center;white-space:nowrap} }
 @media (max-width:640px){ nav .tabbar{flex-wrap:wrap;gap:8px} nav .tab{flex:1 1 30%} }
+#rvDlg .rv-ph{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}
+#rvDlg .rv-ph:empty{display:none}
+#rvDlg .rv-ph img{height:150px;max-width:240px;border-radius:10px;object-fit:cover;background:var(--surface2);cursor:zoom-in;flex:none}
+#rvDlg .rv-ph .msg{font-size:13px;color:var(--muted)}
+#phDlg{border:0;padding:0;background:transparent;max-width:96vw;max-height:94vh;margin:auto}
+#phDlg::backdrop{background:rgba(15,23,42,.82)}
+#phDlg img{display:block;max-width:96vw;max-height:94vh;border-radius:12px;cursor:zoom-out}
 @media print{ #panelPending,#rvDlg{display:none!important} }
 /* เตือนข้อมูลอาจซ้ำ (รอตรวจสอบ) */
 .pd-card .tg span.dup{color:#b91c1c;background:#fee2e2}
@@ -1067,6 +1074,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
   <div class="bd">
     <div class="rv-meta" id="rvMeta"></div>
     <div class="rv-dup" id="rvDup" hidden></div>
+    <div class="rv-ph" id="rvPh"></div>
     <form class="ff" id="rvForm" autocomplete="off" novalidate>
       <label class="full"><span>ประเภทสถานที่ (แท็บ) <span class="req">*</span></span><select id="rvTab"></select></label>
       <div id="rvFields"></div>
@@ -1084,6 +1092,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
     <button class="btn btn-ok" type="button" id="rvOk">✅ ยืนยัน เข้าชีต</button>
   </div>
 </dialog>
+<dialog id="phDlg" aria-label="รูปถ่ายสถานที่"><img id="phImg" alt="รูปถ่ายสถานที่"></dialog>
 <dialog id="pinDlg">
   <div class="pl-card"><div class="pl-card2">
   <form class="pl-form login-box" id="pinForm" method="dialog" autocomplete="off">
@@ -1514,7 +1523,7 @@ function renderPending(){
   $('pdList').innerHTML = PD.map((p,i)=>{ const r = p.row || {}, n = pdName(p), ll = isFinite(parseFloat(r.lat)) && r.lat!=='';
     return `<div class="pd-card${reduceMotion?'':' reveal'}" style="--d:${Math.min(i,12)*45}ms">
       <div class="nm">${esc(n.name)}</div>
-      <div class="tg">${pdDupes(p).length?'<span class="dup">⚠️ อาจซ้ำ</span>':''}<span>${typeIcon(r.tab)} ${esc(String(r.tab||'-').trim())}</span>${ll?`<span>📍 ${esc(pfInZone(+r.lat,+r.lng))}</span>`:(r.map?'<span>🔗 มีลิงก์แผนที่</span>':'<span class="no">ยังไม่มีพิกัด</span>')}</div>
+      <div class="tg">${pdDupes(p).length?'<span class="dup">⚠️ อาจซ้ำ</span>':''}<span>${typeIcon(r.tab)} ${esc(String(r.tab||'-').trim())}</span>${ll?`<span>📍 ${esc(pfInZone(+r.lat,+r.lng))}</span>`:(r.map?'<span>🔗 มีลิงก์แผนที่</span>':'<span class="no">ยังไม่มีพิกัด</span>')}${(p.files||[]).length?`<span>📷 ${p.files.length} รูป</span>`:''}</div>
       <div class="meta">👮 ${esc(p.by||'-')} · ${esc(agoTH(p.at))}${n.addr?`<br>🏠 ${esc(n.addr)}`:''}</div>
       ${p.msg?`<div class="msg">💬 ${esc(p.msg)}</div>`:''}
       <button class="btn btn-print go" type="button" data-i="${i}">🔍 ตรวจสอบ</button></div>`; }).join('');
@@ -1578,12 +1587,29 @@ async function openReview(i){
   rvRenderTab(r.tab, r.fields || {});
   $('rvLat').value = ''; $('rvLng').value = ''; $('rvMapLink').value = r.map || ''; $('rvNote').value = '';
   $('rvDlg').showModal(); $('rvDlg').querySelector('.bd').scrollTop = 0;
+  loadReviewPhotos(p);
   rvInitMap();
   const lat = parseFloat(r.lat), lng = parseFloat(r.lng);
   if(isFinite(lat) && isFinite(lng) && r.lat!=='') rvSetPick(lat, lng, true);
   else { rvSetPick(NaN, NaN); if(rvMap && rvMap._zb) rvMap.fitBounds(rvMap._zb, {padding:[8,8]}); if(r.map) $('rvMapLink').dispatchEvent(new Event('change')); }
 }
 $('rvClose').addEventListener('click', ()=>{ PD_CUR = null; $('rvDlg').close(); });
+/* รูปถ่ายจากแบบสำรวจ (ไม่บังคับ) · โหลดผ่าน Apps Script ด้วยรหัสเจ้าหน้าที่ · ไม่มีรูป = ไม่แสดงอะไร */
+const PIMG = {}, driveId = u=>(String(u).match(/[-\w]{25,}/)||[])[0];
+async function loadReviewPhotos(p){
+  const ids = [...new Set((p.files||[]).map(driveId).filter(Boolean))].slice(0, 4);
+  if(!ids.length){ $('rvPh').innerHTML = ''; return; }
+  $('rvPh').innerHTML = `<span class="msg">⏳ กำลังโหลดรูป ${ids.length} รูป…</span>`;
+  const out = [];
+  for(const id of ids){
+    if(!(id in PIMG)){ try{ const j = await api({action:'pimg', pin:S.pin, id}); PIMG[id] = j.ok ? `data:${j.mime};base64,${j.data}` : null; }catch(_){ PIMG[id] = null; } }
+    if(PIMG[id]) out.push(PIMG[id]);
+  }
+  if(PD_CUR !== p) return;
+  $('rvPh').innerHTML = out.length ? out.map(u=>`<img src="${u}" alt="รูปถ่ายสถานที่">`).join('') : '<span class="msg">📷 โหลดรูปไม่ได้ (อัปเดต Apps Script ไฟล์ LocalPending แล้วหรือยัง)</span>';
+}
+$('rvPh').addEventListener('click', e=>{ const im = e.target.closest('img'); if(!im) return; $('phImg').src = im.src; $('phDlg').showModal(); });
+$('phDlg').addEventListener('click', ()=>$('phDlg').close());
 async function reviewAct(ok){
   const p = PD_CUR; if(!p) return;
   let body;
