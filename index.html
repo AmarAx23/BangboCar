@@ -795,12 +795,12 @@ body.form-mode .controls,body.form-mode .kpi-row,body.form-mode .print-header,bo
 body:not(.th-staff) .col-vic{display:none}
 body.th-staff #vicBtn{display:none}
 #vicBtn{font-size:12.5px;padding:6px 12px;margin-left:auto}
-/* ---------- Page Transition: เปลี่ยนหน้าแบบ "การ์ดขยาย" (หน้าแรก ↔ หน้าย่อย) ----------
-   การ์ดที่กดในหน้าแรก = ชิ้น "hero" → ขยายต่อเนื่องไปเป็นหัวข้อของหน้าใหม่ · เบราว์เซอร์ที่ไม่รองรับเปลี่ยนหน้าแบบเดิม */
+/* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
 @view-transition{navigation:auto}
-::view-transition-group(hero){animation-duration:.42s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
-@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:tabFade .28s ease both}
+@keyframes tabFade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
 </head>
 <body>
@@ -2904,28 +2904,6 @@ setInterval(()=>loadData(true), REFRESH_MS);
   });
   document.getElementById('a2hsClose').addEventListener('click', () => dlg.close());
   dlg.addEventListener('click', e => { if(e.target === dlg) dlg.close(); });
-})();
-</script>
-<script>
-/* Page Transition (การ์ดขยาย): ตั้งชื่อ hero ให้การ์ดที่กด · ตอนกดกลับมาหน้าแรก ให้การ์ดของหน้าที่เพิ่งออกมาหดกลับเข้าที่ */
-(function(){
-  const cards = ()=>[...document.querySelectorAll('a.hc-card')].filter(a=>a.origin === location.origin);
-  const clear = ()=>cards().forEach(a=>a.style.viewTransitionName = '');
-  const fileOf = u=>{ try{ return new URL(u, location.href).pathname.split('/').pop(); }catch(_){ return ''; } };
-  document.addEventListener('click', e=>{
-    const a = e.target.closest('a.hc-card, [data-go]'); if(!a) return;
-    const card = a.closest('a.hc-card'); if(!card || card.origin !== location.origin) return;
-    clear(); card.style.viewTransitionName = 'hero';
-  }, true);
-  addEventListener('pageshow', clear);
-  addEventListener('pagereveal', e=>{
-    if(!e.viewTransition || !window.navigation || !navigation.activation || !navigation.activation.from) return;
-    const from = fileOf(navigation.activation.from.url);
-    const card = cards().find(a=>fileOf(a.href) === from);
-    if(!card){ return; }
-    card.style.viewTransitionName = 'hero';
-    e.viewTransition.finished.finally(clear);
-  });
 })();
 </script>
 </body>
