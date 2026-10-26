@@ -973,6 +973,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ck-snap.ck-share{background:#06c755;border-color:#06c755;color:#fff;opacity:1}
 .ck-snap.ck-share:hover{background:#05b04b;border-color:#05b04b}
 @media (max-width:700px){ .ck-snap.ck-share .tx{display:inline} }
+@media (hover:hover) and (pointer:fine){ .ck-snap.ck-share{display:none} }   /* คอมพิวเตอร์ (ใช้เมาส์) ไม่ต้องมีปุ่มแชร์ */
 /* หน้าต่างแสดงภาพ (มือถือ/LINE: กดค้างที่รูปเพื่อบันทึกหรือแชร์) */
 #imgDlg{margin:auto;border:0;border-radius:16px;padding:0;max-width:min(96vw,980px);width:96vw;background:var(--surface);color:var(--text);box-shadow:0 24px 60px rgba(15,23,42,.45)}
 #imgDlg::backdrop{background:rgba(15,23,42,.6)}
@@ -985,7 +986,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 #imgDlg .id-acts{display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;flex-wrap:wrap}
 #imgDlg .id-acts a,#imgDlg .id-acts button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text-strong);font:600 13.5px 'Prompt',sans-serif;cursor:pointer;text-decoration:none}
 #imgDlg .id-acts .line{background:#06c755;border-color:#06c755;color:#fff}
-/* ภาพสำหรับแชร์ (LINE) — การ์ดรายบุคคล วาดใหม่นอกจอ ไม่ขึ้นกับขนาดจอ/โหมดมืด */
+/* ภาพสำหรับแชร์ (LINE) — ตาราง วาดใหม่นอกจอ ไม่ขึ้นกับขนาดจอ/โหมดมืด */
 #shareCard{position:fixed;left:-12000px;top:0;width:1080px;background:#fff;border-radius:28px;overflow:hidden;color:#0f172a;font-family:'Prompt',sans-serif;line-height:1.45}
 #shareCard *{box-sizing:border-box;margin:0;padding:0}
 #shareCard .sc-hd{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;padding:30px 40px 26px}
@@ -997,21 +998,22 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 #shareCard .sc-r2 b{white-space:nowrap}
 #shareCard .sc-bar{height:14px;background:rgba(255,255,255,.18);border-radius:99px;margin-top:14px;overflow:hidden}
 #shareCard .sc-bar i{display:block;height:100%;background:#facc15;border-radius:99px}
-#shareCard .sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:28px 32px}
-#shareCard .sc-pc{border:2px solid #e2e8f0;border-radius:20px;padding:20px 22px}
-#shareCard .sc-pc h3{font-size:26px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px}
-#shareCard .sc-pc h3 b{font-size:22px;border-radius:99px;padding:3px 14px;background:#dcfce7;color:#15803d;white-space:nowrap}
-#shareCard .sc-pc h3 b.w{background:#fef3c7;color:#b45309}
-#shareCard .sc-pc h3 b.r{background:#fee2e2;color:#b91c1c}
-#shareCard .sc-nm{font-size:17px;color:#64748b;margin:2px 0 12px;min-height:25px}
-#shareCard .sc-it{display:flex;align-items:center;gap:12px;font-size:19px;padding:7px 0;border-top:1px dashed #e2e8f0}
-#shareCard .sc-ck{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:18px;font-weight:700}
+#shareCard table{width:100%;border-collapse:collapse}
+#shareCard th,#shareCard td{padding:16px 10px;text-align:center;border-bottom:1px solid #e2e8f0}
+#shareCard td{vertical-align:middle;color:#0f172a;background:#fff}
+#shareCard th:last-child,#shareCard td:last-child{padding-right:30px}
+#shareCard th{font-size:21px;font-weight:700;color:#334155;background:#f8fafc;vertical-align:bottom;line-height:1.3}
+#shareCard th small{display:block;font-size:15px;font-weight:400;color:#64748b;margin-top:2px;white-space:nowrap}
+#shareCard th.t{text-align:left;padding-left:36px}
+#shareCard td.t{text-align:left;font-size:22px;font-weight:600;padding-left:36px;white-space:nowrap}
+#shareCard td.t span{margin-right:10px}
+#shareCard .sc-ck{display:inline-grid;place-items:center;width:46px;height:46px;border-radius:12px;font-size:28px;font-weight:700;line-height:1;vertical-align:middle}
 #shareCard .sc-ck.ok{background:#dcfce7;color:#16a34a;border:3px solid #22c55e}
 #shareCard .sc-ck.no{background:#fef2f2;border:3px solid #ef4444}
 #shareCard .sc-ck.wait{background:#f8fafc;border:3px solid #cbd5e1}
-#shareCard .sc-tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:18px}
-#shareCard .sc-tg{color:#94a3b8;font-size:15px;white-space:nowrap}
-#shareCard .sc-it.miss .sc-tx{color:#dc2626;font-weight:600}
+#shareCard .sc-tg{display:block;font-size:14px;color:#64748b;margin-top:4px;white-space:nowrap}
+#shareCard tr.sum td{font-size:24px;font-weight:700;background:#f8fafc}
+#shareCard tr.sum td.t{color:#64748b;font-weight:600}
 #shareCard .sc-ft{padding:16px 40px 24px;color:#64748b;font-size:18px;display:flex;justify-content:space-between;gap:20px;border-top:1px solid #e2e8f0;white-space:nowrap}
 /* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
 @view-transition{navigation:auto}
@@ -1418,17 +1420,16 @@ async function snapWeek(i, btn){
   }catch(err){ toast('⚠️ บันทึกภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
   finally{ btnBusy(btn, false, old); }
 }
-/* ภาพสำหรับแชร์: การ์ดรายบุคคล (2×2) ตัวหนังสือเรียงใหม่ อ่านง่ายในกลุ่ม LINE · ความกว้าง 2160px */
+/* ภาพสำหรับแชร์: ตารางจัดตัวหนังสือใหม่ (หัวข้อบรรทัดเดียว + เป้าหมายใต้ช่องติ๊ก) อ่านง่ายในกลุ่ม LINE · กว้าง 2160px */
 function shareCardHtml(i){
   const w = W[i], s = stats(w), ph = phase(w), pct = Math.round(s.pct*100);
   const range = /\(/.test(w.label) ? w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,'') : '';
-  const short = t=>String(t||'').replace(/\s*\/\s*สัปดาห์/,'').trim();
   return `<div class="sc-hd"><div class="sc-r1"><h1>${esc(w.label.split('(')[0].trim())}</h1><span class="dt">${esc(range)}</span><span class="st">${phaseTxt[ph]}</span></div>
     <div class="sc-r2"><span>${esc(w.month)} · CHECKLIST ผู้บังคับบัญชา</span><b>ดำเนินการแล้ว ${s.done}/${s.tot} (${pct}%)</b></div><div class="sc-bar"><i style="width:${pct}%"></i></div></div>
-  <div class="sc-grid">${w.roles.map((r,ri)=>{ const x = roleStats(w,ri), p = personOf(r.name) || '';
-    return `<div class="sc-pc"><h3>${esc(r.name)}<b class="${x.pct>=1?'':x.pct>=.6?'w':'r'}">${x.done}/${x.tot}</b></h3><div class="sc-nm">${esc(p)}</div>` +
-      w.tasks.map(t=>{ const c = t.cells[ri] || {}; const miss = !c.done && ph==='past';
-        return `<div class="sc-it${miss?' miss':''}"><span class="sc-ck ${c.done?'ok':miss?'no':'wait'}">${c.done?'✓':''}</span><span class="sc-tx">${taskIcon(t.name)} ${esc(t.name)}</span><span class="sc-tg">${esc(short(c.target))}</span></div>`; }).join('') + '</div>'; }).join('')}</div>
+  <table><tr><th class="t">หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${esc(r.name)}<small>${esc(personOf(r.name) || '')}</small></th>`).join('')}</tr>` +
+    w.tasks.map(t=>`<tr><td class="t"><span>${taskIcon(t.name)}</span>${esc(t.name)}</td>${w.roles.map((r,ri)=>{ const c = t.cells[ri] || {}; const miss = !c.done && ph==='past';
+      return `<td><span class="sc-ck ${c.done?'ok':miss?'no':'wait'}">${c.done?'✓':''}</span><span class="sc-tg">${esc(c.target || '')}</span></td>`; }).join('')}</tr>`).join('') +
+    `<tr class="sum"><td class="t">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></table>
   <div class="sc-ft"><span>สถานีตำรวจภูธรบางบ่อ · ผลการตรวจผู้บังคับบัญชา</span><span>ข้อมูลจากชีต POLICE 4.0</span></div>`;
 }
 async function shareImage(i){
