@@ -391,6 +391,12 @@ main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
 #pfType label{font-size:13.5px;padding:8px 6px}
 .pf-all select{min-width:0}
 @media (max-width:640px){ #pfType{grid-template-columns:repeat(2,minmax(0,1fr))} #pickMap{height:300px} }
+/* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
+html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:tabFade .28s ease both}
+@keyframes tabFade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
 </head>
 <body>
