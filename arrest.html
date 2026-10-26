@@ -1095,6 +1095,12 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 #dtDlg .pics img{max-width:100%;max-height:52vh;border-radius:10px;background:var(--surface2)}
 #dtDlg .msg{color:var(--muted);font-size:13px}
 @media (max-width:700px){ #dtDlg dl{grid-template-columns:1fr} #dtDlg dt{margin-top:6px} }
+/* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
+html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:tabFade .28s ease both}
+@keyframes tabFade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
 </head>
 <body>
@@ -1578,5 +1584,6 @@ async function load(quiet, pre){
   }
 })();
 </script>
+<script>/* สลับแท็บ: เนื้อหาจางเข้า */document.addEventListener('click',e=>{ if(e.target.closest('[data-view]')) document.documentElement.classList.add('tabbed'); },true);</script>
 </body>
 </html>
