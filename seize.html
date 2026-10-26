@@ -1063,6 +1063,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
+<script src="fx.js"></script>
 </head>
 <body>
 <nav>
@@ -1115,6 +1116,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
         <div class="sub" id="szTitle">กำลังโหลดข้อมูล…</div>
       </div>
     </div>
+    <div class="sk-status" id="skStatus" hidden><div class="sk-msg"><span class="dot"></span><span id="skMsg"></span></div></div>
     <div class="sz-bar">
       <select id="fMonth" aria-label="เดือน"><option value="">📅 ทุกเดือน</option></select>
       <select id="fType" aria-label="ประเภทรถ"><option value="">🚗 ทุกประเภทรถ</option></select>
@@ -1223,7 +1225,7 @@ function setTheme(t, save){
 }
 $('themeBtn').addEventListener('change', e=>setTheme(e.target.checked ? 'dark' : 'light', true));
 $('themeBtn').checked = isDark();
-let toastT; function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 3200); }
+let toastT; function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 3200);  BB.toastHaptic(m); }
 
 const DEF = {
   type: ['รถจักรยานยนต์','รถยนต์','รถกระบะ','รถบรรทุก','อื่น ๆ'],
@@ -1349,7 +1351,7 @@ function openPin(err){ $('pinErr').textContent = err || ''; $('pinInput').value 
 $('pinClose').addEventListener('click', ()=>{ pending = null; $('pinDlg').close(); });
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); const v = $('pinInput').value.trim(); if(!v) return; PIN = v; try{ sessionStorage.setItem('seize-pin', PIN); }catch(_){} $('pinDlg').close(); const p = pending; pending = null; if(p) p(); });
 function needPin(fn){ if(!PIN){ pending = fn; openPin(); return true; } return false; }
-function authFail(j, retry){ PIN = ''; try{ sessionStorage.removeItem('seize-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); }
+function authFail(j, retry){ BB.haptic('err'); PIN = ''; try{ sessionStorage.removeItem('seize-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); }
 async function enterStaff(after){
   if(!SEIZE_API) return toast('⚠️ ยังไม่ได้เชื่อมต่อ Apps Script');
   const again = ()=>enterStaff(after);
@@ -1566,9 +1568,11 @@ function pubGet(key, url, fresh, onFresh){
 }
 const STALE_TAG = '⏳ กำลังอัปเดตข้อมูลล่าสุด… · ';
 const hmTH = t => new Date(t).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-function szFresh(){ const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG,'').replace(/อัปเดต [^·]*?น\./, 'อัปเดต ' + hmTH(Date.now()) + ' น.'); }
+const SKD = BB.dash({panel:'panelList', kpi:['kAll','kMc','kCar','kTop'], month:'cMonth', hb:['cCharge','cTeam'], sheet:'ตรวจยึดรถ'});   // skeleton ตอนเปิดครั้งแรก (fx.js)
+function szFresh(){ SKD.stale(false); const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG,'').replace(/อัปเดต [^·]*?น\./, 'อัปเดต ' + hmTH(Date.now()) + ' น.'); }
 async function load(quiet, pre){
-  const j = pre || await pubGet('seize', SEIZE_API, quiet, Object.assign((f, changed)=>{ if(changed) load(true, f).then(()=>{ revealVisible(); }).catch(()=>{}); else szFresh(); }, {fail:()=>{ const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG, '⚠️ โหลดข้อมูลล่าสุดไม่สำเร็จ แสดงข้อมูลที่จำไว้ · '); }}));
+  const j = pre || await pubGet('seize', SEIZE_API, quiet, Object.assign((f, changed)=>{ if(changed) load(true, f).then(()=>{ revealVisible(); }).catch(()=>{}); else szFresh(); }, {fail:()=>{ SKD.stale(false); const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG, '⚠️ โหลดข้อมูลล่าสุดไม่สำเร็จ แสดงข้อมูลที่จำไว้ · '); }}));
+  SKD.off(); SKD.stale(!!j._at);
   if(!j.ok) throw new Error(j.error || 'อ่านข้อมูลไม่สำเร็จ');
   R = j.rows || []; OPTS = j.opts || {};
   fillSel('fMonth', uniq(R.map(r=>ymOf(r.date))).sort().reverse(), '📅 ทุกเดือน', ymFull);
@@ -1585,11 +1589,13 @@ async function load(quiet, pre){
   fillForm(); drawThumbs();
   if(!SEIZE_API){ $('szSetup').hidden = false; $('szTitle').textContent = ''; render(); return; }
   try{
+    SKD.on(); $('tbl').innerHTML = BB.skRows(5);
     await load();
     revealVisible();
     let st = ''; try{ st = sessionStorage.getItem('seize-staff') || ''; }catch(_){}
     if(st && PIN) enterStaff();
   }catch(err){
+    SKD.off(); render();
     $('szMsg').hidden = false; $('szMsg').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + err.message;
     $('szTitle').textContent = '';
   }
