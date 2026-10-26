@@ -322,6 +322,8 @@ main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
 :root[data-theme="dark"] .done .ic{background:#14532d;color:#86efac}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
 .done h2{font-size:20px;color:var(--text-strong);margin-bottom:6px}.done p{color:var(--muted);line-height:1.6;margin-bottom:18px}
+.done.queued .ic{background:#fef3c7;color:#b45309}
+:root[data-theme="dark"] .done.queued .ic{background:#3a2f12;color:#f0c55a}
 @media (prefers-reduced-motion:reduce){ .reveal,.done .ic,.nav-coin{animation:none!important} }
 [hidden]{display:none!important}
 
@@ -399,6 +401,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
 <script src="fx.js"></script>
+<script src="outbox.js"></script>
 </head>
 <body>
 <nav>
@@ -462,6 +465,9 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
     </div>
     <div class="card">
       <div class="ff">
+        <div class="sec">📷 รูปถ่ายสถานที่ <span style="font-weight:500;color:var(--muted)">(ไม่บังคับ)</span></div>
+        <label class="drop"><input type="file" id="files" accept="image/*" multiple>📷 แตะเพื่อถ่ายรูป / เลือกรูป · มีก็แนบ ไม่มีก็ข้ามได้ · สูงสุด 4 รูป</label>
+        <div class="thumbs" id="thumbs"></div>
         <div class="sec">💬 หมายเหตุถึงเจ้าหน้าที่</div>
         <label class="full"><span>ข้อมูลเพิ่มเติม (ถ้ามี)</span><textarea id="note" maxlength="500" placeholder="เช่น เวลาเปิด-ปิด จุดเสี่ยง ข้อสังเกต"></textarea></label>
         <div class="full priv">🔒 ข้อมูลจะส่งให้เจ้าหน้าที่ตรวจสอบก่อน ยังไม่เข้าระบบจนกว่าจะได้รับการยืนยัน · ชื่อ/เบอร์เจ้าของ และข้อมูลความปลอดภัย ไม่แสดงบนเว็บสาธารณะ · ส่งแล้วแก้ไขเองไม่ได้ ถ้ากรอกผิดให้แจ้งเจ้าหน้าที่</div>
@@ -472,9 +478,9 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
     <div class="note">หน้านี้ใช้ส่งข้อมูลอย่างเดียว ไม่แสดงข้อมูลที่ส่งไปแล้ว</div></div>
   </form>
   <div class="card done" id="done" hidden>
-    <div class="ic">✓</div>
-    <h2>ส่งข้อมูลเรียบร้อย</h2>
-    <p>รอเจ้าหน้าที่ตรวจสอบและยืนยัน<br><span id="doneId" style="font-size:12.5px"></span></p>
+    <div class="ic" id="doneIc">✓</div>
+    <h2 id="doneH">ส่งข้อมูลเรียบร้อย</h2>
+    <p><span id="doneP">รอเจ้าหน้าที่ตรวจสอบและยืนยัน</span><br><span id="doneId" style="font-size:12.5px"></span></p>
     <button class="btn btn-print send" id="again" type="button">➕ สำรวจสถานที่ถัดไป</button>
   </div>
 </main>
@@ -648,6 +654,30 @@ $('pfGeo').addEventListener('click', ()=>{
     {enableHighAccuracy:true,timeout:15000,maximumAge:0});
 });
 
+/* ---------- รูปถ่ายสถานที่ (ไม่บังคับ) · ย่อให้เล็กก่อนส่ง ---------- */
+let FILES = [];
+function shrink(file){
+  return new Promise((res,rej)=>{
+    const rd = new FileReader(); rd.onerror = ()=>rej(new Error('อ่านไฟล์ไม่ได้'));
+    rd.onload = ()=>{ const img = new Image();
+      img.onload = ()=>{ const k=Math.min(1,1600/Math.max(img.width,img.height)), c=document.createElement('canvas');
+        c.width=Math.round(img.width*k); c.height=Math.round(img.height*k); c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        const u=c.toDataURL('image/jpeg',.8); res({type:'image/jpeg',data:u.split(',')[1],url:u}); };
+      img.onerror = ()=>rej(new Error('เปิดรูปไม่ได้')); img.src = rd.result; };
+    rd.readAsDataURL(file);
+  });
+}
+function drawThumbs(){ $('thumbs').innerHTML = FILES.map((f,i)=>`<div class="th"><img src="${f.url}" alt=""><button type="button" data-i="${i}" aria-label="ลบรูป">✕</button></div>`).join(''); }
+$('files').addEventListener('change', async e=>{
+  for(const f of [...e.target.files]){
+    if(FILES.length>=4){ toast('แนบได้สูงสุด 4 รูป'); break; }
+    if(!/^image\//.test(f.type)) continue;
+    try{ FILES.push(await shrink(f)); }catch(err){ toast('⚠️ '+err.message); }
+  }
+  e.target.value=''; drawThumbs();
+});
+$('thumbs').addEventListener('click', e=>{ const b=e.target.closest('[data-i]'); if(b){ FILES.splice(+b.dataset.i,1); drawThumbs(); } });
+
 /* ---------- ส่งข้อมูล ---------- */
 $('f').addEventListener('submit', e=>{
   e.preventDefault();
@@ -659,26 +689,37 @@ $('f').addEventListener('submit', e=>{
   if(!isFinite(row.lat) || !isFinite(row.lng)){ row.lat = ''; row.lng = ''; }
   if(row.lat==='' && !row.map && !confirm('ยังไม่ได้ปักหมุดตำแหน่ง — ส่งต่อหรือไม่?\n(แนะนำกด "📍 ใช้ตำแหน่งปัจจุบัน" ตอนอยู่หน้าสถานที่)')) return;
   try{ localStorage.setItem('survey-by', by); }catch(_){}
-  const b = $('send'); b.disabled = true; b.textContent = '⏳ กำลังส่ง…';
-  const reset = ()=>{ b.disabled = false; b.textContent = '📤 ส่งให้เจ้าหน้าที่ตรวจสอบ'; };
-  fetch(LOCAL_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'submit', by, note:$('note').value.trim(), hp:$('hp').value, row})})
-    .then(x=>x.json())
+  const b = $('send'); b.disabled = true; b.textContent = !BBQ.online() ? '💾 กำลังเก็บไว้ในเครื่อง…' : FILES.length ? '⏳ กำลังอัปโหลดรูป…' : '⏳ กำลังส่ง…';
+  const cName = PF_TAB.cols.find(c=>c.name==='ชื่อสถานที่'), cid = BBQ.newId();
+  OBX.submit({cid, url:LOCAL_API, body:{action:'submit', cid, by, note:$('note').value.trim(), hp:$('hp').value, row, files:FILES.map(f=>({type:f.type,data:f.data}))},
+              label:((cName && fields[cName.i]) || 'สถานที่') + ' · ' + PF_TAB.tab.trim(), files:FILES.length})
     .then(res=>{
-      reset();
-      if(!res || !res.ok){ toast('⚠️ ' + (res && res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
-      BB.haptic('ok'); $('f').hidden = true; $('done').hidden = false; $('doneId').textContent = 'เลขอ้างอิง ' + (res.id || '');
-      window.scrollTo({top:0,behavior:'smooth'}); reveal();
-    })
-    .catch(()=>{ reset(); toast('⚠️ เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); });
+      b.disabled = false; b.textContent = SEND_LABEL; OBX.draw();
+      if(!res.ok && !res.queued){ toast('⚠️ ' + (res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
+      showDone(res);
+    });
 });
+const SEND_LABEL = '📤 ส่งให้เจ้าหน้าที่ตรวจสอบ';
+function showDone(res){
+  const q = !!res.queued;
+  BB.haptic('ok'); $('f').hidden = true; $('done').hidden = false; $('done').classList.toggle('queued', q);
+  $('doneIc').textContent = q ? '💾' : '✓';
+  $('doneH').textContent = q ? 'บันทึกไว้ในเครื่องแล้ว' : 'ส่งข้อมูลเรียบร้อย';
+  $('doneP').textContent = q ? 'สัญญาณไม่พอส่ง ระบบจะส่งให้เองเมื่อกลับมามีสัญญาณ ไม่ต้องกรอกใหม่' : 'รอเจ้าหน้าที่ตรวจสอบและยืนยัน';
+  $('doneId').textContent = q ? 'ดูรายการที่รอส่งได้ที่กล่องด้านบน · อย่าล้างข้อมูลเบราว์เซอร์ก่อนส่งเสร็จ' : 'เลขอ้างอิง ' + (res.id || '');
+  window.scrollTo({top:0,behavior:'smooth'}); reveal();
+}
 $('again').addEventListener('click', ()=>{
   const by = $('by').value, tab = PF_TAB ? PF_TAB.tab : '';
-  $('f').reset(); $('by').value = by; pfPick(tab); clearPick();
-  $('done').hidden = true; $('f').hidden = false; window.scrollTo({top:0}); reveal();
+  $('f').reset(); $('by').value = by; pfPick(tab); clearPick(); FILES = []; drawThumbs();
+  $('done').hidden = true; $('f').hidden = false; OBX.draw(); window.scrollTo({top:0}); reveal();
   setTimeout(()=>{ if(pmap) pmap.invalidateSize(); const x = $('pfFields').querySelector('input[data-n="ชื่อสถานที่"]'); if(x) x.focus(); }, 60);
 });
 initPick();
 pfLoadSchema();
+/* กล่องรอส่ง: ไม่มีสัญญาณ → เก็บไว้ในเครื่อง แล้วส่งให้เองเมื่อกลับมาออนไลน์ (outbox.js) */
+const OBX = BBQ.ui({kind:'survey', mount:$('f'), btn:$('send'), label:SEND_LABEL, toast});
+BBQ.installSW('./survey');
 
 /* ---------- เพิ่มลงหน้าจอโฮม (iPhone: บอกขั้นตอน · Android: ติดตั้งได้ถ้าเบราว์เซอร์รองรับ) ---------- */
 (function(){
