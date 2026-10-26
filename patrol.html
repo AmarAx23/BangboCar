@@ -355,6 +355,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
+<script src="fx.js"></script>
 </head>
 <body>
 <nav>
@@ -446,7 +447,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 <script>
 const $ = id=>document.getElementById(id);
 const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let tT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),3400); }
+let tT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),3400);  BB.toastHaptic(m); }
 const DEF = { type:['นักเรียนทะเลาะวิวาท','แข่งขันรถในทาง','ยาเสพติด','บุคคลเฝ้าระวัง','อื่นๆ'], level:['สีแดง','สีเหลือง','สีเขียว'],
   edu:['ป.6','มัธยมศึกษาตอนต้น','มัธยมศึกษาตอนปลาย','ปวช.','ปวส.','กศน.','ปริญญาตรี','ไม่มี'] };
 const LV = t=>/แดง/.test(t)?'r':/เหลือง/.test(t)?'y':/เขียว/.test(t)?'g':'n';
@@ -539,7 +540,7 @@ $('f').addEventListener('submit', e=>{
     .then(res=>{
       reset();
       if(!res || !res.ok){ toast('⚠️ ' + (res && res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
-      $('f').hidden = true; $('done').hidden = false; $('doneId').textContent = 'เลขอ้างอิง ' + (res.id || '');
+      BB.haptic('ok'); $('f').hidden = true; $('done').hidden = false; $('doneId').textContent = 'เลขอ้างอิง ' + (res.id || '');
       window.scrollTo({top:0,behavior:'smooth'}); reveal();
     })
     .catch(()=>{ reset(); toast('⚠️ เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); });
