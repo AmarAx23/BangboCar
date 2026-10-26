@@ -1149,6 +1149,48 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .rv-dup ul{margin:0;padding-left:18px}
 :root[data-theme="dark"] .rv-dup{background:rgba(220,38,38,.12);border-color:#7f1d1d;color:#fecaca}
 .rv-dup[hidden]{display:none}
+/* ---------- Page Transition: เปลี่ยนหน้าแบบ "การ์ดขยาย" (หน้าแรก ↔ หน้าย่อย) ----------
+   การ์ดที่กดในหน้าแรก = ชิ้น "hero" → ขยายต่อเนื่องไปเป็นหัวข้อของหน้าใหม่ · เบราว์เซอร์ที่ไม่รองรับเปลี่ยนหน้าแบบเดิม */
+@view-transition{navigation:auto}
+::view-transition-group(hero){animation-duration:.42s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+/* ---------- Page Transition: หัวข้อหน้า = ชิ้น "hero" (รับการ์ดที่ขยายมาจากหน้าแรก) · สลับแท็บ = เลื่อนข้างตามทิศ ---------- */
+#panelList .cm-head,#panelForm .cm-head,#panelPending .cm-head{view-transition-name:hero}
+html.vt-tab main{view-transition-name:pane}
+html.vt-tab #panelList .cm-head,html.vt-tab #panelForm .cm-head,html.vt-tab #panelPending .cm-head{view-transition-name:none}
+html.vt-tab::view-transition-old(root),html.vt-tab::view-transition-new(root){animation:none}
+html.vt-tab::view-transition-old(pane){animation:.3s cubic-bezier(.2,.8,.2,1) both vtOutL}
+html.vt-tab::view-transition-new(pane){animation:.3s cubic-bezier(.2,.8,.2,1) both vtInR}
+html.vt-tab.vt-rev::view-transition-old(pane){animation-name:vtOutR}
+html.vt-tab.vt-rev::view-transition-new(pane){animation-name:vtInL}
+@keyframes vtOutL{to{transform:translateX(-24%);opacity:0}}
+@keyframes vtInR{from{transform:translateX(40%);opacity:0}}
+@keyframes vtOutR{to{transform:translateX(24%);opacity:0}}
+@keyframes vtInL{from{transform:translateX(-40%);opacity:0}}
+/* ---------- Skeleton loading: กล่องเทาแสงวิ่ง (เปิดครั้งแรก) · ข้อมูลเดิมจาง+แสงวิ่ง (กำลังอัปเดต) ---------- */
+:root{--skg:linear-gradient(90deg,var(--border) 25%,color-mix(in srgb,var(--border),#fff 45%) 45%,var(--border) 65%)}
+:root[data-theme="dark"]{--skg:linear-gradient(90deg,var(--border) 25%,color-mix(in srgb,var(--border),#fff 12%) 45%,var(--border) 65%)}
+.skb,.mcol .c i.skb{display:block;height:12px;border-radius:8px;background:var(--border);background:var(--skg);background-size:300% 100%;animation:skSh 1.4s linear infinite}
+@keyframes skSh{from{background-position:100% 0}to{background-position:-100% 0}}
+.kpi-val .skb{height:30px;width:56%}
+.kpi-sub .skb{height:10px;width:34%;margin-top:6px}
+.mcol .c i.skb{width:100%;max-width:46px;border-radius:8px 8px 3px 3px}
+.mcol .c span.skb{height:9px;width:70%}
+.hb .r .t .skb{height:7px}
+.sk-status{margin:-4px 0 14px;display:flex;flex-direction:column;gap:7px}
+.sk-status[hidden]{display:none}
+.sk-msg{font-size:13px;color:var(--muted);display:flex;gap:7px;align-items:center}
+.sk-msg .dot{width:7px;height:7px;border-radius:50%;background:#2563eb;flex:none;animation:skPl 1s ease-in-out infinite}
+@keyframes skPl{50%{opacity:.35}}
+.sk-stale .kpi-val,.sk-stale .kpi-sub,.sk-stale .mcol,.sk-stale .hb{opacity:.6;transition:opacity .35s}
+.sk-stale .kpi::before,.sk-stale .sz-grid .card::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);background-size:250% 100%;animation:skSh 1.6s linear infinite}
+:root[data-theme="dark"] .sk-stale .kpi::before,:root[data-theme="dark"] .sk-stale .sz-grid .card::before{background:linear-gradient(100deg,transparent 30%,rgba(148,163,184,.14) 50%,transparent 70%);background-size:250% 100%}
+.sk-card{gap:10px;animation:skUp .45s ease both}
+@keyframes skUp{from{opacity:0;transform:translateY(8px)}}
+.sz-tbl tr.sk-tr td{padding-top:12px;padding-bottom:12px}
+@media (prefers-reduced-motion:reduce){.skb,.mcol .c i.skb,.sk-msg .dot,.sk-card,.sk-stale .kpi::before,.sk-stale .sz-grid .card::before{animation:none}}
 </style>
 </head>
 <body>
@@ -1203,6 +1245,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
         <div class="sub" id="szTitle">กำลังโหลดข้อมูล…</div>
       </div>
     </div>
+    <div class="sk-status" id="skStatus" hidden><div class="sk-msg"><span class="dot"></span><span id="skMsg"></span></div></div>
     <div class="sz-bar">
       <select id="fMonth" aria-label="ช่วงเวลา"><option value="">📅 ทุกช่วงเวลา</option></select>
       <select id="fType" aria-label="ประเภทกลุ่มเสี่ยง"><option value="">🏷️ ทุกประเภท</option></select>
@@ -1387,7 +1430,25 @@ function setTheme(t, save){
 }
 $('themeBtn').addEventListener('change', e=>setTheme(e.target.checked ? 'dark' : 'light', true));
 $('themeBtn').checked = isDark();
-let toastT; function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 3200); }
+/* ---------- มือถือสั่นเบาๆ (haptic) ----------
+   Android: Vibration API · iPhone (iOS 18 ขึ้นไป): กดสวิตช์ซ่อนเพื่อให้เครื่องสั่น (iPhone ไม่รองรับ Vibration API)
+   ok = บันทึก/ยืนยันสำเร็จ (สั่นสั้น 2 ที) · err = ผิดพลาด/กรอกไม่ครบ (สั่น 3 ที) */
+const HAPTIC = (()=>{
+  const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let lbl = null;
+  const iosTap = ()=>{
+    if(!lbl){ lbl = document.createElement('label'); lbl.setAttribute('aria-hidden', 'true');
+      lbl.style.cssText = 'position:fixed;left:-200px;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+      const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); i.tabIndex = -1; lbl.appendChild(i); document.body.appendChild(lbl); }
+    lbl.click(); };
+  const VIB = {tap:10, ok:[14,60,20], err:[35,60,35,60,35]}, IOS = {tap:[0], ok:[0,110], err:[0,120,240]};
+  return kind=>{ try{
+    if(navigator.vibrate) navigator.vibrate(VIB[kind] || 10);
+    else if(ios) (IOS[kind] || [0]).forEach(t=>setTimeout(iosTap, t));
+  }catch(_){} };
+})();
+let toastT; function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 3200);
+  if(/^(⚠️|กรุณา|เลขบัตร|แนบได้)/.test(m)) HAPTIC('err'); else if(/^(✓|✅|🔓|📋|❌)/.test(m)) HAPTIC('ok'); }
 
 const DEF = {
   type: ['นักเรียนทะเลาะวิวาท','แข่งขันรถในทาง','ยาเสพติด','บุคคลเฝ้าระวัง','อื่นๆ'],
@@ -1519,11 +1580,12 @@ function openPin(err){ $('pinErr').textContent = err || ''; $('pinInput').value 
 $('pinClose').addEventListener('click', ()=>{ pending = null; $('pinDlg').close(); });
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); const v = $('pinInput').value.trim(); if(!v) return; PIN = v; try{ sessionStorage.setItem('risk-pin', PIN); }catch(_){} $('pinDlg').close(); const p = pending; pending = null; if(p) p(); });
 function needPin(fn){ if(!PIN){ pending = fn; openPin(); return true; } return false; }
-function authFail(j, retry){ PIN = ''; try{ sessionStorage.removeItem('risk-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); }
+function authFail(j, retry){ HAPTIC('err'); PIN = ''; try{ sessionStorage.removeItem('risk-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); }
 async function enterStaff(){
   if(!RISK_API) return toast('⚠️ ยังไม่ได้เชื่อมต่อ Apps Script');
   if(needPin(enterStaff)) return;
   $('staffBtn').disabled = $('unlockBtn').disabled = true;
+  if(!STAFF){ $('lockCard').hidden = true; $('tblCard').hidden = false; $('tbl').innerHTML = skRows(6); }
   try{
     const j = await api({action:'full', pin:PIN});
     if(!j.ok){ if(j.auth) authFail(j, enterStaff); else toast('⚠️ ' + (j.error||'โหลดไม่สำเร็จ')); return; }
@@ -1532,7 +1594,7 @@ async function enterStaff(){
     try{ sessionStorage.setItem('risk-staff','1'); }catch(_){}
     render(); revealVisible(); toast('🔓 แสดงรายชื่อแล้ว');
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
-  finally{ $('staffBtn').disabled = $('unlockBtn').disabled = false; }
+  finally{ $('staffBtn').disabled = $('unlockBtn').disabled = false; if(!STAFF) render(); }
 }
 function leaveStaff(){ STAFF = null; $('staffBtn').classList.remove('on'); $('staffBtn').textContent = '🔓 ดูรายชื่อ (เจ้าหน้าที่)'; try{ sessionStorage.removeItem('risk-staff'); }catch(_){} render(); }
 $('staffBtn').addEventListener('click', ()=>{ if(STAFF) leaveStaff(); else enterStaff(); });
@@ -1692,7 +1754,7 @@ async function loadPending(){
   if(!RISK_API) return;
   if(!PIN){ $('pdLock').hidden = false; $('pdList').hidden = true; return; }
   $('pdLock').hidden = true; $('pdList').hidden = false;
-  if(!PD.length) $('pdList').innerHTML = '<div class="pd-empty">⏳ กำลังโหลด…</div>';
+  if(!PD.length) $('pdList').innerHTML = skCards(3);
   try{
     const j = await api({action:'pending', pin:PIN});
     if(!j.ok){ if(j.auth) authFail(j, loadPending); else { $('pdList').innerHTML = ''; toast('⚠️ ' + (j.error||'โหลดไม่สำเร็จ')); } return; }
@@ -1790,12 +1852,36 @@ function showView(v, push){
   if(v==='list' && R.length) render();
   if(R.length){ revealVisible(); playAnim(); }
 }
-document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click', ()=>showView(t.dataset.view, true)));
+const VIEWS = ['list', 'form', 'pending'];
+function switchView(v){                                         // สลับแท็บแบบเลื่อนข้าง (ไปขวา = แท็บถัดไป)
+  if(v === VIEW) return;
+  const de = document.documentElement;
+  if(!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return showView(v, true);
+  de.classList.add('vt-tab'); de.classList.toggle('vt-rev', VIEWS.indexOf(v) < VIEWS.indexOf(VIEW));
+  const tr = document.startViewTransition(()=>showView(v, true));
+  tr.finished.finally(()=>de.classList.remove('vt-tab', 'vt-rev'));
+}
+document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click', ()=>switchView(t.dataset.view)));
 showView(location.hash.slice(1));
 
 
 /* ---------- ข้อมูลทั่วไป: แสดงชุดล่าสุดที่จำไว้ในเครื่องทันที แล้วอัปเดตเมื่อข้อมูลใหม่จาก Apps Script มาถึง ----------
    เก็บเฉพาะข้อมูลที่ทุกคนดูได้ (ไม่มีข้อมูลที่ต้องใส่รหัส) · fresh=true = ข้ามของที่จำไว้ (หลังบันทึก/ยืนยัน) */
+/* ---------- Skeleton loading ---------- */
+let SK_T = 0;
+function skelOn(){
+  $('panelList').classList.add('sk-loading'); $('skStatus').hidden = false;
+  $('skMsg').textContent = 'กำลังดึงข้อมูลจากชีต "กลุ่มเสี่ยง"… ครั้งแรกอาจใช้ 5–10 วินาที';
+  ['kAll','kR','kY','kG'].forEach(id=>{ $(id).innerHTML = '<span class="skb"></span>'; $(id+'Sub').innerHTML = '<span class="skb"></span>'; });
+  $('cMonth').innerHTML = [45,70,55,85,60,75,50,90].map(h=>`<div class="c"><i class="skb" style="height:${h}%"></i><span class="skb"></span></div>`).join('');
+  ['cType','cEdu','cAge','cWeapon'].forEach(id=>{ $(id).innerHTML = [72,58,44,30].map(w=>`<div class="r"><span class="skb" style="width:${w}%"></span><span class="skb" style="width:22px;justify-self:end"></span><span class="t"><span class="skb" style="width:${w+18}%"></span></span></div>`).join(''); });
+  clearTimeout(SK_T); SK_T = setTimeout(()=>{ $('skMsg').textContent = 'ยังโหลดอยู่… เครือข่ายหรือ Google อาจช้า รอสักครู่'; }, 15000);
+}
+function skelOff(){ $('panelList').classList.remove('sk-loading'); $('skStatus').hidden = true; clearTimeout(SK_T); }
+function staleOn(on){ $('panelList').classList.toggle('sk-stale', !!on); }
+const skCards = n => Array.from({length:n}, (_, i)=>`<div class="pd-card sk-card" style="animation-delay:${i*90}ms"><span class="skb" style="width:62%;height:16px"></span><span class="skb" style="width:42%"></span><span class="skb" style="width:86%"></span><span class="skb" style="width:34%;height:30px;border-radius:10px"></span></div>`).join('');
+const skRows = n => '<tbody>' + Array.from({length:n}, (_, i)=>`<tr class="sk-tr">${[18, 70 - i%3*12, 50, 40, 26].map(w=>`<td><span class="skb" style="width:${w}%"></span></td>`).join('')}</tr>`).join('') + '</tbody>';
+
 function pubGet(key, url, fresh, onFresh){
   const k = 'bb-pub:' + key, strip = j => JSON.stringify(Object.assign({}, j, {updated:0, _at:0}));
   let c = null; if(!fresh){ try{ c = JSON.parse(localStorage.getItem(k) || 'null'); }catch(_){} }
@@ -1810,9 +1896,10 @@ function pubGet(key, url, fresh, onFresh){
 }
 const STALE_TAG = '⏳ กำลังอัปเดตข้อมูลล่าสุด… · ';
 const hmTH = t => new Date(t).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-function szFresh(){ const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG,'').replace(/อัปเดต [^·]*?น\./, 'อัปเดต ' + hmTH(Date.now()) + ' น.'); }
+function szFresh(){ staleOn(false); const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG,'').replace(/อัปเดต [^·]*?น\./, 'อัปเดต ' + hmTH(Date.now()) + ' น.'); }
 async function load(quiet, pre){
-  const j = pre || await pubGet('risk', RISK_API, quiet, Object.assign((f, changed)=>{ if(changed) load(true, f).then(()=>{ revealVisible(); }).catch(()=>{}); else szFresh(); }, {fail:()=>{ const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG, '⚠️ โหลดข้อมูลล่าสุดไม่สำเร็จ แสดงข้อมูลที่จำไว้ · '); }}));
+  const j = pre || await pubGet('risk', RISK_API, quiet, Object.assign((f, changed)=>{ if(changed) load(true, f).then(()=>{ revealVisible(); }).catch(()=>{}); else szFresh(); }, {fail:()=>{ staleOn(false); const e = $('szFoot'); e.textContent = e.textContent.replace(STALE_TAG, '⚠️ โหลดข้อมูลล่าสุดไม่สำเร็จ แสดงข้อมูลที่จำไว้ · '); }}));
+  skelOff(); staleOn(!!j._at);
   if(!j.ok) throw new Error(j.error || 'อ่านข้อมูลไม่สำเร็จ');
   R = j.rows || []; OPTS = j.opts || {}; pdBadge(j.pending || 0);
   const yrs = uniq(R.map(r=>r.date.slice(0,4))).sort().reverse(), mos = uniq(R.map(r=>ymOf(r.date))).sort().reverse();
@@ -1832,11 +1919,13 @@ async function load(quiet, pre){
   fillForm(); drawThumbs();
   if(!RISK_API){ $('szSetup').hidden = false; $('szTitle').textContent = ''; render(); return; }
   try{
+    skelOn();
     await load();
     revealVisible();
     let st = ''; try{ st = sessionStorage.getItem('risk-staff') || ''; }catch(_){}
     if(st && PIN) enterStaff();
   }catch(err){
+    skelOff(); render();
     $('szMsg').hidden = false; $('szMsg').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + err.message;
     $('szTitle').textContent = '';
   }
