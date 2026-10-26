@@ -973,6 +973,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
+<script src="fx.js"></script>
 </head>
 <body>
 <nav>
@@ -1268,7 +1269,7 @@ function renderCheck(noAnim){
 /* ---------- ติ๊กบนเว็บ → บันทึกลงชีตผ่าน Apps Script (รหัสตรวจที่ฝั่งเซิร์ฟเวอร์) ---------- */
 let PIN = ''; try{ PIN = sessionStorage.getItem('cmd-pin') || ''; }catch(_){}
 let pendingTick = null;
-function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2600); }
+function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2600);  BB.toastHaptic(m); }
 function openPin(err){ $('pinErr').textContent = err||''; $('pinInput').value = ''; $('pinDlg').showModal(); setTimeout(()=>$('pinInput').focus(), 50); if(err){ const b = $('pinForm'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
 $('pinClose').onclick = ()=>{ pendingTick = null; $('pinDlg').close(); };
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); PIN = $('pinInput').value.trim(); if(!PIN) return; try{ sessionStorage.setItem('cmd-pin', PIN); }catch(_){} $('pinDlg').close(); if(pendingTick){ const p = pendingTick; pendingTick = null; tick(p); } });
@@ -1350,8 +1351,10 @@ function showView(v, push){
 document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click', ()=>showView(t.dataset.view, true)));
 showView(location.hash.slice(1));
 (async function boot(){
+  BB.skelCards($('panelList'), true);   // skeleton (fx.js)
   try{
     W = parseSheet(await loadJSONP());
+    BB.skelCardsOff();
     if(!W.length) throw new Error('ไม่พบข้อมูลสัปดาห์ในชีต');
     $('wkSel').innerHTML = W.map((w,i)=>`<option value="${i}">${esc(w.label)}</option>`).join('');
     cur = currentIndex(); CKM = monthOf(W[cur]); $('ckHint').hidden = !CMD_API; render(); renderCheck(); if(VIEW==='check') setTimeout(()=>scrollToCurrent(false), 60);
@@ -1359,6 +1362,7 @@ showView(location.hash.slice(1));
     $('cmFoot').textContent = `ข้อมูลจากชีต "POLICE 4.0" · อัปเดต ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. · ติ๊กในชีตแล้วกดรีเฟรชหน้านี้เพื่อดูผลล่าสุด`;
     if(!reduceMotion) document.querySelectorAll('.kpi, .card').forEach((c,i)=>{ c.style.setProperty('--d', i*60+'ms'); c.classList.add('cm-in'); });
   }catch(err){
+    BB.skelCardsOff();
     $('cmMsg').hidden = false; $('cmMsg').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + err.message + ' (ตรวจว่าชีตแชร์แบบ "ทุกคนที่มีลิงก์ดูได้")';
     $('wkTitle').textContent = ''; $('ckSub').textContent = ''; $('ckWeeks').innerHTML = '';
   }
