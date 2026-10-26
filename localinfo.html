@@ -932,6 +932,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
+<script src="fx.js"></script>
 </head>
 <body>
 <nav>
@@ -1318,7 +1319,7 @@ const PF_QUICK = ['ร้านค้าทอง','ธนาคาร','ร้�
 const PF_ZCOL = {'เขตตรวจที่ 1':'#FFD600','เขตตรวจที่ 2':'#795548','เขตตรวจที่ 3':'#F48FB1'};
 let afterPin = null;
 let PF_TABS = [], PF_TAB = null, pendingPlace = null, pmap = null, pmark = null;
-let toastT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3600); }
+let toastT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3600);  BB.toastHaptic(m); }
 const pfLabel = t => t.label || t.tab;
 /* รายการประเภท + หัวคอลัมน์: แสดงชุดที่จำไว้ทันที แล้วเช็กกับชีตทุกครั้ง ถ้าหัวคอลัมน์เปลี่ยน → ช่องกรอกเปลี่ยนตาม (ค่าที่กรอกอยู่ย้ายตามชื่อคอลัมน์) */
 async function pfLoadSchema(force){
@@ -1472,12 +1473,12 @@ const agoTH = iso=>{ const t = new Date(iso); if(isNaN(t)) return ''; const m = 
   return t.getDate() + ' ' + TH_MS[t.getMonth()] + ' ' + String(t.getFullYear()+543).slice(-2) + ' ' + String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0'); };
 const api = body => fetch(LOCAL_API, {method:'POST', body: JSON.stringify(body)}).then(r=>r.json());
 function askPin(cb, err){ afterPin = cb; pendingPlace = null; $('pinErr').textContent = err || ''; $('pinInput').value = ''; pinDlg.showModal(); setTimeout(()=>$('pinInput').focus(), 50); }
-function authFail(j, cb){ S.pin = ''; S.full = null; askPin(cb, j.error || 'รหัสไม่ถูกต้อง'); }
+function authFail(j, cb){ BB.haptic('err'); S.pin = ''; S.full = null; askPin(cb, j.error || 'รหัสไม่ถูกต้อง'); }
 async function loadPending(){
   if(!LOCAL_API) return;
   if(!S.pin){ $('pdLock').hidden = false; $('pdList').hidden = true; return; }
   $('pdLock').hidden = true; $('pdList').hidden = false;
-  if(!PD.length) $('pdList').innerHTML = '<div class="pd-empty">⏳ กำลังโหลด…</div>';
+  if(!PD.length) $('pdList').innerHTML = BB.skCards(3);
   if(!PF_TABS.length) pfLoadSchema();
   try{
     const j = await api({action:'pending', pin:S.pin});
@@ -1623,7 +1624,7 @@ function pubGet(key, url, fresh, onFresh){
 }
 const STALE_TAG = '⏳ กำลังอัปเดตข้อมูลล่าสุด… · ';
 const hmTH = t => new Date(t).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-function liFresh(){ const e = $('liFoot'); e.textContent = e.textContent.replace(STALE_TAG,''); }
+function liFresh(){ BB.stale(document.body, false); const e = $('liFoot'); e.textContent = e.textContent.replace(STALE_TAG,''); }
 function alertMsg(t){ const m = $('liMsg'); m.textContent = t; m.hidden = !t; }
 async function load(pre, fresh){
   if(!LOCAL_API){
@@ -1631,15 +1632,17 @@ async function load(pre, fresh){
     renderTypes(); renderTable(); return;
   }
   $('liSub').textContent = 'สถานีตำรวจภูธรบางบ่อ · กำลังโหลดข้อมูล…';
+  if(!pre && !S.rows.length){ $('typeRow').innerHTML = BB.skTypeCards(8); $('liTable').innerHTML = BB.skRows(6); }   // skeleton (fx.js)
   try{
-    const j = pre || await pubGet('local', LOCAL_API, fresh, Object.assign((f, changed)=>{ if(changed) load(f); else { liFresh(); if(typeof f.pending === 'number') pdBadge(f.pending); } }, {fail:()=>{ const e = $('liFoot'); e.textContent = e.textContent.replace(STALE_TAG, '⚠️ โหลดข้อมูลล่าสุดไม่สำเร็จ แสดงข้อมูลที่จำไว้ · '); }}));
+    const j = pre || await pubGet('local', LOCAL_API, fresh, Object.assign((f, changed)=>{ if(changed) load(f); else { liFresh(); if(typeof f.pending === 'number') pdBadge(f.pending); } }, {fail:()=>{ BB.stale(document.body, false); const e = $('liFoot'); e.textContent = e.textContent.replace(STALE_TAG, '⚠️ โหลดข้อมูลล่าสุดไม่สำเร็จ แสดงข้อมูลที่จำไว้ · '); }}));
+    BB.stale(document.body, !!j._at);
     if(!j.ok) throw new Error(j.error || 'โหลดข้อมูลไม่สำเร็จ');
     S.rows = j.rows || [];
     if(typeof j.pending === 'number') pdBadge(j.pending);
     $('liSub').textContent = `สถานีตำรวจภูธรบางบ่อ · ${fmt(S.rows.length)} แห่ง`;
     $('liFoot').textContent = (j._at ? STALE_TAG : '') + 'ข้อมูลจากชีต "ข้อมูลท้องถิ่น 2569" · หน้านี้แสดงเฉพาะข้อมูลทั่วไป ข้อมูลเจ้าของ/ความปลอดภัยต้องใส่รหัส';
     alertMsg('');
-  }catch(err){ alertMsg('โหลดข้อมูลไม่สำเร็จ: ' + err.message); $('liSub').textContent = 'สถานีตำรวจภูธรบางบ่อ'; }
+  }catch(err){ BB.stale(document.body, false); alertMsg('โหลดข้อมูลไม่สำเร็จ: ' + err.message); $('liSub').textContent = 'สถานีตำรวจภูธรบางบ่อ'; }
   renderTypes(); renderTable(); renderOverview();
   if(typeof PD !== 'undefined' && PD.length) renderPending();   // ข้อมูลในชีตมาแล้ว → เช็กข้อมูลซ้ำอีกรอบ
   if(!reduceMotion) [...document.querySelectorAll('.kpi, .card')].forEach((c,i)=>{ c.style.setProperty('--d', Math.min(i,10)*50+'ms'); c.classList.add('reveal'); });
