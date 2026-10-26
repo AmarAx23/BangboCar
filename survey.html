@@ -398,6 +398,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
+<script src="fx.js"></script>
 </head>
 <body>
 <nav>
@@ -444,7 +445,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
         <div class="sec">🏷️ ประเภทสถานที่ <span class="req">*</span> <span style="font-weight:500;color:var(--muted)" id="pfTabCount"></span></div>
         <div class="full seg" id="pfType" role="radiogroup" aria-label="ประเภทสถานที่ (ที่ใช้บ่อย)"></div>
         <div class="pf-all"><span style="font-size:12.5px;font-weight:600;color:var(--muted)">หรือเลือกจากทุกประเภท</span><select id="pfTab" aria-label="ประเภทสถานที่ทั้งหมด"><option value="">— เลือกประเภท —</option></select></div>
-        <div id="pfFields"><div class="pf-msg">⏳ กำลังโหลดรายการประเภท…</div></div>
+        <div id="pfFields"><div class="pf-sk" aria-label="กำลังโหลดรายการประเภท"><span class="skb lb"></span><span class="skb in"></span><span class="skb lb" style="width:22%"></span><span class="skb in"></span><span class="skb lb" style="width:36%"></span><span class="skb in"></span></div></div>
       </div>
     </div>
     <div class="card">
@@ -489,7 +490,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 <script>
 const $ = id=>document.getElementById(id);
 const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let tT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),3400); }
+let tT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),3400);  BB.toastHaptic(m); }
 /* ส่งข้อมูลผ่าน Apps Script ของชีตข้อมูลท้องถิ่น (ตัวเดียวกับหน้า localinfo.html) · สายตรวจส่งได้อย่างเดียว อ่านข้อมูลไม่ได้ */
 const LOCAL_API = 'https://script.google.com/macros/s/AKfycbw2VRBIJNLuhaLTD53KgnLeKoYj42uP0uzo9rYSqmPxmKZOJJIsrl81oJZ2e9uIlr3b-Q/exec';
 const ICON = {'ร้านทอง':'💍','ร้านค้าทอง / ร้านค้าเครื่องประดับ':'💍','ธนาคาร':'🏦','ร้านสะดวกซื้อ':'🏪','ปั้มน้ำมัน':'⛽','ปั๊มน้ำมัน':'⛽','โรงเรียน':'🏫','วัด':'🛕','โรงแรม':'🏨'};
@@ -665,7 +666,7 @@ $('f').addEventListener('submit', e=>{
     .then(res=>{
       reset();
       if(!res || !res.ok){ toast('⚠️ ' + (res && res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
-      $('f').hidden = true; $('done').hidden = false; $('doneId').textContent = 'เลขอ้างอิง ' + (res.id || '');
+      BB.haptic('ok'); $('f').hidden = true; $('done').hidden = false; $('doneId').textContent = 'เลขอ้างอิง ' + (res.id || '');
       window.scrollTo({top:0,behavior:'smooth'}); reveal();
     })
     .catch(()=>{ reset(); toast('⚠️ เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); });
