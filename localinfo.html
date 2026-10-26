@@ -925,6 +925,12 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .rv-dup ul{margin:0;padding-left:18px}
 :root[data-theme="dark"] .rv-dup{background:rgba(220,38,38,.12);border-color:#7f1d1d;color:#fecaca}
 .rv-dup[hidden]{display:none}
+/* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
+html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:tabFade .28s ease both}
+@keyframes tabFade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
 </head>
 <body>
@@ -1641,5 +1647,6 @@ async function load(pre, fresh){
 load();
 showView(location.hash.slice(1) || 'overview');
 </script>
+<script>/* สลับแท็บ: เนื้อหาจางเข้า */document.addEventListener('click',e=>{ if(e.target.closest('[data-view]')) document.documentElement.classList.add('tabbed'); },true);</script>
 </body>
 </html>
