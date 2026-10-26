@@ -964,8 +964,27 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ck-snap:disabled{cursor:progress;opacity:.7}
 .ck-week.snapping *,.ck-week.snapping{animation:none!important;transition:none!important}
 .ck-week.snapping .ck-tbl-wrap{overflow:visible!important}
-@media print{ .ck-snap{display:none!important} }
+.ck-week.snapping{width:max-content;min-width:100%;max-width:none}   /* ตารางกว้างกว่าจอมือถือ → ขยายให้เห็นครบทุกคอลัมน์ในภาพ */
+@media print{ .ck-snap,.ck-acts{display:none!important} }
 @media (max-width:700px){ .ck-snap .tx{display:none} .ck-snap{padding:0 10px} }
+/* ปุ่มแชร์ (LINE ฯลฯ) อยู่คู่ปุ่มบันทึกภาพ */
+.ck-acts{position:absolute;top:-14px;right:14px;z-index:4;display:flex;gap:6px}
+.ck-acts .ck-snap{position:static}
+.ck-snap.ck-share{background:#06c755;border-color:#06c755;color:#fff;opacity:1}
+.ck-snap.ck-share:hover{background:#05b04b;border-color:#05b04b}
+@media (max-width:700px){ .ck-snap.ck-share .tx{display:inline} }
+/* หน้าต่างแสดงภาพ (มือถือ/LINE: กดค้างที่รูปเพื่อบันทึกหรือแชร์) */
+#imgDlg{border:0;border-radius:16px;padding:0;max-width:min(96vw,980px);width:96vw;background:var(--surface);color:var(--text);box-shadow:0 24px 60px rgba(15,23,42,.45)}
+#imgDlg::backdrop{background:rgba(15,23,42,.6)}
+#imgDlg .id-hd{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);font-weight:600}
+#imgDlg .id-hd b{flex:1}
+#imgDlg .id-x{border:0;background:none;font-size:20px;cursor:pointer;color:var(--muted)}
+#imgDlg .id-body{padding:12px;max-height:68vh;overflow:auto;background:var(--bg)}
+#imgDlg img{display:block;width:100%;height:auto;border-radius:8px;-webkit-touch-callout:default;user-select:auto}
+#imgDlg .id-tip{font-size:12.5px;color:var(--muted);padding:10px 14px 0;line-height:1.6}
+#imgDlg .id-acts{display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;flex-wrap:wrap}
+#imgDlg .id-acts a,#imgDlg .id-acts button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text-strong);font:600 13.5px 'Prompt',sans-serif;cursor:pointer;text-decoration:none}
+#imgDlg .id-acts .line{background:#06c755;border-color:#06c755;color:#fff}
 /* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
 @view-transition{navigation:auto}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
@@ -1259,7 +1278,7 @@ function renderCheck(noAnim){
   $('ckSub').textContent = `${fmt(list.length)} สัปดาห์${CKM?` · ${CKM}`:''}${CMD_API?'':' · ติ๊กในชีตแล้วกดรีเฟรชหน้านี้เพื่อดูผลล่าสุด'}`;
   let k = 0, wn = 0; const dir = CK_DIR; CK_DIR = '';
   $('ckWeeks').innerHTML = list.map(({w,i})=>{ const ph = phase(w), s = stats(w);
-    return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}${dir&&!noAnim?' from-'+dir:''}" id="ckw${i}" style="--wd:${Math.min(wn++,6)*90}ms"><button class="ck-snap" type="button" data-snap="${i}" title="บันทึกภาพ PNG ความละเอียดสูง สำหรับรายงาน" aria-label="บันทึกภาพสัปดาห์นี้">📷<span class="tx"> บันทึกภาพ</span></button><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
+    return `<section class="ck-week ${ph}${noAnim?'':' ck-in'}${dir&&!noAnim?' from-'+dir:''}" id="ckw${i}" style="--wd:${Math.min(wn++,6)*90}ms"><div class="ck-acts"><button class="ck-snap ck-share" type="button" data-share="${i}" title="แชร์ภาพความละเอียดสูง เช่น ส่งเข้ากลุ่ม LINE" aria-label="แชร์ภาพสัปดาห์นี้">📤<span class="tx"> แชร์</span></button><button class="ck-snap" type="button" data-snap="${i}" title="บันทึกภาพ PNG ความละเอียดสูง สำหรับรายงาน" aria-label="บันทึกภาพสัปดาห์นี้">📷<span class="tx"> บันทึกภาพ</span></button></div><div class="ck-side"><div class="wl">${esc(w.label.split('(')[0].trim())}</div>${/\(/.test(w.label)?`<div class="wd">${esc(w.label.replace(/^[^(]*\(\s*|\s*\)\s*$/g,''))}</div>`:''}<div class="wm">${esc(w.month)}</div><span class="wb">${phaseTxt[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
       `<div class="ck-tbl-wrap"><table class="ck-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th>${w.roles.map(r=>`<th>${roleHtml(r.name)}</th>`).join('')}</tr></thead><tbody>` +
       w.tasks.map((t,ti)=>`<tr style="--rd:${ti*45}ms"><td class="t"><span class="ti">${taskIcon(t.name)}</span>${esc(t.name)}</td>${t.cells.map((c,ri)=>{ const cls = (c.done ? 'on' : ph==='past' ? 'miss' : '') + (CMD_API ? ' can' : ''); return `<td><span class="ck-cell"><span class="tg">${esc(c.target)}</span><span class="cb ${cls}" data-w="${i}" data-t="${ti}" data-r="${ri}" role="${CMD_API?'checkbox':'img'}" ${CMD_API?'tabindex="0"':''} aria-checked="${c.done}" style="--d:${(k++%20)*20}ms" title="${c.done?'ดำเนินการแล้ว':ph==='past'?'ไม่ได้ดำเนินการ':'ยังไม่ได้ดำเนินการ'}">${NEON_IN}</span></span></td>`; }).join('')}</tr>`).join('') +
       `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td>${w.roles.map((r,ri)=>{ const x = roleStats(w,ri); return `<td style="color:${pctColor(x.pct)}">${x.done}/${x.tot}</td>`; }).join('')}</tr></tfoot></table></div></section>`; }).join('') || '<div class="card" style="text-align:center;color:var(--faint)">ไม่มีสัปดาห์ในเดือนที่เลือก</div>';
@@ -1307,27 +1326,85 @@ function snapFontCSS(){
     return out.join('\n');
   }).catch(()=>{ fontCSSP = null; return undefined; }));
 }
-async function snapWeek(i, btn){
-  const sec = $('ckw'+i); if(!sec) return;
-  const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = '⏳<span class="tx"> กำลังสร้างภาพ…</span>';
+/* สร้างภาพสัปดาห์ (PNG ความละเอียด 3 เท่า) → {blob, name} */
+async function weekImage(i){
+  const sec = $('ckw'+i); if(!sec) throw new Error('no week');
+  const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
+  try{ await document.fonts.ready; }catch(_){}
+  sec.classList.add('snapping');
   try{
-    const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
-    try{ await document.fonts.ready; }catch(_){}
-    sec.classList.add('snapping');
     const bg = getComputedStyle(document.body).backgroundColor || '#ffffff';
-    const opt = { pixelRatio: 3, backgroundColor: bg, fontEmbedCSS: fontCSS,
-      filter: n => !(n.classList && n.classList.contains('ck-snap')),
+    const wpx = Math.max(sec.scrollWidth, sec.offsetWidth);
+    const opt = { pixelRatio: Math.min(6, Math.max(3, Math.ceil(2400 / wpx))), backgroundColor: bg, fontEmbedCSS: fontCSS,   // กว้างอย่างน้อย ~2400px (คมพอส่ง LINE)
+      width: wpx, height: sec.scrollHeight,
+      filter: n => !(n.classList && (n.classList.contains('ck-snap') || n.classList.contains('ck-acts'))),
       style: { margin: '0', transform: 'none' } };
-    await htmlToImage.toPng(sec, opt);                 // รอบแรกให้ฟอนต์/รูปโหลดครบ (Safari)
-    const url = await htmlToImage.toPng(sec, opt);
+    await htmlToImage.toBlob(sec, opt);                // รอบแรกให้ฟอนต์/รูปโหลดครบ (Safari)
+    const blob = await htmlToImage.toBlob(sec, opt);
+    if(!blob) throw new Error('blob');
     const w = W[i] || {};
     const name = ('CHECKLIST ' + (w.label || 'สัปดาห์') + ' ' + (w.month || '')).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_').trim() + '.png';
+    return {blob, name};
+  } finally { sec.classList.remove('snapping'); }
+}
+/* iPhone/iPad และเบราว์เซอร์ในแอป (LINE, Facebook) ดาวน์โหลดไฟล์แล้วหาไม่เจอ → แสดงภาพให้กดค้างบันทึกแทน */
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IN_APP = /Line\/|FBAN|FBAV|Instagram/i.test(navigator.userAgent);
+const imgFile = (blob, name)=>{ try{ return new File([blob], name, {type:'image/png'}); }catch(_){ return null; } };
+const canShareFile = f=>!!(f && navigator.canShare && navigator.share && (()=>{ try{ return navigator.canShare({files:[f]}); }catch(_){ return false; } })());
+async function shareFile(f, name){
+  try{ await navigator.share({files:[f], title:name.replace(/\.png$/,'').replace(/_/g,' ')}); return 'ok'; }
+  catch(err){ return err && err.name === 'AbortError' ? 'abort' : 'fail'; }
+}
+let IMG_URL = null;
+function showImgDlg(blob, name){
+  let d = $('imgDlg');
+  if(!d){
+    d = document.createElement('dialog'); d.id = 'imgDlg';
+    d.innerHTML = '<div class="id-hd"><b>ภาพสรุปสัปดาห์</b><button class="id-x" type="button" aria-label="ปิด">✕</button></div><div class="id-body"><img alt="ภาพสรุปสัปดาห์"></div><div class="id-tip"></div><div class="id-acts"><button class="line" type="button" data-act="share">📤 แชร์ (LINE ฯลฯ)</button><a data-act="dl">⬇️ ดาวน์โหลดไฟล์</a></div>';
+    document.body.appendChild(d);
+    d.querySelector('.id-x').onclick = ()=>d.close();
+    d.addEventListener('click', e=>{ if(e.target === d) d.close(); });
+    d.addEventListener('close', ()=>{ if(IMG_URL){ URL.revokeObjectURL(IMG_URL); IMG_URL = null; } });
+  }
+  if(IMG_URL) URL.revokeObjectURL(IMG_URL);
+  IMG_URL = URL.createObjectURL(blob);
+  const f = imgFile(blob, name), sh = canShareFile(f);
+  d.querySelector('img').src = IMG_URL;
+  const dl = d.querySelector('[data-act="dl"]'); dl.href = IMG_URL; dl.download = name;
+  const sb = d.querySelector('[data-act="share"]'); sb.hidden = !sh;
+  sb.onclick = async ()=>{ const r = await shareFile(f, name); if(r === 'ok'){ BB.haptic('ok'); d.close(); } else if(r === 'fail') toast('⚠️ แชร์ไม่ได้ในเบราว์เซอร์นี้ · กดค้างที่รูปแล้วเลือกบันทึก/แชร์'); };
+  d.querySelector('.id-tip').textContent = (sh ? 'กด "แชร์" แล้วเลือก LINE และกลุ่มที่ต้องการ · ' : '') + 'หรือกดค้างที่รูป แล้วเลือก "บันทึกรูปภาพ" / "แชร์" (ภาพความละเอียดสูง 3 เท่า)';
+  d.showModal();
+}
+const btnBusy = (btn, on, old)=>{ btn.disabled = on; btn.innerHTML = on ? '⏳<span class="tx"> กำลังสร้างภาพ…</span>' : old; };
+async function snapWeek(i, btn){
+  const old = btn.innerHTML; btnBusy(btn, true);
+  try{
+    const {blob, name} = await weekImage(i);
+    if(IS_IOS || IN_APP){ showImgDlg(blob, name); return; }          // มือถือ iPhone / ในแอป LINE: ให้กดค้างบันทึกรูป
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 30000);
     toast('📷 บันทึกภาพแล้ว · ' + name);
   }catch(err){ toast('⚠️ บันทึกภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
-  finally{ sec.classList.remove('snapping'); btn.disabled = false; btn.innerHTML = old; }
+  finally{ btnBusy(btn, false, old); }
 }
-$('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.ck-snap'); if(b){ e.stopPropagation(); snapWeek(+b.dataset.snap, b); } });
+async function shareWeek(i, btn){
+  const old = btn.innerHTML; btnBusy(btn, true);
+  try{
+    const {blob, name} = await weekImage(i);
+    const f = imgFile(blob, name);
+    if(canShareFile(f)){
+      const r = await shareFile(f, name);                              // เปิดหน้าแชร์ของมือถือ → เลือก LINE
+      if(r === 'ok'){ BB.haptic('ok'); return; }
+      if(r === 'abort') return;
+    }
+    showImgDlg(blob, name);                                            // แชร์ตรงไม่ได้ (คอม/บางเบราว์เซอร์) → แสดงภาพพร้อมปุ่ม
+  }catch(err){ toast('⚠️ สร้างภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+  finally{ btnBusy(btn, false, old); }
+}
+$('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.ck-snap'); if(!b) return; e.stopPropagation(); if(b.dataset.share != null) shareWeek(+b.dataset.share, b); else snapWeek(+b.dataset.snap, b); });
 $('ckWeeks').addEventListener('click', e=>{ const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({w:+b.dataset.w, t:+b.dataset.t, r:+b.dataset.r}); });
 $('ckWeeks').addEventListener('keydown', e=>{ if((e.key===' '||e.key==='Enter') && e.target.classList.contains('can')){ e.preventDefault(); e.target.click(); } });
 $('ckMonths').addEventListener('change', e=>{ if(e.target.id!=='ckMonthSel') return; CKM = e.target.value; renderCheck(); window.scrollTo({top:0}); });
