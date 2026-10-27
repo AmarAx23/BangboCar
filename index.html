@@ -802,6 +802,21 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
 </style>
+<!-- iPhone/iPad: แตะช่องกรอกแล้วหน้าไม่ซูมเอง (ยังซูมด้วยสองนิ้วได้) · ช่องวันที่สูงเท่าช่องอื่น · ความสูงจอที่ถูกต้องเมื่อแถบ Safari ยุบ/ขยาย -->
+<script>(function(){var ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(!ios)return;var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1');})();</script>
+<style id="ios-fix">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highlight-color:transparent}
+@supports (-webkit-touch-callout:none){
+  input[type=date],input[type=time],input[type=month],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-height:2.6em;text-align:left}
+  input::-webkit-date-and-time-value{text-align:left}
+}
+@supports (height:100dvh){
+  #panel-heat #theftMap{height:calc(100dvh - 300px)}
+  #panelMap #liMap{height:calc(100dvh - 290px)}
+  #rvDlg .bd{max-height:calc(100dvh - 200px)}
+}
+</style>
 </head>
 <body>
 <!-- Loading screen: spinning station logo, fades out once the sheet data arrives -->
