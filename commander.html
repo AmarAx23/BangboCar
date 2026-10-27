@@ -962,9 +962,6 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ck-snap{position:absolute;top:-14px;right:14px;z-index:4;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text-strong);font:600 12.5px 'Prompt',sans-serif;cursor:pointer;box-shadow:0 4px 12px -4px rgba(15,23,42,.35);opacity:.92;transition:transform .15s,opacity .15s,background .15s}
 .ck-snap:hover{opacity:1;transform:translateY(-1px);background:#2563eb;color:#fff;border-color:#2563eb}
 .ck-snap:disabled{cursor:progress;opacity:.7}
-.ck-week.snapping *,.ck-week.snapping{animation:none!important;transition:none!important}
-.ck-week.snapping .ck-tbl-wrap{overflow:visible!important}
-.ck-week.snapping{width:max-content;min-width:100%;max-width:none}   /* ตารางกว้างกว่าจอมือถือ → ขยายให้เห็นครบทุกคอลัมน์ในภาพ */
 @media print{ .ck-snap,.ck-acts{display:none!important} }
 @media (max-width:700px){ .ck-snap .tx{display:none} .ck-snap{padding:0 10px} }
 /* ปุ่มแชร์ (LINE ฯลฯ) อยู่คู่ปุ่มบันทึกภาพ */
@@ -1357,26 +1354,6 @@ function snapFontCSS(){
   }).catch(()=>{ fontCSSP = null; return undefined; }));
 }
 /* สร้างภาพสัปดาห์ (PNG ความละเอียด 3 เท่า) → {blob, name} */
-async function weekImage(i){
-  const sec = $('ckw'+i); if(!sec) throw new Error('no week');
-  const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
-  try{ await document.fonts.ready; }catch(_){}
-  sec.classList.add('snapping');
-  try{
-    const bg = getComputedStyle(document.body).backgroundColor || '#ffffff';
-    const wpx = Math.max(sec.scrollWidth, sec.offsetWidth);
-    const opt = { pixelRatio: Math.min(6, Math.max(3, Math.ceil(2400 / wpx))), backgroundColor: bg, fontEmbedCSS: fontCSS,   // กว้างอย่างน้อย ~2400px (คมพอส่ง LINE)
-      width: wpx, height: sec.scrollHeight,
-      filter: n => !(n.classList && (n.classList.contains('ck-snap') || n.classList.contains('ck-acts'))),
-      style: { margin: '0', transform: 'none' } };
-    await htmlToImage.toBlob(sec, opt);                // รอบแรกให้ฟอนต์/รูปโหลดครบ (Safari)
-    const blob = await htmlToImage.toBlob(sec, opt);
-    if(!blob) throw new Error('blob');
-    const w = W[i] || {};
-    const name = ('CHECKLIST ' + (w.label || 'สัปดาห์') + ' ' + (w.month || '')).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_').trim() + '.png';
-    return {blob, name};
-  } finally { sec.classList.remove('snapping'); }
-}
 /* iPhone/iPad และเบราว์เซอร์ในแอป (LINE, Facebook) ดาวน์โหลดไฟล์แล้วหาไม่เจอ → แสดงภาพให้กดค้างบันทึกแทน */
 const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const IN_APP = /Line\/|FBAN|FBAV|Instagram/i.test(navigator.userAgent);
@@ -1411,7 +1388,7 @@ const btnBusy = (btn, on, old)=>{ btn.disabled = on; btn.innerHTML = on ? '⏳<s
 async function snapWeek(i, btn){
   const old = btn.innerHTML; btnBusy(btn, true);
   try{
-    const {blob, name} = await weekImage(i);
+    const {blob, name} = await shareImage(i);                         // ภาพเดียวกับปุ่มแชร์ (ตารางแบบ A · 2160px)
     if(IS_IOS || IN_APP){ showImgDlg(blob, name); return; }          // มือถือ iPhone / ในแอป LINE: ให้กดค้างบันทึกรูป
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
