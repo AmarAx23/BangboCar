@@ -403,6 +403,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 </style>
 <script src="fx.js"></script>
 <script src="outbox.js"></script>
+<script src="formkit.js"></script>
 <!-- iPhone/iPad: แตะช่องกรอกแล้วหน้าไม่ซูมเอง (ยังซูมด้วยสองนิ้วได้) · ช่องวันที่สูงเท่าช่องอื่น · ความสูงจอที่ถูกต้องเมื่อแถบ Safari ยุบ/ขยาย -->
 <script>(function(){var ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(!ios)return;var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1');})();</script>
 <style id="ios-fix">
@@ -695,7 +696,7 @@ $('files').addEventListener('change', async e=>{
 $('thumbs').addEventListener('click', e=>{ const b=e.target.closest('[data-i]'); if(b){ FILES.splice(+b.dataset.i,1); drawThumbs(); } });
 
 /* ---------- ส่งข้อมูล ---------- */
-$('f').addEventListener('submit', e=>{
+$('f').addEventListener('submit', async e=>{
   e.preventDefault();
   const by = $('by').value.trim();
   if(!by){ toast('กรุณากรอก ชื่อผู้สำรวจ'); $('by').focus(); return; }
@@ -703,8 +704,8 @@ $('f').addEventListener('submit', e=>{
   const fields = pfCollect($('pfFields')); if(!fields) return;
   const row = { tab: PF_TAB.tab, fields, lat: parseFloat($('pfLat').value), lng: parseFloat($('pfLng').value), map: $('pfMap').value.trim() };
   if(!isFinite(row.lat) || !isFinite(row.lng)){ row.lat = ''; row.lng = ''; }
-  if(row.lat==='' && !row.map && !confirm('ยังไม่ได้ปักหมุดตำแหน่ง — ส่งต่อหรือไม่?\n(แนะนำกด "📍 ใช้ตำแหน่งปัจจุบัน" ตอนอยู่หน้าสถานที่)')) return;
   try{ localStorage.setItem('survey-by', by); }catch(_){}
+  if(!await BBF.review(reviewOf(by, row))) return;                             // หน้าสรุปก่อนส่ง
   const b = $('send'); b.disabled = true; b.textContent = !BBQ.online() ? '💾 กำลังเก็บไว้ในเครื่อง…' : FILES.length ? '⏳ กำลังอัปโหลดรูป…' : '⏳ กำลังส่ง…';
   const cName = PF_TAB.cols.find(c=>c.name==='ชื่อสถานที่'), cid = BBQ.newId();
   OBX.submit({cid, url:LOCAL_API, body:{action:'submit', cid, by, note:$('note').value.trim(), hp:$('hp').value, row, files:FILES.map(f=>({type:f.type,data:f.data}))},
@@ -712,9 +713,22 @@ $('f').addEventListener('submit', e=>{
     .then(res=>{
       b.disabled = false; b.textContent = SEND_LABEL; OBX.draw();
       if(!res.ok && !res.queued){ toast('⚠️ ' + (res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
-      showDone(res);
+      DRAFT.clear(); showDone(res);
     });
 });
+/* ---------- หน้าสรุปก่อนส่ง ---------- */
+function reviewOf(by, row){
+  const rows = PF_TAB.cols.filter(c=>row.fields[c.i] != null).map(c=>[(c.group ? c.group + ' › ' : '') + c.name, row.fields[c.i] === '/' ? '✓' : row.fields[c.i]]);
+  const hasLL = row.lat !== '', notes = [];
+  if(!hasLL && !row.map) notes.push('⚠️ ยังไม่ได้ปักหมุดตำแหน่ง — แนะนำกด "กลับไปแก้" แล้วกด 📍 ใช้ตำแหน่งปัจจุบัน ตอนอยู่หน้าสถานที่');
+  if(!BBQ.online()) notes.push('📴 ตอนนี้ไม่มีสัญญาณ กดยืนยันแล้วจะเก็บไว้ในเครื่อง และส่งให้เองเมื่อมีสัญญาณ');
+  return { title:'ตรวจทานก่อนส่ง', sections:[
+    {title:'🏷️ ' + PF_TAB.tab.trim(), rows:[['ผู้สำรวจ', by]].concat(rows)},
+    {title:'🧭 ตำแหน่ง', rows:[['พิกัด', hasLL ? (+row.lat).toFixed(6) + ', ' + (+row.lng).toFixed(6) : (row.map ? 'ลิงก์ Google Maps' : '')], ['เขตตรวจ', hasLL ? $('pfZone').textContent : '']]},
+    {title:'💬 หมายเหตุ', rows:[['ถึงเจ้าหน้าที่', $('note').value.trim()]]}],
+    photos: FILES.map(f=>f.url), note: notes.join('\n'),
+    ok: BBQ.online() ? '📤 ยืนยันส่ง' : '💾 ยืนยัน เก็บไว้ส่ง' };
+}
 const SEND_LABEL = '📤 ส่งให้เจ้าหน้าที่ตรวจสอบ';
 function showDone(res){
   const q = !!res.queued;
@@ -726,6 +740,7 @@ function showDone(res){
   window.scrollTo({top:0,behavior:'smooth'}); reveal();
 }
 $('again').addEventListener('click', ()=>{
+  DRAFT.hideBar();
   const by = $('by').value, tab = PF_TAB ? PF_TAB.tab : '';
   $('f').reset(); $('by').value = by; pfPick(tab); clearPick(); FILES = []; drawThumbs();
   $('done').hidden = true; $('f').hidden = false; OBX.draw(); window.scrollTo({top:0}); reveal();
@@ -736,6 +751,26 @@ pfLoadSchema();
 /* กล่องรอส่ง: ไม่มีสัญญาณ → เก็บไว้ในเครื่อง แล้วส่งให้เองเมื่อกลับมาออนไลน์ (outbox.js) */
 const OBX = BBQ.ui({kind:'survey', mount:$('f'), btn:$('send'), label:SEND_LABEL, toast});
 BBQ.installSW('./survey');
+/* ร่างอัตโนมัติ: กรอกค้างแล้วเผลอปิด/มีสายเข้า เปิดใหม่ข้อมูลยังอยู่ (ไม่รวมรูปถ่าย) */
+let D_PENDING = null;
+function draftApply(o){
+  if(o.tab){ if(!PF_TABS.some(t=>t.tab===o.tab)){ D_PENDING = o; return; } pfPick(o.tab); pfFill($('pfFields'), o.fields || {}); }
+  const lat = parseFloat(o.lat), lng = parseFloat(o.lng);
+  if(isFinite(lat) && isFinite(lng)) setPick(lat, lng, true);
+  if(o.map) $('pfMap').value = o.map;
+  if(o.note) $('note').value = o.note;
+}
+const DRAFT = BBF.draft({ key:'survey', form:$('f'), mount:$('f'), toast, note:'รูปถ่ายต้องแนบใหม่',
+  get: ()=>({ by:$('by').value, tab: PF_TAB ? PF_TAB.tab : '', fields: PF_TAB ? pfCollectLoose() : {}, lat:$('pfLat').value, lng:$('pfLng').value, map:$('pfMap').value, note:$('note').value }),
+  isEmpty: o=>!o.tab && !o.lat && !o.map && !String(o.note||'').trim(),
+  set: o=>{ if(o.by) $('by').value = o.by; draftApply(o); },
+  reset: ()=>{ const by = $('by').value; $('f').reset(); $('by').value = by; pfPick(''); clearPick(); FILES = []; drawThumbs(); window.scrollTo({top:0}); } });
+{ const _pick = setPick, _clear = clearPick, _tabs = pfSetTabs;                   // ปักหมุดบนแผนที่ (ไม่ใช่การพิมพ์) ก็บันทึกร่างด้วย
+  setPick = function(){ _pick.apply(this, arguments); DRAFT.save(); };
+  clearPick = function(){ _clear.apply(this, arguments); DRAFT.save(); };
+  pfSetTabs = function(){ _tabs.apply(this, arguments); if(D_PENDING){ const o = D_PENDING; D_PENDING = null; draftApply(o); } }; }
+DRAFT.restore();
+BBF.pull({ before: ()=>DRAFT.saveNow() });                                       // ดึงหน้าลงเพื่อรีเฟรช (เปิดจากหน้าจอโฮม / LINE)
 
 /* ---------- เพิ่มลงหน้าจอโฮม (iPhone: บอกขั้นตอน · Android: ติดตั้งได้ถ้าเบราว์เซอร์รองรับ) ---------- */
 (function(){
