@@ -373,6 +373,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 </style>
 <script src="fx.js"></script>
 <script src="outbox.js"></script>
+<script src="formkit.js"></script>
 <!-- iPhone/iPad: แตะช่องกรอกแล้วหน้าไม่ซูมเอง (ยังซูมด้วยสองนิ้วได้) · ช่องวันที่สูงเท่าช่องอื่น · ความสูงจอที่ถูกต้องเมื่อแถบ Safari ยุบ/ขยาย -->
 <script>(function(){var ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(!ios)return;var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1');})();</script>
 <style id="ios-fix">
@@ -493,7 +494,8 @@ function fill(o){
   $('type').innerHTML = '<option value="">— เลือกประเภท —</option>' + pick('type').map(v=>`<option>${esc(v)}</option>`).join('');
   if(cur) $('type').value = cur;
   const lvs = pick('level').slice().sort((a,b)=>'rygn'.indexOf(LV(a))-'rygn'.indexOf(LV(b)));
-  $('level').innerHTML = lvs.map(v=>`<label class="${LV(v)}"><input type="radio" name="lv" value="${esc(v)}"><i style="background:${LVC[LV(v)]}"></i>${esc(v)}</label>`).join('');
+  const curLv = (document.querySelector('#level input:checked')||{}).value || '';
+  $('level').innerHTML = lvs.map(v=>`<label class="${LV(v)}"><input type="radio" name="lv" value="${esc(v)}"${v===curLv?' checked':''}><i style="background:${LVC[LV(v)]}"></i>${esc(v)}</label>`).join('');
   $('eduList').innerHTML = pick('edu').map(v=>`<option value="${esc(v)}">`).join('');
 }
 fill(null);
@@ -587,22 +589,38 @@ function row(){
     name:v('name'), nick:v('nick'), age:v('age'), phone:v('phone').replace(/\D/g,''), idno:$('idnoUnk').checked ? 'ไม่ทราบ' : v('idno').replace(/\D/g,''),
     addr:v('addr'), work:v('work'), edu:v('edu'), weapon:v('weapon'), place:v('place'), behave:v('behave'), hp:v('hp') };
 }
-$('f').addEventListener('submit', e=>{
+$('f').addEventListener('submit', async e=>{
   e.preventDefault();
   const r = row();
   const miss = [['by','by','ชื่อผู้บันทึก'],['date','date','วันที่'],['type','type','ประเภทกลุ่มเสี่ยง'],['level','level','ระดับความเสี่ยง'],['name','name','ชื่อ - สกุล']].find(([k])=>!r[k]);
   if(miss){ toast('กรุณากรอก '+miss[2]); const el=$(miss[1]); (el.querySelector('input')||el).focus(); return; }
   if(r.idno && r.idno!=='ไม่ทราบ' && r.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('idno').focus(); return; }
   try{ localStorage.setItem('patrol-by', r.by); }catch(_){}
+  if(!await BBF.review(reviewOf(r))) return;                                   // หน้าสรุปก่อนส่ง
   const b = $('send'); b.disabled = true; b.textContent = !BBQ.online() ? '💾 กำลังเก็บไว้ในเครื่อง…' : FILES.length ? '⏳ กำลังอัปโหลดรูป…' : '⏳ กำลังส่ง…';
   const cid = BBQ.newId(); r.cid = cid;
   OBX.submit({cid, url:RISK_API, body:{action:'submit', row:r, files:FILES.map(f=>({type:f.type,data:f.data}))}, label:r.name + ' · ' + r.type, files:FILES.length})
     .then(res=>{
       b.disabled = false; b.textContent = SEND_LABEL; OBX.draw();
       if(!res.ok && !res.queued){ toast('⚠️ ' + (res.error || 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง')); return; }
-      showDone(res);
+      DRAFT.clear(); showDone(res);
     });
 });
+/* ---------- หน้าสรุปก่อนส่ง ---------- */
+const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const thDate = s=>{ const m = String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? (+m[3]) + ' ' + TH_MON[m[2]-1] + ' ' + (+m[1] + 543) : s; };
+const idFmt = s=>/^\d{13}$/.test(s) ? s.replace(/(\d)(\d{4})(\d{5})(\d{2})(\d)/, '$1-$2-$3-$4-$5') : s;
+const telFmt = s=>/^\d{10}$/.test(s) ? s.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3') : s;
+function reviewOf(r){
+  return { title:'ตรวจทานก่อนส่ง · ' + r.name, sections:[
+    {title:'🗓️ การบันทึก', rows:[['ผู้บันทึก', r.by], ['วันที่ / เวลา', thDate(r.date) + (r.time ? ' · ' + r.time + ' น.' : '')], ['ประเภท', r.type], ['ระดับความเสี่ยง', r.level]]},
+    {title:'👤 ข้อมูลบุคคล', rows:[['ชื่อ - สกุล', r.name], ['ชื่อเล่น', r.nick], ['อายุ', r.age && r.age + ' ปี'], ['เบอร์โทร', telFmt(r.phone)], ['เลขบัตรประชาชน', idFmt(r.idno)],
+      ['ที่อยู่', r.addr], ['ที่ทำงาน / สถานศึกษา', r.work], ['การศึกษา', r.edu]]},
+    {title:'🚨 พฤติกรรม', rows:[['อาวุธ / สิ่งผิดกฎหมาย', r.weapon || 'ไม่มี'], ['สถานที่ที่พบ', r.place], ['พฤติกรรม / ข้อหา', r.behave]]}],
+    photos: FILES.map(f=>f.url),
+    note: BBQ.online() ? '' : '📴 ตอนนี้ไม่มีสัญญาณ กดยืนยันแล้วจะเก็บไว้ในเครื่อง และส่งให้เองเมื่อมีสัญญาณ',
+    ok: BBQ.online() ? '📤 ยืนยันส่ง' : '💾 ยืนยัน เก็บไว้ส่ง' };
+}
 const SEND_LABEL = '📤 ส่งให้เจ้าหน้าที่ตรวจสอบ';
 function showDone(res){
   const q = !!res.queued;
@@ -614,6 +632,7 @@ function showDone(res){
   window.scrollTo({top:0,behavior:'smooth'}); reveal();
 }
 $('again').addEventListener('click', ()=>{
+  DRAFT.hideBar();
   const keep = {by:$('by').value, date:$('date').value, type:$('type').value};
   $('f').reset(); FILES=[]; drawThumbs();
   $('by').value = keep.by; $('date').value = keep.date; $('time').value = nowHM(); $('type').value = keep.type;
@@ -622,6 +641,18 @@ $('again').addEventListener('click', ()=>{
 /* กล่องรอส่ง: ไม่มีสัญญาณ → เก็บไว้ในเครื่อง แล้วส่งให้เองเมื่อกลับมาออนไลน์ (outbox.js) */
 const OBX = BBQ.ui({kind:'patrol', mount:$('f'), btn:$('send'), label:SEND_LABEL, toast});
 BBQ.installSW('./patrol');
+/* ร่างอัตโนมัติ: กรอกค้างแล้วเผลอปิด/มีสายเข้า เปิดใหม่ข้อมูลยังอยู่ (ไม่รวมรูปถ่าย) */
+const D_KEYS = ['by','date','time','type','name','nick','age','phone','idno','addr','work','edu','weapon','place','behave'];
+const DRAFT = BBF.draft({ key:'patrol', form:$('f'), mount:$('f'), toast, note:'รูปถ่ายต้องแนบใหม่',
+  get: ()=>{ const o = {}; D_KEYS.forEach(k=>o[k] = $(k).value); o.level = (document.querySelector('#level input:checked')||{}).value || ''; o.idnoUnk = $('idnoUnk').checked; return o; },
+  isEmpty: o=>!['type','level','name','nick','age','phone','idno','addr','work','edu','weapon','place','behave'].some(k=>String(o[k]||'').trim()) && !o.idnoUnk,
+  set: o=>{ D_KEYS.forEach(k=>{ if(o[k] != null && o[k] !== '') $(k).value = o[k]; });
+    if(o.type && ![...$('type').options].some(x=>x.value===o.type)) $('type').insertAdjacentHTML('beforeend', `<option>${esc(o.type)}</option>`), $('type').value = o.type;
+    const lv = [...document.querySelectorAll('#level input')].find(x=>x.value===o.level); if(lv) lv.checked = true;
+    if(o.idnoUnk){ $('idnoUnk').checked = true; $('idnoUnk').dispatchEvent(new Event('change')); } },
+  reset: ()=>{ const by = $('by').value; $('f').reset(); FILES = []; drawThumbs(); $('by').value = by; $('date').value = today(); $('time').value = nowHM(); window.scrollTo({top:0}); } });
+DRAFT.restore();
+BBF.pull({ before: ()=>DRAFT.saveNow() });                                       // ดึงหน้าลงเพื่อรีเฟรช (เปิดจากหน้าจอโฮม / LINE)
 
 /* ---------- เพิ่มลงหน้าจอโฮม (iPhone: บอกขั้นตอน · Android: ติดตั้งได้ถ้าเบราว์เซอร์รองรับ) ---------- */
 (function(){
