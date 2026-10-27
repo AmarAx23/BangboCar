@@ -2,8 +2,8 @@
    1) จำหน้าฟอร์มไว้ในเครื่อง → เปิดได้แม้ไม่มีสัญญาณ (มีเน็ตใช้ของใหม่เสมอ)
    2) ส่งรายการที่ค้างในเครื่องให้เองเมื่อกลับมามีสัญญาณ (Android/Chrome ส่งได้แม้ปิดหน้าไปแล้ว) */
 importScripts('outbox.js');
-const CACHE = 'bb-forms-v1';
-const LOCAL = ['patrol.html', 'survey.html', 'fx.js', 'outbox.js', 'logo.webp', 'favicon.png', 'apple-touch-icon.png', 'icon-192.png', 'patrol.webmanifest', 'survey.webmanifest'];
+const CACHE = 'bb-forms-v2';
+const LOCAL = ['patrol.html', 'survey.html', 'fx.js', 'outbox.js', 'formkit.js', 'logo.webp', 'favicon.png', 'apple-touch-icon.png', 'icon-192.png', 'patrol.webmanifest', 'survey.webmanifest'];
 const CDN = ['https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'];
 const STATIC_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
