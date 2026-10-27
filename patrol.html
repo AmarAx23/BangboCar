@@ -360,6 +360,12 @@ main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
 .id-row{display:flex;gap:8px;align-items:stretch}
 .id-row > input{flex:1;min-width:0}
 .id-row > input:disabled{opacity:.55;cursor:not-allowed}
+.id-msg{font-size:12.5px;font-weight:600;min-height:0}
+.id-msg:empty{display:none}
+.id-msg.ok{color:#16a34a}
+.id-msg.bad{color:#dc2626}
+.ff .id-row > input.bad{border-color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.15)}
+.ff .id-row > input.ok{border-color:#16a34a}
 .ff label.unk{flex:none;flex-direction:row;align-items:center;gap:7px;padding:0 14px;min-height:38px;border:1px solid var(--input-border);border-radius:8px;background:var(--surface2);cursor:pointer;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;user-select:none;transition:border-color .15s,background .15s,color .15s}
 .ff label.unk input{width:17px;height:17px;min-height:0;margin:0;padding:0;accent-color:#2563eb;cursor:pointer;flex:none}
 .ff label.unk:has(input:checked){border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
@@ -443,7 +449,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
         <label><span>ชื่อเล่น</span><input id="nick"></label>
         <label><span>อายุ</span><input type="number" id="age" min="1" max="119" inputmode="numeric"></label>
         <label><span>เบอร์โทรศัพท์</span><input type="tel" id="phone" inputmode="tel" placeholder="0xx-xxx-xxxx"></label>
-        <div class="full idf"><span>เลขที่บัตรประชาชน</span><div class="id-row"><input id="idno" inputmode="numeric" maxlength="17" placeholder="13 หลัก" aria-label="เลขที่บัตรประชาชน"><label class="unk"><input type="checkbox" id="idnoUnk">ไม่ทราบ</label></div></div>
+        <div class="full idf"><span>เลขที่บัตรประชาชน</span><div class="id-row"><input id="idno" inputmode="numeric" maxlength="17" placeholder="13 หลัก" aria-label="เลขที่บัตรประชาชน"><label class="unk"><input type="checkbox" id="idnoUnk">ไม่ทราบ</label></div><div class="id-msg" id="idnoMsg" aria-live="polite"></div></div>
         <label class="full"><span>ที่อยู่ปัจจุบัน</span><input id="addr" placeholder="บ้านเลขที่ หมู่ ตำบล อำเภอ จังหวัด"></label>
         <label><span>ชื่อสถานที่ทำงาน / สถานศึกษา</span><input id="work"></label>
         <label><span>ระดับชั้นการศึกษา</span><input id="edu" list="eduList" placeholder="เลือก หรือพิมพ์เอง"><datalist id="eduList"></datalist></label>
@@ -560,6 +566,19 @@ function bindUnk(inpId, cbId){
   return sync;
 }
 bindUnk('idno','idnoUnk');
+/* ตรวจเลขบัตรประชาชนด้วยหลักตรวจสอบ (หลักที่ 13) · พิมพ์ผิดหลักเดียวก็จับได้ */
+function thaiIdOk(d){ d = String(d||'').replace(/\D/g,''); if(!/^\d{13}$/.test(d)) return false; let s = 0; for(let i = 0; i < 12; i++) s += +d[i] * (13 - i); return (11 - s % 11) % 10 === +d[12]; }
+function idCheck(){
+  const inp = $('idno'), m = $('idnoMsg'), d = inp.value.replace(/\D/g,'');
+  const ok = d.length === 13 && thaiIdOk(d), bad = d.length === 13 && !ok;
+  inp.classList.toggle('ok', ok); inp.classList.toggle('bad', bad);
+  m.className = 'id-msg' + (ok ? ' ok' : bad ? ' bad' : '');
+  m.textContent = ok ? '✓ เลขบัตรถูกต้อง' : bad ? '⚠️ เลขบัตรไม่ถูกต้อง มีเลขหลักใดหลักหนึ่งผิด ตรวจกับบัตรอีกครั้ง' : '';
+  return !bad;
+}
+$('idno').addEventListener('input', idCheck);
+$('idnoUnk').addEventListener('change', idCheck);
+$('f').addEventListener('reset', ()=>setTimeout(idCheck, 0));
 let FILES = [];
 function shrink(file){
   return new Promise((res,rej)=>{
@@ -595,6 +614,7 @@ $('f').addEventListener('submit', async e=>{
   const miss = [['by','by','ชื่อผู้บันทึก'],['date','date','วันที่'],['type','type','ประเภทกลุ่มเสี่ยง'],['level','level','ระดับความเสี่ยง'],['name','name','ชื่อ - สกุล']].find(([k])=>!r[k]);
   if(miss){ toast('กรุณากรอก '+miss[2]); const el=$(miss[1]); (el.querySelector('input')||el).focus(); return; }
   if(r.idno && r.idno!=='ไม่ทราบ' && r.idno.length!==13){ toast('เลขบัตรประชาชนต้องมี 13 หลัก'); $('idno').focus(); return; }
+  if(r.idno && r.idno!=='ไม่ทราบ' && !thaiIdOk(r.idno)){ idCheck(); toast('⚠️ เลขบัตรประชาชนไม่ถูกต้อง ตรวจกับบัตรอีกครั้ง หรือติ๊ก "ไม่ทราบ"'); $('idno').focus(); return; }
   try{ localStorage.setItem('patrol-by', r.by); }catch(_){}
   if(!await BBF.review(reviewOf(r))) return;                                   // หน้าสรุปก่อนส่ง
   const b = $('send'); b.disabled = true; b.textContent = !BBQ.online() ? '💾 กำลังเก็บไว้ในเครื่อง…' : FILES.length ? '⏳ กำลังอัปโหลดรูป…' : '⏳ กำลังส่ง…';
@@ -649,7 +669,7 @@ const DRAFT = BBF.draft({ key:'patrol', form:$('f'), mount:$('f'), toast, note:'
   set: o=>{ D_KEYS.forEach(k=>{ if(o[k] != null && o[k] !== '') $(k).value = o[k]; });
     if(o.type && ![...$('type').options].some(x=>x.value===o.type)) $('type').insertAdjacentHTML('beforeend', `<option>${esc(o.type)}</option>`), $('type').value = o.type;
     const lv = [...document.querySelectorAll('#level input')].find(x=>x.value===o.level); if(lv) lv.checked = true;
-    if(o.idnoUnk){ $('idnoUnk').checked = true; $('idnoUnk').dispatchEvent(new Event('change')); } },
+    if(o.idnoUnk){ $('idnoUnk').checked = true; $('idnoUnk').dispatchEvent(new Event('change')); } idCheck(); },
   reset: ()=>{ const by = $('by').value; $('f').reset(); FILES = []; drawThumbs(); $('by').value = by; $('date').value = today(); $('time').value = nowHM(); window.scrollTo({top:0}); } });
 DRAFT.restore();
 BBF.pull({ before: ()=>DRAFT.saveNow() });                                       // ดึงหน้าลงเพื่อรีเฟรช (เปิดจากหน้าจอโฮม / LINE)
