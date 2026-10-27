@@ -303,6 +303,19 @@ main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
 .pt-badge{font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;background:#dbeafe;color:#1d4ed8;white-space:nowrap}
 :root[data-theme="dark"] .pt-badge{background:#1e3a8a;color:#bfdbfe}
 .card{margin-bottom:16px}
+/* ช่อง "เลือก หรือพิมพ์เอง": ลูกศร ▾ + รายการตัวเลือก (iPhone ไม่แสดงรายการ datalist ให้เห็นชัด) */
+.cbx{position:relative}
+.ff .cbx input{padding-right:44px}
+.cbx-btn{position:absolute;right:1px;top:1px;bottom:1px;width:42px;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;border-radius:0 8px 8px 0;-webkit-tap-highlight-color:transparent}
+.cbx-btn svg{width:18px;height:18px;transition:transform .2s}
+.cbx.open .cbx-btn svg{transform:rotate(180deg)}
+.cbx-pop{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:40;background:var(--surface);border:1px solid var(--input-border);border-radius:10px;box-shadow:0 14px 30px -10px rgba(15,23,42,.4);padding:4px;max-height:260px;overflow:auto;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch}
+.cbx-pop[hidden]{display:none}
+.cbx-pop button{text-align:left;border:0;background:none;padding:11px 12px;font:500 15px 'Prompt',sans-serif;color:var(--text);border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cbx-pop button:hover,.cbx-pop button:focus-visible{background:var(--surface2);outline:0}
+.cbx-pop button.on{color:#2563eb;font-weight:600;background:var(--surface2)}
+.cbx-pop button.on::after{content:' ✓'}
+.cbx-pop .hint{font-size:12px;color:var(--muted);padding:6px 12px 4px}
 .ff input,.ff select,.ff textarea{font-size:16px}
 /* iOS: ช่องวันที่/เวลาไม่ล้นกรอบ */
 .ff{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -483,6 +496,34 @@ function fill(o){
   $('eduList').innerHTML = pick('edu').map(v=>`<option value="${esc(v)}">`).join('');
 }
 fill(null);
+/* ---------- ช่อง "เลือก หรือพิมพ์เอง" (ระดับชั้นการศึกษา, อาวุธ): กด ▾ หรือแตะช่องเพื่อดูตัวเลือก · พิมพ์เองได้ ---------- */
+function combo(inp){
+  const dl = document.getElementById(inp.getAttribute('list')); if(!dl) return;
+  inp.removeAttribute('list'); inp.setAttribute('autocomplete', 'off');
+  const wrap = document.createElement('div'); wrap.className = 'cbx'; inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+  const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'cbx-btn'; btn.tabIndex = -1; btn.setAttribute('aria-label', 'แสดงตัวเลือก');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+  const pop = document.createElement('div'); pop.className = 'cbx-pop'; pop.setAttribute('role', 'listbox'); pop.hidden = true;
+  wrap.append(btn, pop);
+  const opts = ()=>[...dl.options].map(o=>o.value).filter(Boolean);
+  const close = ()=>{ pop.hidden = true; wrap.classList.remove('open'); };
+  const draw = all=>{
+    const q = inp.value.trim().toLowerCase(), list = all || !q ? opts() : opts().filter(v=>v.toLowerCase().includes(q));
+    if(!list.length){ close(); return; }
+    pop.innerHTML = list.map(v=>`<button type="button" role="option" class="${v===inp.value.trim()?'on':''}">${esc(v)}</button>`).join('') + '<div class="hint">ไม่มีในรายการ พิมพ์เองได้</div>';
+    pop.hidden = false; wrap.classList.add('open');
+  };
+  btn.addEventListener('click', e=>{ e.preventDefault(); if(!pop.hidden) return close(); draw(true); });
+  inp.addEventListener('focus', ()=>draw(true));
+  inp.addEventListener('input', ()=>draw(false));
+  inp.addEventListener('keydown', e=>{ if(e.key === 'Escape' || e.key === 'Tab') close(); });
+  pop.addEventListener('mousedown', e=>e.preventDefault());                        // แตะรายการแล้วช่องไม่หลุดโฟกัสก่อนเลือก
+  pop.addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b){ close(); return; } e.preventDefault();
+    inp.value = b.textContent; close(); inp.dispatchEvent(new Event('change', {bubbles:true})); });
+  document.addEventListener('pointerdown', e=>{ if(!wrap.contains(e.target)) close(); });
+  if(inp.form) inp.form.addEventListener('reset', close);
+}
+['edu', 'weapon'].forEach(id=>combo($(id)));
 $('date').value = today(); $('time').value = nowHM();
 try{ $('by').value = localStorage.getItem('patrol-by') || ''; }catch(_){}
 /* ส่งข้อมูลผ่าน Apps Script ของชีตกลุ่มเสี่ยง (ตัวเดียวกับหน้า risk.html) · สายตรวจส่งได้อย่างเดียว อ่านข้อมูลไม่ได้ */
