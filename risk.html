@@ -281,6 +281,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 /* on phones the header is tall (title, buttons, tabs): let it scroll away instead of covering a third of the screen */
 @media (max-width:700px){ nav{position:static} }
 .tab-panel[hidden]{display:none}
+@media (max-width:480px){ nav .tabbar{gap:8px} nav .tabbar .tab{flex:1 1 auto;white-space:nowrap;font-size:13.5px;gap:4px;min-width:0;padding-left:.45em;padding-right:.45em} }   /* มือถือ: ชื่อแท็บไม่ตกบรรทัด */
 @media print{ .tabbar{display:none} }
 /* card header with title + small controls on the right */
 .card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
@@ -1178,6 +1179,21 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:tabFade .28s ease both}
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
+</style>
+<!-- iPhone/iPad: แตะช่องกรอกแล้วหน้าไม่ซูมเอง (ยังซูมด้วยสองนิ้วได้) · ช่องวันที่สูงเท่าช่องอื่น · ความสูงจอที่ถูกต้องเมื่อแถบ Safari ยุบ/ขยาย -->
+<script>(function(){var ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(!ios)return;var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1');})();</script>
+<style id="ios-fix">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highlight-color:transparent}
+@supports (-webkit-touch-callout:none){
+  input[type=date],input[type=time],input[type=month],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-height:2.6em;text-align:left}
+  input::-webkit-date-and-time-value{text-align:left}
+}
+@supports (height:100dvh){
+  #panel-heat #theftMap{height:calc(100dvh - 300px)}
+  #panelMap #liMap{height:calc(100dvh - 290px)}
+  #rvDlg .bd{max-height:calc(100dvh - 200px)}
+}
 </style>
 </head>
 <body>
