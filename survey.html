@@ -267,7 +267,8 @@ html.no-motion .nav-coin{animation:none}
 
 .cm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .cm-head h2{font-size:18px;color:var(--text-strong);margin:0}
-.cm-head .sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.6}
+.cm-head .sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm-head > div{min-width:0;max-width:100%}
 .cm-head .sub b{color:var(--text);font-weight:600}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%)}
@@ -456,7 +457,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   <div class="cm-head">
     <div>
       <h2>📝 สำรวจสถานที่สำคัญในพื้นที่</h2>
-      <div class="sub">เลือกประเภท → กรอกข้อมูล → ปักหมุด → กด <b>ส่ง</b><br>เจ้าหน้าที่จะตรวจสอบก่อนเข้าระบบ</div>
+      <div class="sub">เลือกประเภท → กรอก → ปักหมุด → <b>ส่ง</b> · เจ้าหน้าที่ตรวจก่อนเข้าระบบ</div>
     </div>
   </div>
   <form id="f" autocomplete="off" novalidate>
@@ -502,6 +503,10 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
     <p><span id="doneP">รอเจ้าหน้าที่ตรวจสอบและยืนยัน</span><br><span id="doneId" style="font-size:12.5px"></span></p>
     <button class="btn btn-print send" id="again" type="button">➕ สำรวจสถานที่ถัดไป</button>
   </div>
+<script>/* คำอธิบายใต้หัวข้อ: อยู่บรรทัดเดียวเสมอ (จอแคบ → ย่อตัวอักษรลงเล็กน้อย) */
+(function(){ const s = document.querySelector('.cm-head .sub'); if(!s) return;
+  const fit = ()=>{ s.style.fontSize = ''; let f = 13; while(s.scrollWidth > s.clientWidth && f > 10.5){ f -= .25; s.style.fontSize = f + 'px'; } };
+  fit(); addEventListener('resize', fit); if(document.fonts) document.fonts.ready.then(fit); })();</script>
 </main>
 <dialog id="a2hsDlg" aria-labelledby="a2hsTitle">
   <div class="a2hs-box">
