@@ -666,6 +666,11 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .type-card .ti{font-size:24px;line-height:1}
 .type-card.on{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.35)}
 .type-card .kpi-val{font-size:26px}
+.type-card .kpi-lbl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em;line-height:1.25}
+/* ประเภทที่ยังไม่มีข้อมูล (0 แห่ง): แสดงไว้แต่จางลง */
+.type-card.zero:not(.on),.sec-tabs button.zero:not(.on){opacity:.55}
+.ov-row.zero .nm,.ov-row.zero .v{color:var(--ov-mute)}
+.ov-row.zero .v{font-weight:500}
 .li-tools{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px}
 .li-table{width:100%;border-collapse:collapse;font-size:14px}
 .li-table th{background:var(--surface2);color:var(--muted);font-weight:700;text-align:left;padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;font-size:13px}
@@ -1162,12 +1167,20 @@ const ICON_RULES = [  // ไอคอนตามคำในชื่อแท�
   [/ธนาคาร/,'🏦'],[/สะดวกซื้อ/,'🏪'],[/ปั[้๊]ม/,'⛽'],[/โรงเรียน/,'🏫'],[/วัด/,'🛕'],[/โรงแรม|รีสอร์ท/,'🏨']
 ];
 function typeIcon(t){ t = String(t||'').trim(); if(ICON[t]) return ICON[t]; const r = ICON_RULES.find(([re])=>re.test(t)); return r ? r[1] : '📍'; }
-function renderTypes(){
+/* ทุกประเภท = ทุกแท็บในชีต (ตามลำดับแท็บ) · แท็บที่ยังไม่มีข้อมูลก็แสดง (จำนวน 0) */
+function allTypeCounts(){
+  let tabs = PF_TABS;
+  if(!tabs.length){ try{ tabs = JSON.parse(localStorage.getItem('li-schema') || '[]') || []; }catch(_){ tabs = []; } }
   const counts = new Map();
+  tabs.forEach(t=>{ const k = String(pfLabel(t) || '').trim(); if(k && !counts.has(k)) counts.set(k, 0); });
   S.rows.forEach(r=>counts.set(r.type, (counts.get(r.type)||0)+1));
+  return counts;
+}
+function renderTypes(){
+  const counts = allTypeCounts();
   const cards = [['', 'ทั้งหมด', S.rows.length, '📍'], ...[...counts].map(([t,n])=>[t, t || 'ไม่ระบุ', n, typeIcon(t)])];
-  $('mapTabs').innerHTML = $('pubTabs').innerHTML = cards.map(([t,lbl,n,ic])=>`<button type="button" role="tab" aria-selected="${S.type===t}" data-t="${esc(t)}" class="${S.type===t?'on':''}">${ic} ${esc(lbl)} · ${fmt(n)}</button>`).join('');
-  $('typeRow').innerHTML = cards.map(([t,lbl,n,ic])=>`<button type="button" class="kpi type-card${S.type===t?' on':''}" data-t="${esc(t)}"><span class="ti">${ic}</span><span class="kpi-lbl">${esc(lbl)}</span><span class="kpi-val">${fmt(n)}</span></button>`).join('');
+  $('mapTabs').innerHTML = $('pubTabs').innerHTML = cards.map(([t,lbl,n,ic])=>`<button type="button" role="tab" aria-selected="${S.type===t}" data-t="${esc(t)}" class="${S.type===t?'on':''}${n?'':' zero'}">${ic} ${esc(lbl)} · ${fmt(n)}</button>`).join('');
+  $('typeRow').innerHTML = cards.map(([t,lbl,n,ic])=>`<button type="button" class="kpi type-card${S.type===t?' on':''}${n?'':' zero'}" data-t="${esc(t)}" title="${esc(lbl)}"><span class="ti">${ic}</span><span class="kpi-lbl">${esc(lbl)}</span><span class="kpi-val">${fmt(n)}</span></button>`).join('');
 }
 function renderTable(){
   const q = S.q.trim().toLowerCase().replace(/\s+/g,'');
@@ -1175,7 +1188,7 @@ function renderTable(){
   $('liCount').textContent = `แสดง ${fmt(list.length)} จาก ${fmt(S.rows.length)} แห่ง`;
   $('liTable').innerHTML = `<thead><tr><th>#</th><th>ประเภท</th><th>ชื่อสถานที่</th><th>ที่ตั้ง</th><th>แผนที่</th></tr></thead><tbody>` +
     (list.length ? list.map((r,i)=>`<tr><td class="n">${i+1}</td><td><span class="tpill">${typeIcon(r.type)} ${esc(r.type)}</span></td><td class="nm">${esc(r.name)}</td><td class="ad">${esc(r.addr)}</td><td>${r.map?`<a class="maplink" href="${esc(r.map)}" target="_blank" rel="noopener">🗺️ เปิด</a>`:''}</td></tr>`).join('')
-      : `<tr><td colspan="5" class="li-empty">ไม่พบสถานที่ที่ค้นหา</td></tr>`) + '</tbody>';
+      : `<tr><td colspan="5" class="li-empty">${S.type && !q ? 'ประเภทนี้ยังไม่มีข้อมูลในชีต' : 'ไม่พบสถานที่ที่ค้นหา'}</td></tr>`) + '</tbody>';
   renderMap(list);
 }
 /* ---------- แผนที่สถานที่ (แผนที่ฐานเดียวกับ Heat Map · ขอบพื้นที่สีเดียว · หมุดตามประเภท) ---------- */
@@ -1223,9 +1236,8 @@ function ovZone(r){
 function renderOverview(){
   $('ovAsof').textContent = 'ข้อมูล ณ วันที่ ' + new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
   const row = (no,nm,v,cls)=>`<li class="ov-row${cls?' '+cls:''}"><span class="no">${no}</span><span class="nm">${nm}</span><span class="lb">จำนวน</span><span class="v">${fmt(v)}</span><span class="u">แห่ง</span></li>`;
-  const counts = new Map(); S.rows.forEach(r=>counts.set(r.type||'ไม่ระบุ', (counts.get(r.type||'ไม่ระบุ')||0)+1));
-  const types = [...counts].sort((a,b)=>b[1]-a[1]);
-  let h = types.map(([t,n],i)=>row(TH_NUM(i+1)+'.', `<span class="ic">${typeIcon(t)}</span> ${esc(t)}`, n)).join('');
+  const types = [...allTypeCounts()].map(([t,n])=>[t||'ไม่ระบุ', n]).sort((a,b)=>b[1]-a[1]);   // มากไปน้อย · เท่ากันเรียงตามแท็บในชีต
+  let h = types.map(([t,n],i)=>row(TH_NUM(i+1)+'.', `<span class="ic">${typeIcon(t)}</span> ${esc(t)}`, n, n?'':'zero')).join('');
   // แยกตามเขตตรวจ (แบบหัวข้อย่อยในภาพตัวอย่าง)
   const zc = {}; S.rows.forEach(r=>{ const z=ovZone(r)||'ยังไม่มีพิกัด'; zc[z]=(zc[z]||0)+1; });
   const ZC = {'เขตตรวจที่ 1':'#FFD600','เขตตรวจที่ 2':'#795548','เขตตรวจที่ 3':'#F48FB1'};
@@ -1250,7 +1262,7 @@ function playOverview(head){
   const base = head ? 650 : 120;
   const items = [...$('ovList').querySelectorAll('.ov-row'), $('ovTotal')];
   items.forEach((el,i)=>{
-    const d = base + i*70;
+    const d = base + i*Math.min(70, Math.round(1600/items.length));   // แถวเยอะ → ไล่เร็วขึ้น (รวมไม่เกิน ~1.6 วิ)
     el.classList.remove('ov-in'); void el.offsetWidth; el.style.setProperty('--d', d+'ms'); el.classList.add('ov-in');
     const v = el.querySelector('.v'); if(!v) return;
     const to = parseInt(v.textContent.replace(/[^\d]/g,''),10) || 0; v.textContent = fmt(0);
@@ -1372,6 +1384,7 @@ function pfSetTabs(tabs){
   $('pfType').innerHTML = quick.map(t=>`<label><input type="radio" name="pfType" value="${esc(t.tab)}">${typeIcon(pfLabel(t))} ${esc(pfLabel(t))}</label>`).join('');
   $('pfTab').innerHTML = '<option value="">— เลือกประเภท —</option>' + tabs.map(t=>`<option value="${esc(t.tab)}">${typeIcon(t.tab)} ${esc(t.tab.trim())}</option>`).join('');
   $('pfFields').innerHTML = '<div class="pf-msg">👆 เลือกประเภทสถานที่ แล้วช่องกรอกจะขึ้นตามหัวคอลัมน์ของแท็บนั้น</div>';
+  if(S.rows.length){ renderTypes(); renderOverview(); }   // ภาพรวม/รายชื่อ แสดงทุกแท็บในชีต
 }
 function pfPick(tab){
   PF_TAB = PF_TABS.find(t=>t.tab===tab) || null;
@@ -1691,6 +1704,7 @@ async function load(pre, fresh){
   if(!reduceMotion) [...document.querySelectorAll('.kpi, .card')].forEach((c,i)=>{ c.style.setProperty('--d', Math.min(i,10)*50+'ms'); c.classList.add('reveal'); });
 }
 load();
+pfLoadSchema();   // รายชื่อแท็บทั้งหมดในชีต → ภาพรวม/รายชื่อแสดงครบทุกประเภท (รวมที่ยังเป็น 0)
 showView(location.hash.slice(1) || 'overview');
 </script>
 <script>/* สลับแท็บ: เนื้อหาจางเข้า */document.addEventListener('click',e=>{ if(e.target.closest('[data-view]')) document.documentElement.classList.add('tabbed'); },true);</script>
