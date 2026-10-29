@@ -9,26 +9,354 @@
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>(function(){ try{ if(localStorage.getItem('bangbo-theme')==='dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){} })();</script>
 <style>
-:root{--bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;--text:#1e293b;--text-strong:#0f172a;--muted:#64748b;--faint:#94a3b8;--accent:#2563eb;--shadow:0 1px 3px rgba(0,0,0,.04)}
-:root[data-theme="dark"]{--bg:#0b1220;--surface:#111a2e;--border:#1e293b;--text:#e2e8f0;--text-strong:#f8fafc;--muted:#94a3b8;--faint:#64748b;--accent:#3b82f6;--shadow:none}
+:root{--bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;--text:#1e293b;--text-strong:#0f172a;--muted:#64748b;--faint:#94a3b8;--accent:#2563eb;--shadow:0 1px 3px rgba(0,0,0,.04);
+  --gold:#b7791f;--gold-bg:#fef3c7;--blue:#2563eb;--blue-bg:#dbeafe;--green:#16a34a;--green-bg:#dcfce7;--amber:#d97706;--amber-bg:#ffedd5;--navy:#0b2a5b}
+:root[data-theme="dark"]{--bg:#0b1220;--surface:#111a2e;--border:#1e293b;--text:#e2e8f0;--text-strong:#f8fafc;--muted:#94a3b8;--faint:#64748b;--accent:#3b82f6;--shadow:none;
+  --gold:#f0c55a;--gold-bg:#3a2f12;--blue:#60a5fa;--blue-bg:#16264a;--green:#4ade80;--green-bg:#123222;--amber:#fbbf24;--amber-bg:#3a2a10;--navy:#93c5fd}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;display:flex;flex-direction:column}
-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-nav a{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
-nav img{width:44px;height:51px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+[hidden]{display:none!important}
+body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+nav{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+nav a.home{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+nav img{width:40px;height:46px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
 .nav-title{font-size:17px;font-weight:700;color:var(--text-strong)}
 .nav-sub{font-size:13px;color:var(--muted);margin-top:2px}
-main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 16px}
-.soon{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:44px 34px;text-align:center;max-width:460px;width:100%;box-shadow:var(--shadow);animation:up .5s cubic-bezier(.2,.7,.2,1) both}
-.soon .ico{font-size:64px;line-height:1;margin-bottom:12px}
-.soon h1{font-size:22px;color:var(--text-strong);margin-bottom:6px}
-.soon p{color:var(--muted);line-height:1.6}
-.badge{display:inline-block;margin-top:18px;font-size:13px;font-weight:700;color:#b45309;background:#fef3c7;border-radius:99px;padding:5px 14px}
-:root[data-theme="dark"] .badge{background:#3a2f12;color:#f0c55a}
-.back{display:inline-block;margin-top:22px;color:var(--accent);font-weight:600;text-decoration:none}
-.back:hover{text-decoration:underline}
-@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.soon{animation:none}}
+.nav-right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.btn{font-family:inherit;font-size:14px;font-weight:600;border:0;border-radius:10px;padding:9px 16px;cursor:pointer;background:var(--accent);color:#fff}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--border)}
+main{max-width:1180px;margin:0 auto;padding:22px 20px 40px}
+.asof{color:var(--muted);font-size:13px;margin:-6px 0 14px}
+h2.sec{font-size:17px;color:var(--text-strong);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi .ic{font-size:26px;line-height:1}
+.kpi .lb{color:var(--muted);font-size:13.5px;margin-top:8px}
+.kpi .v{font-size:34px;font-weight:700;color:var(--text-strong);line-height:1.15;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.kpi.total{background:linear-gradient(135deg,#0b2a5b,#1d4ed8);border:0;color:#fff}
+.kpi.total .lb,.kpi.total .v small{color:rgba(255,255,255,.8)}.kpi.total .v{color:#fff}
+.kpi.total::after{content:'👮';position:absolute;right:-6px;bottom:-14px;font-size:86px;opacity:.16}
+.kpi .split{height:8px;border-radius:99px;background:var(--blue-bg);margin-top:10px;overflow:hidden;display:flex}
+.kpi .split i{display:block;height:100%}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px}
+.pill.g{background:var(--green-bg);color:var(--green)}.pill.a{background:var(--amber-bg);color:var(--amber)}
+
+/* cards */
+.grid2{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;margin-bottom:18px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.bars{list-style:none;display:flex;flex-direction:column;gap:9px}
+.bars li{display:grid;grid-template-columns:132px minmax(0,1fr) 34px;align-items:center;gap:10px;font-size:14px}
+.bars .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bars .tr{height:14px;background:var(--bg);border-radius:99px;overflow:hidden}
+.bars .tr i{display:block;height:100%;border-radius:99px;transform-origin:left;animation:grow .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d)}
+.bars .n{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.bars li.grp{grid-template-columns:1fr;font-size:12px;font-weight:600;color:var(--muted);margin-top:4px;letter-spacing:.2px}
+.bars li.grp:first-child{margin-top:0}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);margin-top:14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+@keyframes grow{from{transform:scaleX(0)}}
+
+/* org chart */
+.org{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 0 2px}
+.tier{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative}
+.tier + .tier{margin-top:26px}
+.tier + .tier::before{content:'';position:absolute;top:-26px;left:50%;width:2px;height:26px;background:var(--border)}
+.node{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:8px 14px;text-align:center;min-width:120px}
+.node b{display:block;font-size:14px;color:var(--text-strong)}
+.node span{font-size:12.5px;color:var(--muted)}
+.node.top{border-color:var(--gold);background:var(--gold-bg)}
+.node.mid{border-color:#93c5fd}
+.node.base{border-color:var(--blue);background:var(--blue-bg);min-width:260px}
+.node .cnt{display:inline-block;margin-top:2px;font-weight:700;color:var(--accent);font-size:13px}
+
+/* roster */
+.roster-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.roster-head .sp{flex:1}
+.search{font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);min-width:240px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{font-family:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.locked{position:relative;border-radius:14px;overflow:hidden}
+.locked .blur{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
+.locked .ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;background:linear-gradient(180deg,transparent,rgba(241,245,249,.6))}
+:root[data-theme="dark"] .locked .ov{background:linear-gradient(180deg,transparent,rgba(11,18,32,.6))}
+.locked .ov .ic{font-size:38px}
+.locked .ov p{color:var(--muted);font-size:14px;max-width:360px}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.person{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px}
+.av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff;background:var(--c,#2563eb)}
+.person .t{min-width:0;flex:1}
+.person .nm{font-weight:600;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person .ps{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person .cs{font-size:12px;color:var(--accent);font-weight:600}
+.person .st{white-space:nowrap;display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;margin-left:6px;vertical-align:1px}
+.person .st.g{background:var(--green-bg);color:var(--green)}.person .st.a{background:var(--amber-bg);color:var(--amber)}
+.foot{color:var(--faint);font-size:12.5px;text-align:center;margin-top:22px}
+
+
+@media (max-width:900px){ .kpis{grid-template-columns:1fr 1fr} .kpi.total{grid-column:1/-1} .grid2{grid-template-columns:1fr} }
+@media (max-width:640px){
+  nav{padding:10px 14px} main{padding:16px 14px 32px}
+  .kpi .v{font-size:28px}
+  .bars li{grid-template-columns:104px minmax(0,1fr) 28px;font-size:13px}
+  .node{min-width:96px;padding:7px 10px}.node.base{min-width:200px}
+  .search{min-width:0;width:100%}
+  .nav-right .btn.ghost{display:none}
+  .nav-right .btn{padding:8px 12px;font-size:13px;white-space:nowrap}
+  .nav-sub{display:none}
+  .nav-title{white-space:nowrap;font-size:15px}
+  .nav-right{gap:6px}
+}
+@media (prefers-reduced-motion:reduce){ .bars .tr i{animation:none} }
+
+.nav-right .theme-switch{--toggle-size:12px}
+.msg{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.6;margin-bottom:16px}
+:root[data-theme="dark"] .msg{background:#3a2f12;color:#fde68a;border-color:#a16207}
+.skb{display:block;border-radius:8px;background:linear-gradient(90deg,rgba(148,163,184,.14) 25%,rgba(148,163,184,.3) 50%,rgba(148,163,184,.14) 75%);background-size:200% 100%;animation:skb 1.2s linear infinite;height:14px}
+@keyframes skb{to{background-position:-200% 0}}
+.empty{color:var(--muted);text-align:center;padding:24px 0}
+.kpi .v{transition:opacity .2s}
+@media print{ nav .nav-right,.roster-card{display:none!important} body{background:#fff} .kpi.total{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+/* Light/dark switch — "strong-squid-82" by Galahhad on Uiverse.io (MIT) */
+.theme-switch {
+  --toggle-size: 7px;
+  /* the size is adjusted using font-size,
+     this is not transform scale,
+     so you can choose any size */
+  --container-width: 5.625em;
+  --container-height: 2.5em;
+  --container-radius: 6.25em;
+  /* radius 0 - minecraft mode :) */
+  --container-light-bg: #3D7EAE;
+  --container-night-bg: #1D1F2C;
+  --circle-container-diameter: 3.375em;
+  --sun-moon-diameter: 2.125em;
+  --sun-bg: #ECCA2F;
+  --moon-bg: #C4C9D1;
+  --spot-color: #959DB1;
+  --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+  --stars-color: #fff;
+  --clouds-color: #F3FDFF;
+  --back-clouds-color: #AACADF;
+  --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17);
+}
+
+.theme-switch, .theme-switch *, .theme-switch *::before, .theme-switch *::after {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-size: var(--toggle-size);
+}
+
+.theme-switch__container {
+  width: var(--container-width);
+  height: var(--container-height);
+  background-color: var(--container-light-bg);
+  border-radius: var(--container-radius);
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+  box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+  position: relative;
+}
+
+.theme-switch__container::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  -webkit-box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+  box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+  border-radius: var(--container-radius)
+}
+
+.theme-switch__checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.theme-switch { position: relative; display: inline-block; flex-shrink: 0; }
+.theme-switch__checkbox:focus-visible + .theme-switch__container { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+.theme-switch__circle-container {
+  width: var(--circle-container-diameter);
+  height: var(--circle-container-diameter);
+  background-color: rgba(255, 255, 255, 0.1);
+  position: absolute;
+  left: var(--circle-container-offset);
+  top: var(--circle-container-offset);
+  border-radius: var(--container-radius);
+  -webkit-box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-transition: var(--circle-transition);
+  -o-transition: var(--circle-transition);
+  transition: var(--circle-transition);
+  pointer-events: none;
+}
+
+.theme-switch__sun-moon-container {
+  pointer-events: auto;
+  position: relative;
+  z-index: 2;
+  width: var(--sun-moon-diameter);
+  height: var(--sun-moon-diameter);
+  margin: auto;
+  border-radius: var(--container-radius);
+  background-color: var(--sun-bg);
+  -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+  box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+  -webkit-filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+  overflow: hidden;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+}
+
+.theme-switch__moon {
+  -webkit-transform: translateX(100%);
+  -ms-transform: translateX(100%);
+  transform: translateX(100%);
+  width: 100%;
+  height: 100%;
+  background-color: var(--moon-bg);
+  border-radius: inherit;
+  -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+  box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+  position: relative;
+}
+
+.theme-switch__spot {
+  position: absolute;
+  top: 0.75em;
+  left: 0.312em;
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: var(--container-radius);
+  background-color: var(--spot-color);
+  -webkit-box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+  box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+}
+
+.theme-switch__spot:nth-of-type(2) {
+  width: 0.375em;
+  height: 0.375em;
+  top: 0.937em;
+  left: 1.375em;
+}
+
+.theme-switch__spot:nth-last-of-type(3) {
+  width: 0.25em;
+  height: 0.25em;
+  top: 0.312em;
+  left: 0.812em;
+}
+
+.theme-switch__clouds {
+  width: 1.25em;
+  height: 1.25em;
+  background-color: var(--clouds-color);
+  border-radius: var(--container-radius);
+  position: absolute;
+  bottom: -0.625em;
+  left: 0.312em;
+  -webkit-box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+  box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+  -webkit-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  -o-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+}
+
+.theme-switch__stars-container {
+  position: absolute;
+  color: var(--stars-color);
+  top: -100%;
+  left: 0.312em;
+  width: 2.75em;
+  height: auto;
+  -webkit-transition: var(--transition);
+  -o-transition: var(--transition);
+  transition: var(--transition);
+}
+
+/* actions */
+
+.theme-switch__checkbox:checked + .theme-switch__container {
+  background-color: var(--container-night-bg);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
+  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter));
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
+  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em)
+}
+
+.theme-switch__circle-container:hover {
+  left: calc(var(--circle-container-offset) + 0.187em);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon {
+  -webkit-transform: translate(0);
+  -ms-transform: translate(0);
+  transform: translate(0);
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds {
+  bottom: -4.062em;
+}
+
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container {
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+#pinDlg{padding:0;border:none;background:transparent;box-shadow:none;width:min(380px,92vw);max-width:none;overflow:visible;color:#fff}
+#pinDlg[open]{margin:auto;animation:pinPop .45s cubic-bezier(.34,1.56,.64,1)}
+#pinDlg::backdrop{background:rgba(2,6,23,.6);backdrop-filter:blur(4px)}
+#pinDlg[open]::backdrop{animation:pinFade .3s ease}
+#pinDlg .pl-card{background-image:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);border-radius:22px;padding:2px;transition:all .3s}
+#pinDlg .pl-card:hover{box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
+#pinDlg .pl-card2{border-radius:20px;transition:all .2s}
+#pinDlg .pl-card2:hover{transform:scale(.98)}
+#pinDlg .pl-form{display:flex;flex-direction:column;gap:10px;padding:0 2em .4em;background:#171717;border-radius:25px;transition:.4s ease-in-out;text-align:center}
+#pinDlg .lg-title{margin:1.6em 0 0;color:#fff;font-size:1.2em;font-weight:700}
+#pinDlg .lg-sub{color:#9ca3af;font-size:12.5px;line-height:1.55;margin-bottom:.8em}
+#pinDlg .pl-field{display:flex;align-items:center;justify-content:center;gap:.5em;border-radius:25px;padding:.6em .9em;border:none;outline:none;color:#fff;background:#171717;box-shadow:inset 2px 5px 10px rgb(5,5,5)}
+#pinDlg .pl-field:focus-within{box-shadow:inset 2px 5px 10px rgb(5,5,5),0 0 0 1px rgba(0,255,117,.45)}
+#pinDlg .pl-icon{height:1.3em;width:1.3em;flex:none;fill:#fff}
+#pinDlg .pl-input{background:none;border:none;outline:none;width:100%;color:#d3d3d3;font-size:16px;font-family:inherit;letter-spacing:3px;padding:0}
+#pinDlg .pl-input::placeholder{color:#6b7280;letter-spacing:normal}
+#pinDlg .lg-err{min-height:18px;color:#f87171;font-size:13px}
+#pinDlg .pl-btns{display:flex;justify-content:center;flex-direction:row;margin-top:.6em;margin-bottom:2.2em;gap:.5em}
+#pinDlg .pl-b1,#pinDlg .pl-b2{padding:.5em 1.1em;border-radius:5px;border:none;outline:none;transition:.4s ease-in-out;background-color:#252525;color:#fff;font-family:inherit;font-size:15px;cursor:pointer}
+#pinDlg .pl-b1{padding:.5em 1.6em}
+#pinDlg .pl-b1:hover,#pinDlg .pl-b1:focus-visible{background-color:#000;color:#00ff75}
+#pinDlg .pl-b2:hover,#pinDlg .pl-b2:focus-visible{background-color:#000;color:#fff}
+#pinDlg .pl-b1:disabled{opacity:.6;cursor:progress}
+#pinDlg .login-box.shake{animation:lgShake .4s}
+@keyframes pinPop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
+@keyframes pinFade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#pinDlg[open],#pinDlg[open]::backdrop{animation:none}}
+@keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 /* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
 @view-transition{navigation:auto}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
@@ -56,17 +384,221 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 </head>
 <body>
 <nav>
-  <a href="index.html" title="กลับหน้าแรก"><img src="logo.webp" alt="ตราสถานีตำรวจภูธรบางบ่อ" width="44" height="51">
-    <div><div class="nav-title">สถานภาพกำลังพล</div><div class="nav-sub">สถานีตำรวจภูธรบางบ่อ</div></div></a>
+  <a class="home" href="index.html" title="กลับหน้าแรก"><img src="logo.webp" alt="ตราสถานีตำรวจภูธรบางบ่อ" width="40" height="46">
+    <div><div class="nav-title">สถานภาพกำลังพล</div><div class="nav-sub">งานป้องกันปราบปราม · สภ.บางบ่อ</div></div></a>
+  <div class="nav-right">
+    <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
+      <input type="checkbox" class="theme-switch__checkbox" id="themeBtn" aria-label="โหมดมืด">
+      <div class="theme-switch__container">
+        <div class="theme-switch__clouds"></div>
+        <div class="theme-switch__stars-container">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545ZM56.8313 24.0069C56.0551 24.8503 55.1114 25.2995 54 25.3545C55.1114 25.4095 56.0551 25.8587 56.8313 26.7112C57.6075 27.5546 57.9956 28.563 57.9956 29.7273C57.9956 28.9572 58.172 28.2513 58.5248 27.5913C58.8864 26.9312 59.3716 26.3995 59.9802 26.0053C60.5976 25.602 61.2679 25.3911 62 25.3545C60.8798 25.2903 59.9361 24.8503 59.1599 24.0069C58.3837 23.1635 57.9956 22.1642 57.9956 21C57.9956 22.1642 57.6075 23.1635 56.8313 24.0069ZM81 25.3545C82.1114 25.2995 83.0551 24.8503 83.8313 24.0069C84.6075 23.1635 84.9956 22.1642 84.9956 21C84.9956 22.1642 85.3837 23.1635 86.1599 24.0069C86.9361 24.8503 87.8798 25.2903 89 25.3545C88.2679 25.3911 87.5976 25.602 86.9802 26.0053C86.3716 26.3995 85.8864 26.9312 85.5248 27.5913C85.172 28.2513 84.9956 28.9572 84.9956 29.7273C84.9956 28.563 84.6075 27.5546 83.8313 26.7112C83.0551 25.8587 82.1114 25.4095 81 25.3545ZM136 36.3545C137.111 36.2995 138.055 35.8503 138.831 35.0069C139.607 34.1635 139.996 33.1642 139.996 32C139.996 33.1642 140.384 34.1635 141.16 35.0069C141.936 35.8503 142.88 36.2903 144 36.3545C143.268 36.3911 142.598 36.602 141.98 37.0053C141.372 37.3995 140.886 37.9312 140.525 38.5913C140.172 39.2513 139.996 39.9572 139.996 40.7273C139.996 39.563 139.607 38.5546 138.831 37.7112C138.055 36.8587 137.111 36.4095 136 36.3545ZM101.831 49.0069C101.055 49.8503 100.111 50.2995 99 50.3545C100.111 50.4095 101.055 50.8587 101.831 51.7112C102.607 52.5546 102.996 53.563 102.996 54.7273C102.996 53.9572 103.172 53.2513 103.525 52.5913C103.886 51.9312 104.372 51.3995 104.98 51.0053C105.598 50.602 106.268 50.3911 107 50.3545C105.88 50.2903 104.936 49.8503 104.16 49.0069C103.384 48.1635 102.996 47.1642 102.996 46C102.996 47.1642 102.607 48.1635 101.831 49.0069Z" fill="currentColor"></path>
+      </svg>
+        </div>
+        <div class="theme-switch__circle-container">
+          <div class="theme-switch__sun-moon-container">
+            <div class="theme-switch__moon"><div class="theme-switch__spot"></div><div class="theme-switch__spot"></div><div class="theme-switch__spot"></div></div>
+          </div>
+        </div>
+      </div>
+    </label>
+    <button class="btn ghost" type="button" onclick="print()">🖨️ พิมพ์</button>
+    <button class="btn" type="button" id="staffBtn">🔒 ข้อมูลเจ้าหน้าที่</button>
+  </div>
 </nav>
 <main>
-  <div class="soon">
-    <div class="ico">👮</div>
-    <h1>สถานภาพกำลังพล</h1>
-    <p>จำนวนกำลังพล ตำแหน่ง และสถานะปฏิบัติหน้าที่</p>
-    <span class="badge">🚧 กำลังจัดทำ</span><br>
-    <a class="back" href="index.html">← กลับหน้าแรก</a>
-  </div>
+  <div class="msg" id="msg" hidden></div>
+  <div class="asof" id="asof">กำลังโหลดข้อมูล…</div>
+
+  <section class="kpis">
+    <div class="kpi total"><div class="ic">👮</div><div class="lb">กำลังพลทั้งหมด</div><div class="v"><span id="kTotal">–</span><small>นาย</small></div>
+      <div class="split" id="kSplit" style="background:rgba(255,255,255,.2)"><i id="kSplitO" style="width:0;background:#fcd34d"></i><i id="kSplitN" style="width:0;background:rgba(255,255,255,.75)"></i></div></div>
+    <div class="kpi"><div class="ic">🎖️</div><div class="lb">ชั้นสัญญาบัตร</div><div class="v"><span id="kOff">–</span><small>นาย</small></div></div>
+    <div class="kpi"><div class="ic">🪖</div><div class="lb">ชั้นประทวน</div><div class="v"><span id="kNco">–</span><small>นาย</small></div></div>
+  </section>
+
+  <section class="grid2">
+    <div class="card">
+      <h2 class="sec">🧭 สายการบังคับบัญชา <small>จำนวนตามตำแหน่ง</small></h2>
+      <div class="org" id="org"><span class="skb" style="width:40%;height:44px"></span></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">🎖️ แยกตามชั้นยศ <small>เรียงจากสูง → ต่ำ</small></h2>
+      <ul class="bars" id="rankBars"><li><span class="skb" style="width:100%"></span></li><li><span class="skb" style="width:80%"></span></li><li><span class="skb" style="width:90%"></span></li></ul>
+      <div class="legend"><span><i style="background:#d4a017"></i>สัญญาบัตร</span><span><i style="background:#2563eb"></i>ประทวน</span></div>
+    </div>
+  </section>
+
+  <section class="card roster-card">
+    <div class="roster-head">
+      <h2 class="sec" style="margin:0">📋 รายชื่อกำลังพล <small id="rosterNote">เฉพาะเจ้าหน้าที่ · ใส่รหัสก่อนดู</small></h2>
+      <span class="sp"></span>
+      <input class="search" placeholder="🔎 ค้นหาชื่อ / นามเรียกขาน / ตำแหน่ง" disabled id="q" aria-label="ค้นหาชื่อ นามเรียกขาน หรือตำแหน่ง">
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="locked" id="locked">
+      <div class="blur" aria-hidden="true"><div class="people" id="peopleBlur"></div></div>
+      <div class="ov"><div class="ic">🔒</div><b>ชื่อ–สกุล ตำแหน่ง และนามเรียกขาน</b><p>แสดงเฉพาะเจ้าหน้าที่ — ใส่รหัสก่อนดู (ตรวจรหัสที่เซิร์ฟเวอร์ เหมือนหน้าอื่นๆ)</p><button class="btn" type="button" id="unlockBtn">🔓 ใส่รหัสเพื่อดูรายชื่อ</button></div>
+    </div>
+    <div class="people" id="people" hidden></div>
+  </section>
+
+  <div class="foot">ข้อมูลจากชีต "รายชื่องานป้องกันฯ" · หน้านี้แสดงเฉพาะจำนวน · รายชื่อต้องใส่รหัส · แสดงเฉพาะ ชื่อ–สกุล ตำแหน่ง นามเรียกขาน (ไม่แสดงเบอร์โทร บัญชีผู้ใช้ รหัสผ่าน)</div>
 </main>
+<dialog id="pinDlg">
+  <div class="pl-card"><div class="pl-card2">
+  <form class="pl-form login-box" id="pinForm" method="dialog" autocomplete="off">
+    <div class="lg-title">🔒 ยืนยันเจ้าหน้าที่</div>
+    <div class="lg-sub">ใส่รหัสเพื่อดูรายชื่อกำลังพล<br>(ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์)</div>
+    <div class="pl-field"><svg class="pl-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><input type="password" class="pl-input" id="pinInput" required inputmode="numeric" autocomplete="off" placeholder="รหัสผ่าน" aria-label="รหัสผ่าน"></div>
+    <div class="lg-err" id="pinErr"></div>
+    <div class="pl-btns">
+      <button type="submit" class="pl-b1">ยืนยัน</button>
+      <button type="button" class="pl-b2" id="pinClose">ยกเลิก</button>
+    </div>
+  </form>
+  </div></div>
+</dialog>
+<script>
+/* ===== สถานภาพกำลังพล · ตัวเลขเปิดให้ทุกคน · รายชื่อต้องใส่รหัส (ตรวจที่ Apps Script ฝั่งเซิร์ฟเวอร์) =====
+   GET  → {total, officers, ncos, ranks:[[ยศ,จำนวน,สัญญาบัตร?]], positions:[[ตำแหน่ง,จำนวน]]}
+   POST {action:'list', pin} → rows:[{name, pos, cs, rank, officer}] (ชื่อ–สกุล · ตำแหน่ง · นามเรียกขาน เท่านั้น) */
+const PERSONNEL_API = '';   // ← URL เว็บแอป Apps Script ของชีต "รายชื่องานป้องกันฯ" (ลงท้าย /exec)
+const $ = id=>document.getElementById(id);
+const esc = s=>String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n=>Number(n||0).toLocaleString('th-TH');
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function isDark(){ return document.documentElement.getAttribute('data-theme')==='dark'; }
+function setTheme(t, save){
+  if(t==='dark') document.documentElement.setAttribute('data-theme','dark'); else document.documentElement.removeAttribute('data-theme');
+  $('themeBtn').checked = t==='dark';
+  if(save){ try{ localStorage.setItem('bangbo-theme', t); }catch(e){} }
+}
+$('themeBtn').addEventListener('change', e=>setTheme(e.target.checked ? 'dark' : 'light', true));
+$('themeBtn').checked = isDark();
+let toastT; function toast(m){ let t = $('toast'); if(!t){ t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role','status'); t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:opacity .25s;opacity:0'; document.body.appendChild(t); } t.textContent = m; t.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(()=>t.style.opacity = 0, 3200); }
+
+/* ---------- ตัวเลข (ทุกคนดูได้) ---------- */
+function countUp(el, to){
+  if(reduceMotion){ el.textContent = fmt(to); return; }
+  const t0 = performance.now(), dur = 700;
+  (function step(now){ const k = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-k,3); el.textContent = fmt(Math.round(to*e)); if(k<1) requestAnimationFrame(step); })(t0);
+}
+/* สายการบังคับบัญชา: ตำแหน่งในชีต → กล่องในแผนผัง (ตำแหน่งที่ไม่อยู่ในรายการ → ต่อท้ายชั้นที่ 3) */
+const ORG = [
+  [['รอง ผกก.ป.','รอง ผกก.ป.']],
+  [['สวป.','สวป.(1)'], ['สว.(สอบสวน)','สวป.(2)']],
+  [['รอง สว.(ป.)','รอง สว.(ป.)'], ['รอง สว.(สส.)','รอง สว.(สส.)'], ['รอง สวป.','รอง สวป.']]
+];
+const isSquad = p=>/^ผบ\.หมู่/.test(p);
+const squadLabel = p=>p==='ผบ.หมู่(ป.)' ? p : p.replace(/^ผบ\.หมู่\s*/,'').replace(/^\((.*)\)$/,'$1') || p;
+function renderOrg(pos){
+  const left = new Map(pos);
+  const node = (lbl, n, cls)=>`<div class="node ${cls}"><b>${esc(lbl)}</b><span class="cnt">${fmt(n)} นาย</span></div>`;
+  const tiers = ORG.map((t,i)=>t.filter(([k])=>left.get(k)).map(([k,lbl])=>{ const n = left.get(k); left.delete(k); return node(lbl, n, i ? 'mid' : 'top'); }));
+  const squad = [...left].filter(([k])=>isSquad(k)).sort((a,b)=>b[1]-a[1]);
+  squad.forEach(([k])=>left.delete(k));
+  left.forEach((n,k)=>tiers[2].push(node(k, n, 'mid')));      // ตำแหน่งอื่นที่ยังไม่อยู่ในแผนผัง
+  let h = tiers.filter(t=>t.length).map(t=>`<div class="tier">${t.join('')}</div>`).join('');
+  const sn = squad.reduce((s,[,n])=>s+n, 0);
+  if(sn) h += `<div class="tier"><div class="node base"><b>ผู้บังคับหมู่</b><span>${squad.map(([k,n])=>esc(squadLabel(k))+' '+fmt(n)).join(' · ')}</span><br><span class="cnt">${fmt(sn)} นาย</span></div></div>`;
+  $('org').innerHTML = h || '<div class="empty">ยังไม่มีข้อมูล</div>';
+}
+function renderRanks(ranks, off, nco){
+  const max = Math.max(1, ...ranks.map(r=>r[1]));
+  let h = '', grp = -1, i = 0;
+  ranks.forEach(([r,n,o])=>{
+    if(o !== grp){ grp = o; h += `<li class="grp">${o ? 'ชั้นสัญญาบัตร · '+fmt(off) : 'ชั้นประทวน · '+fmt(nco)} นาย</li>`; }
+    h += `<li><span class="nm">${esc(r)}</span><span class="tr"><i style="width:${n/max*100}%;background:${o?'#d4a017':'#2563eb'};--d:${(i++)*70}ms"></i></span><span class="n">${fmt(n)}</span></li>`;
+  });
+  $('rankBars').innerHTML = h || '<li class="empty">ยังไม่มีข้อมูล</li>';
+}
+let PUB = null;
+function renderPublic(d, animate){
+  PUB = d;
+  if(animate){ countUp($('kTotal'), d.total); countUp($('kOff'), d.officers); countUp($('kNco'), d.ncos); }
+  else { $('kTotal').textContent = fmt(d.total); $('kOff').textContent = fmt(d.officers); $('kNco').textContent = fmt(d.ncos); }
+  const t = Math.max(1, d.total);
+  $('kSplitO').style.width = (d.officers/t*100)+'%'; $('kSplitN').style.width = (d.ncos/t*100)+'%';
+  $('kSplit').title = `สัญญาบัตร ${d.officers} · ประทวน ${d.ncos}`;
+  renderOrg(d.positions || []); renderRanks(d.ranks || [], d.officers, d.ncos);
+  $('asof').textContent = 'ข้อมูล ณ วันที่ ' + new Date(d.updated || Date.now()).toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+  if(!STAFF) renderChips();
+}
+function showMsg(t){ $('msg').innerHTML = t; $('msg').hidden = !t; }
+async function loadPublic(){
+  if(!PERSONNEL_API){ showMsg('⚙️ <b>ยังไม่ได้เชื่อมต่อชีต "รายชื่องานป้องกันฯ"</b> — ติดตั้ง Apps Script ในชีตนั้น แล้วนำ URL เว็บแอป (ลงท้าย /exec) มาใส่ที่ <code>PERSONNEL_API</code> ในหน้านี้'); $('asof').textContent = ''; return; }
+  let c = null; try{ c = JSON.parse(localStorage.getItem('bb-pub:personnel') || 'null'); }catch(_){}
+  if(c && c.ok) renderPublic(c, false);
+  try{
+    const j = await fetch(PERSONNEL_API + '?t=' + Date.now()).then(r=>r.json());
+    if(!j.ok) throw new Error(j.error || 'โหลดข้อมูลไม่สำเร็จ');
+    try{ localStorage.setItem('bb-pub:personnel', JSON.stringify(j)); }catch(_){}
+    if(!c || JSON.stringify(Object.assign({},c,{updated:0})) !== JSON.stringify(Object.assign({},j,{updated:0}))) renderPublic(j, !c);
+    else $('asof').textContent = 'ข้อมูล ณ วันที่ ' + new Date(j.updated).toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+    showMsg('');
+  }catch(err){ if(!c) showMsg('⚠️ โหลดข้อมูลไม่สำเร็จ: ' + esc(err.message) + ' — ลองรีเฟรชอีกครั้ง'); }
+}
+
+/* ---------- รายชื่อ (ต้องใส่รหัส) ---------- */
+let PIN = '', STAFF = null, FILTER = '', pending = null;
+try{ PIN = sessionStorage.getItem('personnel-pin') || ''; }catch(_){}
+const COL = r=>/^พ\.ต\./.test(r) ? '#b7791f' : /^ร\.ต\./.test(r) ? '#c2410c' : '#2563eb';
+const initial = (name, rank)=>{ const s = String(name).replace(/\s+/g,'').slice(String(rank||'').length); return (s.match(/[\u0E01-\u0E2E]|[A-Za-z]/) || ['•'])[0]; };
+const card = p=>`<div class="person"><div class="av" style="--c:${COL(p.rank)}">${esc(initial(p.name, p.rank === 'อื่นๆ' ? '' : p.rank))}</div><div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="ps">${esc(p.pos || '–')}</div>${p.cs ? `<div class="cs">📻 ${esc(p.cs)}</div>` : ''}</div></div>`;
+const FAKE = Array.from({length:8}, (_,i)=>({name:'ด.ต.xxxxxx xxxxxx', pos:'ผบ.หมู่', cs:'xxxx '+(i+1), rank:i<2?'พ.ต.ท.':'ด.ต.'}));
+$('peopleBlur').innerHTML = FAKE.map(card).join('');
+function groups(){
+  const pos = (PUB && PUB.positions) || [];
+  const g = [['', 'ทั้งหมด', PUB ? PUB.total : (STAFF ? STAFF.length : 0)], ['@off', 'สัญญาบัตร', PUB ? PUB.officers : 0]];
+  pos.filter(([k])=>isSquad(k)).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>g.push([k, squadLabel(k), n]));
+  return g;
+}
+function renderChips(){
+  $('chips').innerHTML = groups().map(([k,l,n])=>`<button type="button" class="chip${FILTER===k?' on':''}" data-k="${esc(k)}">${esc(l)} · ${fmt(n)}</button>`).join('');
+}
+function renderPeople(){
+  if(!STAFF) return;
+  const q = $('q').value.trim().toLowerCase().replace(/\s+/g,'');
+  const list = STAFF.filter(p=>(!FILTER || (FILTER==='@off' ? p.officer : p.pos===FILTER)) && (!q || (p.name+p.pos+p.cs).toLowerCase().replace(/\s+/g,'').includes(q)));
+  $('people').innerHTML = list.length ? list.map(card).join('') : '<div class="empty" style="grid-column:1/-1">ไม่พบรายชื่อที่ค้นหา</div>';
+  $('rosterNote').textContent = `แสดง ${fmt(list.length)} จาก ${fmt(STAFF.length)} นาย`;
+}
+$('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; FILTER = b.dataset.k; renderChips(); renderPeople(); });
+$('q').addEventListener('input', renderPeople);
+function openPin(err){ $('pinErr').textContent = err || ''; $('pinInput').value = ''; $('pinDlg').showModal(); setTimeout(()=>$('pinInput').focus(), 50); }
+$('pinClose').addEventListener('click', ()=>{ pending = null; $('pinDlg').close(); });
+$('pinForm').addEventListener('submit', e=>{ e.preventDefault(); const v = $('pinInput').value.trim(); if(!v) return; PIN = v; try{ sessionStorage.setItem('personnel-pin', PIN); }catch(_){} $('pinDlg').close(); const p = pending; pending = null; if(p) p(); });
+function authFail(j, retry){ PIN = ''; try{ sessionStorage.removeItem('personnel-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); const b = document.querySelector('#pinDlg .login-box'); if(b){ b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
+async function enterStaff(){
+  if(!PERSONNEL_API) return toast('⚠️ ยังไม่ได้เชื่อมต่อ Apps Script');
+  if(!PIN){ pending = enterStaff; openPin(); return; }
+  $('staffBtn').disabled = $('unlockBtn').disabled = true;
+  try{
+    const j = await fetch(PERSONNEL_API, {method:'POST', body: JSON.stringify({action:'list', pin:PIN})}).then(r=>r.json());
+    if(!j.ok){ if(j.auth) authFail(j, enterStaff); else toast('⚠️ ' + (j.error||'โหลดไม่สำเร็จ')); return; }
+    STAFF = j.rows || [];
+    $('locked').hidden = true; $('people').hidden = false; $('q').disabled = false;
+    $('staffBtn').textContent = '🔒 ซ่อนรายชื่อ';
+    try{ sessionStorage.setItem('personnel-staff','1'); }catch(_){}
+    renderChips(); renderPeople(); toast('🔓 แสดงรายชื่อแล้ว');
+  }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+  finally{ $('staffBtn').disabled = $('unlockBtn').disabled = false; }
+}
+function leaveStaff(){
+  STAFF = null; FILTER = ''; $('q').value = ''; $('q').disabled = true;
+  $('locked').hidden = false; $('people').hidden = true; $('people').innerHTML = '';
+  $('staffBtn').textContent = '🔒 ข้อมูลเจ้าหน้าที่'; $('rosterNote').textContent = 'เฉพาะเจ้าหน้าที่ · ใส่รหัสก่อนดู';
+  try{ sessionStorage.removeItem('personnel-staff'); }catch(_){}
+  renderChips();
+}
+$('staffBtn').addEventListener('click', ()=>{ if(STAFF) leaveStaff(); else enterStaff(); });
+$('unlockBtn').addEventListener('click', ()=>enterStaff());
+
+renderChips();
+loadPublic();
+try{ if(PIN && sessionStorage.getItem('personnel-staff')) enterStaff(); }catch(_){}
+</script>
 </body>
 </html>
