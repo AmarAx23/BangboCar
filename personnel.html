@@ -79,12 +79,6 @@ h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .chip{font-family:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
 .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.locked{position:relative;border-radius:14px;overflow:hidden}
-.locked .blur{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
-.locked .ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;background:linear-gradient(180deg,transparent,rgba(241,245,249,.6))}
-:root[data-theme="dark"] .locked .ov{background:linear-gradient(180deg,transparent,rgba(11,18,32,.6))}
-.locked .ov .ic{font-size:38px}
-.locked .ov p{color:var(--muted);font-size:14px;max-width:360px}
 .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
 .person{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px}
 .av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff;background:var(--c,#2563eb)}
@@ -329,34 +323,6 @@ h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
   transform: translateY(-50%);
 }
 
-#pinDlg{padding:0;border:none;background:transparent;box-shadow:none;width:min(380px,92vw);max-width:none;overflow:visible;color:#fff}
-#pinDlg[open]{margin:auto;animation:pinPop .45s cubic-bezier(.34,1.56,.64,1)}
-#pinDlg::backdrop{background:rgba(2,6,23,.6);backdrop-filter:blur(4px)}
-#pinDlg[open]::backdrop{animation:pinFade .3s ease}
-#pinDlg .pl-card{background-image:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);border-radius:22px;padding:2px;transition:all .3s}
-#pinDlg .pl-card:hover{box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
-#pinDlg .pl-card2{border-radius:20px;transition:all .2s}
-#pinDlg .pl-card2:hover{transform:scale(.98)}
-#pinDlg .pl-form{display:flex;flex-direction:column;gap:10px;padding:0 2em .4em;background:#171717;border-radius:25px;transition:.4s ease-in-out;text-align:center}
-#pinDlg .lg-title{margin:1.6em 0 0;color:#fff;font-size:1.2em;font-weight:700}
-#pinDlg .lg-sub{color:#9ca3af;font-size:12.5px;line-height:1.55;margin-bottom:.8em}
-#pinDlg .pl-field{display:flex;align-items:center;justify-content:center;gap:.5em;border-radius:25px;padding:.6em .9em;border:none;outline:none;color:#fff;background:#171717;box-shadow:inset 2px 5px 10px rgb(5,5,5)}
-#pinDlg .pl-field:focus-within{box-shadow:inset 2px 5px 10px rgb(5,5,5),0 0 0 1px rgba(0,255,117,.45)}
-#pinDlg .pl-icon{height:1.3em;width:1.3em;flex:none;fill:#fff}
-#pinDlg .pl-input{background:none;border:none;outline:none;width:100%;color:#d3d3d3;font-size:16px;font-family:inherit;letter-spacing:3px;padding:0}
-#pinDlg .pl-input::placeholder{color:#6b7280;letter-spacing:normal}
-#pinDlg .lg-err{min-height:18px;color:#f87171;font-size:13px}
-#pinDlg .pl-btns{display:flex;justify-content:center;flex-direction:row;margin-top:.6em;margin-bottom:2.2em;gap:.5em}
-#pinDlg .pl-b1,#pinDlg .pl-b2{padding:.5em 1.1em;border-radius:5px;border:none;outline:none;transition:.4s ease-in-out;background-color:#252525;color:#fff;font-family:inherit;font-size:15px;cursor:pointer}
-#pinDlg .pl-b1{padding:.5em 1.6em}
-#pinDlg .pl-b1:hover,#pinDlg .pl-b1:focus-visible{background-color:#000;color:#00ff75}
-#pinDlg .pl-b2:hover,#pinDlg .pl-b2:focus-visible{background-color:#000;color:#fff}
-#pinDlg .pl-b1:disabled{opacity:.6;cursor:progress}
-#pinDlg .login-box.shake{animation:lgShake .4s}
-@keyframes pinPop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
-@keyframes pinFade{from{opacity:0}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){#pinDlg[open],#pinDlg[open]::backdrop{animation:none}}
-@keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 /* ---------- Page Transition: จางเข้า (ทุกหน้า) · เบราว์เซอร์ที่ไม่รองรับจะเปลี่ยนหน้าแบบเดิม ---------- */
 @view-transition{navigation:auto}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}
@@ -404,7 +370,6 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
       </div>
     </label>
     <button class="btn ghost" type="button" onclick="print()">🖨️ พิมพ์</button>
-    <button class="btn" type="button" id="staffBtn">🔒 ข้อมูลเจ้าหน้าที่</button>
   </div>
 </nav>
 <main>
@@ -432,38 +397,20 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 
   <section class="card roster-card">
     <div class="roster-head">
-      <h2 class="sec" style="margin:0">📋 รายชื่อกำลังพล <small id="rosterNote">เฉพาะเจ้าหน้าที่ · ใส่รหัสก่อนดู</small></h2>
+      <h2 class="sec" style="margin:0">📋 รายชื่อกำลังพล <small id="rosterNote"></small></h2>
       <span class="sp"></span>
-      <input class="search" placeholder="🔎 ค้นหาชื่อ / นามเรียกขาน / ตำแหน่ง" disabled id="q" aria-label="ค้นหาชื่อ นามเรียกขาน หรือตำแหน่ง">
+      <input class="search" placeholder="🔎 ค้นหาชื่อ / นามเรียกขาน / ตำแหน่ง" id="q" aria-label="ค้นหาชื่อ นามเรียกขาน หรือตำแหน่ง">
     </div>
     <div class="chips" id="chips"></div>
-    <div class="locked" id="locked">
-      <div class="blur" aria-hidden="true"><div class="people" id="peopleBlur"></div></div>
-      <div class="ov"><div class="ic">🔒</div><b>ชื่อ–สกุล ตำแหน่ง และนามเรียกขาน</b><p>แสดงเฉพาะเจ้าหน้าที่ — ใส่รหัสก่อนดู (ตรวจรหัสที่เซิร์ฟเวอร์ เหมือนหน้าอื่นๆ)</p><button class="btn" type="button" id="unlockBtn">🔓 ใส่รหัสเพื่อดูรายชื่อ</button></div>
-    </div>
-    <div class="people" id="people" hidden></div>
+    <div class="people" id="people"><div class="empty" style="grid-column:1/-1">กำลังโหลดรายชื่อ…</div></div>
   </section>
 
-  <div class="foot">ข้อมูลจากชีต "รายชื่องานป้องกันฯ" · หน้านี้แสดงเฉพาะจำนวน · รายชื่อต้องใส่รหัส · แสดงเฉพาะ ชื่อ–สกุล ตำแหน่ง นามเรียกขาน (ไม่แสดงเบอร์โทร บัญชีผู้ใช้ รหัสผ่าน)</div>
+  <div class="foot">ข้อมูลจากชีต "รายชื่องานป้องกันฯ" · หน้านี้แสดงเฉพาะจำนวน · แสดงเฉพาะ ชื่อ–สกุล ตำแหน่ง นามเรียกขาน (ไม่แสดงเบอร์โทร บัญชีผู้ใช้ รหัสผ่าน)</div>
 </main>
-<dialog id="pinDlg">
-  <div class="pl-card"><div class="pl-card2">
-  <form class="pl-form login-box" id="pinForm" method="dialog" autocomplete="off">
-    <div class="lg-title">🔒 ยืนยันเจ้าหน้าที่</div>
-    <div class="lg-sub">ใส่รหัสเพื่อดูรายชื่อกำลังพล<br>(ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์)</div>
-    <div class="pl-field"><svg class="pl-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><input type="password" class="pl-input" id="pinInput" required inputmode="numeric" autocomplete="off" placeholder="รหัสผ่าน" aria-label="รหัสผ่าน"></div>
-    <div class="lg-err" id="pinErr"></div>
-    <div class="pl-btns">
-      <button type="submit" class="pl-b1">ยืนยัน</button>
-      <button type="button" class="pl-b2" id="pinClose">ยกเลิก</button>
-    </div>
-  </form>
-  </div></div>
-</dialog>
 <script>
-/* ===== สถานภาพกำลังพล · ตัวเลขเปิดให้ทุกคน · รายชื่อต้องใส่รหัส (ตรวจที่ Apps Script ฝั่งเซิร์ฟเวอร์) =====
-   GET  → {total, officers, ncos, ranks:[[ยศ,จำนวน,สัญญาบัตร?]], positions:[[ตำแหน่ง,จำนวน]]}
-   POST {action:'list', pin} → rows:[{name, pos, cs, rank, officer}] (ชื่อ–สกุล · ตำแหน่ง · นามเรียกขาน เท่านั้น) */
+/* ===== สถานภาพกำลังพล (เปิดให้ทุกคน) =====
+   GET → {total, officers, ncos, ranks:[[ยศ,จำนวน,สัญญาบัตร?]], positions:[[ตำแหน่ง,จำนวน]],
+          rows:[{name, pos, cs, rank, officer}]}  (ชื่อ–สกุล · ตำแหน่ง · นามเรียกขาน เท่านั้น — ไม่มีเบอร์โทร/บัญชี/รหัสผ่าน) */
 const PERSONNEL_API = 'https://script.google.com/macros/s/AKfycbzug7pnFa_Zwsra4mf9ZERpKPxh58tKyIiocdhsQTblc9R9QbsGQgksT4yprGgsm7yLmg/exec';   // ← URL เว็บแอป Apps Script ของชีต "รายชื่องานป้องกันฯ" (ลงท้าย /exec)
 const $ = id=>document.getElementById(id);
 const esc = s=>String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -479,7 +426,7 @@ $('themeBtn').addEventListener('change', e=>setTheme(e.target.checked ? 'dark' :
 $('themeBtn').checked = isDark();
 let toastT; function toast(m){ let t = $('toast'); if(!t){ t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role','status'); t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:opacity .25s;opacity:0'; document.body.appendChild(t); } t.textContent = m; t.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(()=>t.style.opacity = 0, 3200); }
 
-/* ---------- ตัวเลข (ทุกคนดูได้) ---------- */
+/* ---------- ตัวเลข ---------- */
 function countUp(el, to){
   if(reduceMotion){ el.textContent = fmt(to); return; }
   const t0 = performance.now(), dur = 700;
@@ -524,7 +471,8 @@ function renderPublic(d, animate){
   $('kSplit').title = `สัญญาบัตร ${d.officers} · ประทวน ${d.ncos}`;
   renderOrg(d.positions || []); renderRanks(d.ranks || [], d.officers, d.ncos);
   $('asof').textContent = 'ข้อมูล ณ วันที่ ' + new Date(d.updated || Date.now()).toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
-  if(!STAFF) renderChips();
+  STAFF = Array.isArray(d.rows) ? d.rows : null;
+  renderChips(); renderPeople();
 }
 function showMsg(t){ $('msg').innerHTML = t; $('msg').hidden = !t; }
 async function loadPublic(){
@@ -541,14 +489,11 @@ async function loadPublic(){
   }catch(err){ if(!c) showMsg('⚠️ โหลดข้อมูลไม่สำเร็จ: ' + esc(err.message) + ' — ลองรีเฟรชอีกครั้ง'); }
 }
 
-/* ---------- รายชื่อ (ต้องใส่รหัส) ---------- */
-let PIN = '', STAFF = null, FILTER = '', pending = null;
-try{ PIN = sessionStorage.getItem('personnel-pin') || ''; }catch(_){}
+/* ---------- รายชื่อ ---------- */
+let STAFF = null, FILTER = '';
 const COL = r=>/^พ\.ต\./.test(r) ? '#b7791f' : /^ร\.ต\./.test(r) ? '#c2410c' : '#2563eb';
 const initial = (name, rank)=>{ const s = String(name).replace(/\s+/g,'').slice(String(rank||'').length); return (s.match(/[\u0E01-\u0E2E]|[A-Za-z]/) || ['•'])[0]; };
 const card = p=>`<div class="person"><div class="av" style="--c:${COL(p.rank)}">${esc(initial(p.name, p.rank === 'อื่นๆ' ? '' : p.rank))}</div><div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="ps">${esc(p.pos || '–')}</div>${p.cs ? `<div class="cs">📻 ${esc(p.cs)}</div>` : ''}</div></div>`;
-const FAKE = Array.from({length:8}, (_,i)=>({name:'ด.ต.xxxxxx xxxxxx', pos:'ผบ.หมู่', cs:'xxxx '+(i+1), rank:i<2?'พ.ต.ท.':'ด.ต.'}));
-$('peopleBlur').innerHTML = FAKE.map(card).join('');
 function groups(){
   const pos = (PUB && PUB.positions) || [];
   const g = [['', 'ทั้งหมด', PUB ? PUB.total : (STAFF ? STAFF.length : 0)], ['@off', 'สัญญาบัตร', PUB ? PUB.officers : 0]];
@@ -559,7 +504,7 @@ function renderChips(){
   $('chips').innerHTML = groups().map(([k,l,n])=>`<button type="button" class="chip${FILTER===k?' on':''}" data-k="${esc(k)}">${esc(l)} · ${fmt(n)}</button>`).join('');
 }
 function renderPeople(){
-  if(!STAFF) return;
+  if(!STAFF){ $('people').innerHTML = '<div class="empty" style="grid-column:1/-1">'+(PUB ? 'ยังไม่มีรายชื่อ — อัปเดต Apps Script ในชีตเป็นเวอร์ชันล่าสุด' : 'กำลังโหลดรายชื่อ…')+'</div>'; $('rosterNote').textContent = ''; return; }
   const q = $('q').value.trim().toLowerCase().replace(/\s+/g,'');
   const list = STAFF.filter(p=>(!FILTER || (FILTER==='@off' ? p.officer : p.pos===FILTER)) && (!q || (p.name+p.pos+p.cs).toLowerCase().replace(/\s+/g,'').includes(q)));
   $('people').innerHTML = list.length ? list.map(card).join('') : '<div class="empty" style="grid-column:1/-1">ไม่พบรายชื่อที่ค้นหา</div>';
@@ -567,38 +512,9 @@ function renderPeople(){
 }
 $('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; FILTER = b.dataset.k; renderChips(); renderPeople(); });
 $('q').addEventListener('input', renderPeople);
-function openPin(err){ $('pinErr').textContent = err || ''; $('pinInput').value = ''; $('pinDlg').showModal(); setTimeout(()=>$('pinInput').focus(), 50); }
-$('pinClose').addEventListener('click', ()=>{ pending = null; $('pinDlg').close(); });
-$('pinForm').addEventListener('submit', e=>{ e.preventDefault(); const v = $('pinInput').value.trim(); if(!v) return; PIN = v; try{ sessionStorage.setItem('personnel-pin', PIN); }catch(_){} $('pinDlg').close(); const p = pending; pending = null; if(p) p(); });
-function authFail(j, retry){ PIN = ''; try{ sessionStorage.removeItem('personnel-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); const b = document.querySelector('#pinDlg .login-box'); if(b){ b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
-async function enterStaff(){
-  if(!PERSONNEL_API) return toast('⚠️ ยังไม่ได้เชื่อมต่อ Apps Script');
-  if(!PIN){ pending = enterStaff; openPin(); return; }
-  $('staffBtn').disabled = $('unlockBtn').disabled = true;
-  try{
-    const j = await fetch(PERSONNEL_API, {method:'POST', body: JSON.stringify({action:'list', pin:PIN})}).then(r=>r.json());
-    if(!j.ok){ if(j.auth) authFail(j, enterStaff); else toast('⚠️ ' + (j.error||'โหลดไม่สำเร็จ')); return; }
-    STAFF = j.rows || [];
-    $('locked').hidden = true; $('people').hidden = false; $('q').disabled = false;
-    $('staffBtn').textContent = '🔒 ซ่อนรายชื่อ';
-    try{ sessionStorage.setItem('personnel-staff','1'); }catch(_){}
-    renderChips(); renderPeople(); toast('🔓 แสดงรายชื่อแล้ว');
-  }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
-  finally{ $('staffBtn').disabled = $('unlockBtn').disabled = false; }
-}
-function leaveStaff(){
-  STAFF = null; FILTER = ''; $('q').value = ''; $('q').disabled = true;
-  $('locked').hidden = false; $('people').hidden = true; $('people').innerHTML = '';
-  $('staffBtn').textContent = '🔒 ข้อมูลเจ้าหน้าที่'; $('rosterNote').textContent = 'เฉพาะเจ้าหน้าที่ · ใส่รหัสก่อนดู';
-  try{ sessionStorage.removeItem('personnel-staff'); }catch(_){}
-  renderChips();
-}
-$('staffBtn').addEventListener('click', ()=>{ if(STAFF) leaveStaff(); else enterStaff(); });
-$('unlockBtn').addEventListener('click', ()=>enterStaff());
 
 renderChips();
 loadPublic();
-try{ if(PIN && sessionStorage.getItem('personnel-staff')) enterStaff(); }catch(_){}
 </script>
 </body>
 </html>
