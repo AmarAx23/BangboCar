@@ -464,7 +464,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 /* ===== สถานภาพกำลังพล · ตัวเลขเปิดให้ทุกคน · รายชื่อต้องใส่รหัส (ตรวจที่ Apps Script ฝั่งเซิร์ฟเวอร์) =====
    GET  → {total, officers, ncos, ranks:[[ยศ,จำนวน,สัญญาบัตร?]], positions:[[ตำแหน่ง,จำนวน]]}
    POST {action:'list', pin} → rows:[{name, pos, cs, rank, officer}] (ชื่อ–สกุล · ตำแหน่ง · นามเรียกขาน เท่านั้น) */
-const PERSONNEL_API = '';   // ← URL เว็บแอป Apps Script ของชีต "รายชื่องานป้องกันฯ" (ลงท้าย /exec)
+const PERSONNEL_API = 'https://script.google.com/macros/s/AKfycbzug7pnFa_Zwsra4mf9ZERpKPxh58tKyIiocdhsQTblc9R9QbsGQgksT4yprGgsm7yLmg/exec';   // ← URL เว็บแอป Apps Script ของชีต "รายชื่องานป้องกันฯ" (ลงท้าย /exec)
 const $ = id=>document.getElementById(id);
 const esc = s=>String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n=>Number(n||0).toLocaleString('th-TH');
