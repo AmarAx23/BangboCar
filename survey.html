@@ -407,6 +407,8 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 <script src="fx.js"></script>
 <script src="outbox.js"></script>
 <script src="formkit.js"></script>
+<!-- ให้เว็บรู้สึกเหมือนแอปบนมือถือ: หน้าต่างเลื่อนขึ้นจากล่าง · ปุ่มยุบตอนแตะ · สีแถบด้านบน · หน้าโลโก้ตอนเปิดแอป -->
+<script src="ios.js" defer></script>
 <!-- iPhone/iPad: แตะช่องกรอกแล้วหน้าไม่ซูมเอง (ยังซูมด้วยสองนิ้วได้) · ช่องวันที่สูงเท่าช่องอื่น · ความสูงจอที่ถูกต้องเมื่อแถบ Safari ยุบ/ขยาย -->
 <script>(function(){var ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(!ios)return;var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1');})();</script>
 <style id="ios-fix">
