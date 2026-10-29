@@ -896,11 +896,11 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
         <span class="hc-desc">ข้อมูลบุคคลและกลุ่มเสี่ยงในพื้นที่ แยกระดับความเสี่ยง</span>
         <span class="hc-stat">รายการ · แบบฟอร์ม</span>
       </a>
-      <a class="hc-card hc-soon" href="personnel.html">
+      <a class="hc-card" href="personnel.html">
         <span class="hc-ico">👮</span>
         <span class="hc-name">สถานภาพกำลังพล</span>
-        <span class="hc-desc">จำนวนกำลังพล ตำแหน่ง และสถานะปฏิบัติหน้าที่</span>
-        <span class="hc-stat">🚧 กำลังจัดทำ</span>
+        <span class="hc-desc">จำนวนกำลังพล ชั้นยศ ตำแหน่ง และรายชื่อติดต่อ</span>
+        <span class="hc-stat" id="hcPersStat">งานป้องกันปราบปราม</span>
       </a>
     </div>
   </div>
@@ -1574,6 +1574,7 @@ function setChooserStat(){
   const hubSave = (k, v)=>{ HUB[k] = v; try{ localStorage.setItem('bb-hub', JSON.stringify(HUB)); }catch(_){} };
   if(HUB.leave) document.getElementById('hcLeaveStat').textContent = HUB.leave;
   if(HUB.local) document.getElementById('hcLocalStat').textContent = HUB.local;
+  if(HUB.pers) document.getElementById('hcPersStat').textContent = HUB.pers;
   fetch(LEAVE_API + '?year=', ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
     if(!j || !j.ok || !Array.isArray(j.rows)) return;
     const wait = j.rows.filter(r=>r.status==='รออนุมัติ').length;
@@ -1592,6 +1593,13 @@ function setChooserStat(){
   // กลุ่มเสี่ยง: จำนวนรายการรอตรวจสอบจากสายตรวจ (ตัวเลขอย่างเดียว)
   const RISK_API = 'https://script.google.com/macros/s/AKfycbyl9CLikS0yYJ8hSHSGx4kB-jrb_TJsaIIRcsVXbyBv4IXx83rvVCOcW_dR3wAPEE9G/exec';
   fetch(RISK_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{ if(j && j.ok){ hcPending('hcRiskPd', j.pending); hubSave('riskPd', Number(j.pending) || 0); } }).catch(()=>{});
+  // สถานภาพกำลังพล: ตัวเลขอย่างเดียว (ไม่มีชื่อ)
+  const PERS_API = 'https://script.google.com/macros/s/AKfycbzug7pnFa_Zwsra4mf9ZERpKPxh58tKyIiocdhsQTblc9R9QbsGQgksT4yprGgsm7yLmg/exec';
+  fetch(PERS_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
+    if(!j || !j.ok) return;
+    const t = `${j.total} นาย · สัญญาบัตร ${j.officers} · ประทวน ${j.ncos}`;
+    document.getElementById('hcPersStat').textContent = t; hubSave('pers', t);
+  }).catch(()=>{});
   function hcPending(id, n){
     const b = document.getElementById(id); n = Number(n) || 0;
     b.hidden = !n; b.textContent = '⏳ ' + (n > 99 ? '99+' : n); b.title = `รอตรวจสอบ ${n} รายการ — กดเพื่อไปตรวจ`;
