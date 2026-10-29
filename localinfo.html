@@ -791,7 +791,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @media (prefers-reduced-motion:reduce){ .ov-head *,.ov-in,.ov-skel{animation:none!important} }
 @media print{ .ov-head *,.ov-in{animation:none!important} }
 @media (max-width:600px){ .ovp-x{display:none} }
-.ov-poster{position:relative;max-width:760px;margin:0 auto;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.9),transparent 60%),var(--ov-paper);border-radius:18px;box-shadow:0 10px 30px rgba(11,42,91,.14);overflow:hidden;padding:46px 56px 54px;color:var(--ov-ink)}
+.ov-poster{position:relative;max-width:1040px;margin:0 auto;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.9),transparent 60%),var(--ov-paper);border-radius:18px;box-shadow:0 10px 30px rgba(11,42,91,.14);overflow:hidden;padding:46px 56px 54px;color:var(--ov-ink)}
 :root[data-theme="dark"] .ov-poster{background:radial-gradient(circle at 50% 38%,rgba(37,99,235,.10),transparent 60%),var(--ov-paper);box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .ov-logo{display:block;width:118px;height:auto;margin:0 auto 18px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));position:relative}
 .ov-ribbon{position:relative;margin:0 auto;max-width:560px;background:linear-gradient(90deg,var(--ov-navy),var(--ov-navy2));color:#fff;text-align:center;padding:14px 46px;clip-path:polygon(22px 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,22px 100%,0 50%);box-shadow:inset 0 -3px 0 var(--ov-gold)}
@@ -799,7 +799,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ov-ribbon small{display:block;font-size:14px;font-weight:400;opacity:.85;margin-top:2px}
 .ov-asof{text-align:right;margin:22px 0 18px;font-size:17px;color:var(--ov-mute)}
 .ov-list{list-style:none;margin:0;padding:0}
-.ov-row{display:grid;grid-template-columns:36px minmax(0,1fr) 64px 76px 40px;align-items:baseline;gap:6px;padding:9px 0;font-size:18px}
+.ov-row{display:grid;grid-template-columns:36px minmax(0,1fr) 64px 40px;align-items:baseline;gap:6px;padding:9px 0;font-size:18px}
 .ov-row .no{font-weight:600;color:var(--ov-navy2)}
 :root[data-theme="dark"] .ov-row .no{color:#93c5fd}
 .ov-row .nm{font-weight:600}
@@ -811,7 +811,10 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .ov-row.sub .v{font-weight:600}
 .ov-zc{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:0;border:1px solid rgba(0,0,0,.25)}
 .ov-gap{height:10px}
-.ov-total{display:grid;grid-template-columns:minmax(0,1fr) 64px 76px 40px;gap:6px;align-items:baseline;margin-top:22px;padding-top:16px;border-top:2px dashed rgba(11,42,91,.25);font-size:20px;font-weight:700}
+/* ประเภทสถานที่: 2 คอลัมน์ (อ่านลงซ้ายก่อน แล้วต่อขวา) · มือถือเหลือคอลัมน์เดียว */
+.ov-cols > ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(var(--rows,1),auto);column-gap:44px}
+.ov-cols .ov-row{font-size:17px}
+.ov-total{display:grid;grid-template-columns:minmax(0,1fr) 76px 40px;gap:6px;align-items:baseline;margin-top:22px;padding-top:16px;border-top:2px dashed rgba(11,42,91,.25);font-size:20px;font-weight:700}
 .ov-total .t{text-align:right}
 .ov-total .lb,.ov-total .u{font-weight:500;font-size:17px;color:var(--ov-mute)}
 .ov-total .v{text-align:right;color:var(--ov-navy2)}
@@ -821,10 +824,11 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
   .ov-logo{width:86px}
   .ov-ribbon{padding:12px 30px}.ov-ribbon h2{font-size:18px}
   .ov-asof{font-size:14px;text-align:center}
-  .ov-row{grid-template-columns:28px minmax(0,1fr) 44px 30px;font-size:15px}
+  .ov-cols > ol{grid-template-columns:1fr;grid-auto-flow:row;grid-template-rows:none}
+  .ov-row,.ov-cols .ov-row{grid-template-columns:28px minmax(0,1fr) 44px 30px;font-size:15px}
   .ov-row .lb{display:none}
   .ov-row.sub{font-size:14px}
-  .ov-total{grid-template-columns:minmax(0,1fr) 54px 30px;font-size:17px}.ov-total .lb{display:none}
+  .ov-total{grid-template-columns:minmax(0,1fr) 54px 30px;font-size:17px}
 }
 :root[data-theme="dark"] .ov-zc{border-color:rgba(255,255,255,.6)}
 @media (max-width:480px){ nav .tabbar{gap:8px} nav .tab{padding:.6em .4em;font-size:14px;white-space:nowrap} }
@@ -1235,9 +1239,9 @@ function ovZone(r){
 }
 function renderOverview(){
   $('ovAsof').textContent = 'ข้อมูล ณ วันที่ ' + new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
-  const row = (no,nm,v,cls)=>`<li class="ov-row${cls?' '+cls:''}"><span class="no">${no}</span><span class="nm">${nm}</span><span class="lb">จำนวน</span><span class="v">${fmt(v)}</span><span class="u">แห่ง</span></li>`;
+  const row = (no,nm,v,cls)=>`<li class="ov-row${cls?' '+cls:''}"><span class="no">${no}</span><span class="nm">${nm}</span><span class="v">${fmt(v)}</span><span class="u">แห่ง</span></li>`;
   const types = [...allTypeCounts()].map(([t,n])=>[t||'ไม่ระบุ', n]).sort((a,b)=>b[1]-a[1]);   // มากไปน้อย · เท่ากันเรียงตามแท็บในชีต
-  let h = types.map(([t,n],i)=>row(TH_NUM(i+1)+'.', `<span class="ic">${typeIcon(t)}</span> ${esc(t)}`, n, n?'':'zero')).join('');
+  let h = types.length ? `<li class="ov-cols" style="--rows:${Math.ceil(types.length/2)}"><ol>` + types.map(([t,n],i)=>row(TH_NUM(i+1)+'.', `<span class="ic">${typeIcon(t)}</span> ${esc(t)}`, n, n?'':'zero')).join('') + '</ol></li>' : '';
   // แยกตามเขตตรวจ (แบบหัวข้อย่อยในภาพตัวอย่าง)
   const zc = {}; S.rows.forEach(r=>{ const z=ovZone(r)||'ยังไม่มีพิกัด'; zc[z]=(zc[z]||0)+1; });
   const ZC = {'เขตตรวจที่ 1':'#FFD600','เขตตรวจที่ 2':'#795548','เขตตรวจที่ 3':'#F48FB1'};
@@ -1247,7 +1251,7 @@ function renderOverview(){
     h += zones.map(z=>row('', `${ZC[z]?`<i class="ov-zc" style="background:${ZC[z]}"></i>`:''}${esc(z)}`, zc[z], 'sub')).join('');
   }
   $('ovList').innerHTML = h || '<li class="li-empty">ยังไม่มีข้อมูล</li>';
-  $('ovTotal').innerHTML = `<span class="t">รวมทั้งหมด</span><span class="lb">จำนวน</span><span class="v">${fmt(S.rows.length)}</span><span class="u">แห่ง</span>`;
+  $('ovTotal').innerHTML = `<span class="t">รวมทั้งหมด</span><span class="v">${fmt(S.rows.length)}</span><span class="u">แห่ง</span>`;
   OV_READY = true;
   if(!$('panelOverview').hidden) playOverview(false);
 }
