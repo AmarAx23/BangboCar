@@ -267,7 +267,8 @@ html.no-motion .nav-coin{animation:none}
 
 .cm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .cm-head h2{font-size:18px;color:var(--text-strong);margin:0}
-.cm-head .sub{font-size:13px;color:var(--muted);margin-top:4px}
+.cm-head .sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.6}
+.cm-head .sub b{color:var(--text);font-weight:600}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none;max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%)}
 .ff{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -455,7 +456,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   <div class="cm-head">
     <div>
       <h2>📝 สำรวจสถานที่สำคัญในพื้นที่</h2>
-      <div class="sub">เลือกประเภท กรอกข้อมูล ปักหมุด แล้วกด "ส่ง" · เจ้าหน้าที่จะตรวจสอบก่อนเข้าระบบ</div>
+      <div class="sub">เลือกประเภท → กรอกข้อมูล → ปักหมุด → กด <b>ส่ง</b><br>เจ้าหน้าที่จะตรวจสอบก่อนเข้าระบบ</div>
     </div>
   </div>
   <form id="f" autocomplete="off" novalidate>
