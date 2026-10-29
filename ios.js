@@ -119,13 +119,16 @@
   }
   if(window.HTMLDialogElement){
     const P = HTMLDialogElement.prototype, show = P.showModal, close = P.close;
-    P.showModal = function(){ try{ prep(this); }catch(_){} return show.apply(this, arguments); };
+    // เปิดซ้ำระหว่างกำลังเลื่อนปิด (เช่น ใส่รหัสผิดแล้วหน้าต่างเด้งกลับ) → ปิดให้จบทันทีก่อน แล้วค่อยเปิดใหม่
+    P.showModal = function(){ const d = this;
+      if(d.__iosClosing){ clearTimeout(d.__iosT); d.classList.remove('ios-closing'); d.__iosClosing = false; close.call(d); }
+      try{ prep(d); }catch(_){} return show.apply(d, arguments); };
     // ปิดแบบเลื่อนลง (ถ้าเป็น sheet)
     P.close = function(){
       const d = this, args = arguments;
       if(!d.open || reduce || !d.classList.contains('ios-sheet') || !narrow() || d.__iosClosing) return close.apply(d, args);
       d.__iosClosing = true; d.classList.add('ios-closing');
-      setTimeout(()=>{ d.classList.remove('ios-closing'); d.__iosClosing = false; close.apply(d, args); }, 200);
+      d.__iosT = setTimeout(()=>{ d.classList.remove('ios-closing'); d.__iosClosing = false; close.apply(d, args); }, 200);
     };
   }
 
