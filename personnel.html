@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="logo.webp">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="fx.js"></script>
 <script>(function(){ try{ if(localStorage.getItem('bangbo-theme')==='dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){} })();</script>
 <style>
 :root{--bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;--text:#1e293b;--text-strong:#0f172a;--muted:#64748b;--faint:#94a3b8;--accent:#2563eb;--shadow:0 1px 3px rgba(0,0,0,.04);
@@ -18,7 +19,6 @@
 body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
 nav{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 nav a.home{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
-nav img{width:40px;height:46px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
 .nav-title{font-size:17px;font-weight:700;color:var(--text-strong)}
 .nav-sub{font-size:13px;color:var(--muted);margin-top:2px}
 .nav-right{margin-left:auto;display:flex;gap:10px;align-items:center}
@@ -38,7 +38,7 @@ h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
 .kpi .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
 .kpi.total{background:linear-gradient(135deg,#0b2a5b,#1d4ed8);border:0;color:#fff}
 .kpi.total .lb,.kpi.total .v small{color:rgba(255,255,255,.8)}.kpi.total .v{color:#fff}
-.kpi.total::after{content:'👮';position:absolute;right:-6px;bottom:-14px;font-size:86px;opacity:.16}
+.kpi.total .wm{position:absolute;right:-6px;bottom:-14px;font-size:86px;line-height:1;opacity:.16;pointer-events:none}
 .kpi .split{height:8px;border-radius:99px;background:var(--blue-bg);margin-top:10px;overflow:hidden;display:flex}
 .kpi .split i{display:block;height:100%}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px}
@@ -109,10 +109,49 @@ h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
 .nav-right .theme-switch{--toggle-size:12px}
 .msg{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.6;margin-bottom:16px}
 :root[data-theme="dark"] .msg{background:#3a2f12;color:#fde68a;border-color:#a16207}
-.skb{display:block;border-radius:8px;background:linear-gradient(90deg,rgba(148,163,184,.14) 25%,rgba(148,163,184,.3) 50%,rgba(148,163,184,.14) 75%);background-size:200% 100%;animation:skb 1.2s linear infinite;height:14px}
-@keyframes skb{to{background-position:-200% 0}}
 .empty{color:var(--muted);text-align:center;padding:24px 0}
 .kpi .v{transition:opacity .2s}
+/* ================= UI + MOTION (ชุดเดียวกับหน้าอื่นของเว็บ) ================= */
+/* โลโก้เหรียญหมุนที่หัวเว็บ */
+.nav-logo{width:44px;height:51px;flex-shrink:0;perspective:300px}
+.nav-coin{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:navSpin 6s linear infinite}
+.coin-face{position:absolute;inset:0;background:url(logo.webp) center/contain no-repeat;backface-visibility:hidden;-webkit-backface-visibility:hidden;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.coin-face.back{transform:rotateY(180deg)}
+@keyframes navSpin{to{transform:rotateY(360deg)}}
+@media (max-width:700px){ .nav-logo{width:36px;height:42px} }
+/* การ์ด: ขอบไล่สีเขียว→น้ำเงิน + เรืองแสงตอนชี้ (เหมือนการ์ดหน้าอื่น) */
+.kpi,.card,.person{position:relative;transition:box-shadow .3s ease,transform .25s ease}
+.kpi::after,.card::after,.person::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;z-index:2;
+  background:linear-gradient(163deg,#00ff75 0%,#3700ff 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:0;transition:opacity .3s ease}
+.kpi:hover,.card:hover,.person:hover{box-shadow:0 0 30px 1px rgba(0,255,117,.3)}
+.kpi:hover::after,.card:hover::after,.person:hover::after{opacity:1}
+.person:hover{transform:translateY(-2px)}
+.roster-card:hover{box-shadow:var(--shadow)}.roster-card:hover::after{opacity:0}   /* กล่องรายชื่อ: ให้เรืองแสงเฉพาะการ์ดรายคน */
+.person:hover .av{transform:scale(1.08) rotate(-6deg)}
+.av{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.kpi .ic{display:inline-block;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.kpi:hover .ic{transform:scale(1.2) rotate(-8deg)}
+.kpi.total::after{background:linear-gradient(163deg,#00ff75 0%,#93c5fd 100%)}
+.chip{transition:background .2s,border-color .2s,color .2s,transform .15s}
+.chip:hover:not(.on){border-color:var(--accent);color:var(--accent)}
+.chip:active{transform:scale(.95)}
+.node{transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.node:hover{transform:translateY(-3px);box-shadow:0 8px 18px -8px rgba(37,99,235,.45)}
+/* เข้าทีละชิ้น */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes lineDown{from{transform:scaleY(0)}}
+.reveal{animation:fadeUp .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
+.org.play .node{animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;animation-delay:var(--d,0ms)}
+.org.play .tier + .tier::before{transform-origin:top;animation:lineDown .3s ease both;animation-delay:var(--dl,0ms)}
+.kpi.total .split i{transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.kpi.total::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 65%);transform:translateX(-120%);pointer-events:none}
+.kpi.total.shine::before{animation:shine 1.1s ease .5s both}
+@keyframes shine{to{transform:translateX(120%)}}
+@media (prefers-reduced-motion:reduce){ .nav-coin,.reveal,.org.play .node,.org.play .tier + .tier::before,.kpi.total.shine::before{animation:none!important} .person:hover,.node:hover{transform:none} }
+@media print{ .nav-coin,.reveal,.org.play .node{animation:none!important} .kpi::after,.card::after,.person::after{display:none} .kpi,.card{box-shadow:none!important} }
 @media print{ nav .nav-right,.roster-card{display:none!important} body{background:#fff} .kpi.total{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
 /* Light/dark switch — "strong-squid-82" by Galahhad on Uiverse.io (MIT) */
 .theme-switch {
@@ -350,7 +389,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 </head>
 <body>
 <nav>
-  <a class="home" href="index.html" title="กลับหน้าแรก"><img src="logo.webp" alt="ตราสถานีตำรวจภูธรบางบ่อ" width="40" height="46">
+  <a class="home" href="index.html" title="กลับหน้าแรก"><div class="nav-logo" role="img" aria-label="ตราสถานีตำรวจภูธรบางบ่อ"><div class="nav-coin"><div class="coin-face"></div><div class="coin-face back"></div></div></div>
     <div><div class="nav-title">สถานภาพกำลังพล</div><div class="nav-sub">งานป้องกันปราบปราม · สภ.บางบ่อ</div></div></a>
   <div class="nav-right">
     <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
@@ -377,7 +416,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   <div class="asof" id="asof">กำลังโหลดข้อมูล…</div>
 
   <section class="kpis">
-    <div class="kpi total"><div class="ic">👮</div><div class="lb">กำลังพลทั้งหมด</div><div class="v"><span id="kTotal">–</span><small>นาย</small></div>
+    <div class="kpi total"><span class="wm" aria-hidden="true">👮</span><div class="ic">👮</div><div class="lb">กำลังพลทั้งหมด</div><div class="v"><span id="kTotal">–</span><small>นาย</small></div>
       <div class="split" id="kSplit" style="background:rgba(255,255,255,.2)"><i id="kSplitO" style="width:0;background:#fcd34d"></i><i id="kSplitN" style="width:0;background:rgba(255,255,255,.75)"></i></div></div>
     <div class="kpi"><div class="ic">🎖️</div><div class="lb">ชั้นสัญญาบัตร</div><div class="v"><span id="kOff">–</span><small>นาย</small></div></div>
     <div class="kpi"><div class="ic">🪖</div><div class="lb">ชั้นประทวน</div><div class="v"><span id="kNco">–</span><small>นาย</small></div></div>
@@ -402,7 +441,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
       <input class="search" placeholder="🔎 ค้นหาชื่อ / นามเรียกขาน / ตำแหน่ง" id="q" aria-label="ค้นหาชื่อ นามเรียกขาน หรือตำแหน่ง">
     </div>
     <div class="chips" id="chips"></div>
-    <div class="people" id="people"><div class="empty" style="grid-column:1/-1">กำลังโหลดรายชื่อ…</div></div>
+    <div class="people" id="people"></div>
   </section>
 
   <div class="foot">ข้อมูลจากชีต "รายชื่องานป้องกันฯ" · หน้านี้แสดงเฉพาะจำนวน · แสดงเฉพาะ ชื่อ–สกุล ตำแหน่ง นามเรียกขาน (ไม่แสดงเบอร์โทร บัญชีผู้ใช้ รหัสผ่าน)</div>
@@ -440,6 +479,13 @@ const ORG = [
 ];
 const isSquad = p=>/^ผบ\.หมู่/.test(p);
 const squadLabel = p=>p==='ผบ.หมู่(ป.)' ? p : p.replace(/^ผบ\.หมู่\s*/,'').replace(/^\((.*)\)$/,'$1') || p;
+function playOrg(){
+  const o = $('org'); if(reduceMotion) return;
+  o.classList.remove('play'); void o.offsetWidth;
+  let k = 0; o.querySelectorAll('.tier').forEach((t,ti)=>{ t.style.setProperty('--dl', (ti*180 - 60)+'ms'); t.querySelectorAll('.node').forEach(n=>n.style.setProperty('--d', (ti*180 + (k++%4)*50)+'ms')); });
+  o.classList.add('play');
+}
+function reveal(els, step){ if(reduceMotion) return; [...els].forEach((e,i)=>{ e.classList.remove('reveal'); void e.offsetWidth; e.style.setProperty('--d', Math.min(i,14)*(step||45)+'ms'); e.classList.add('reveal'); }); }
 function renderOrg(pos){
   const left = new Map(pos);
   const node = (lbl, n, cls)=>`<div class="node ${cls}"><b>${esc(lbl)}</b><span class="cnt">${fmt(n)} นาย</span></div>`;
@@ -451,6 +497,7 @@ function renderOrg(pos){
   const sn = squad.reduce((s,[,n])=>s+n, 0);
   if(sn) h += `<div class="tier"><div class="node base"><b>ผู้บังคับหมู่</b><span>${squad.map(([k,n])=>esc(squadLabel(k))+' '+fmt(n)).join(' · ')}</span><br><span class="cnt">${fmt(sn)} นาย</span></div></div>`;
   $('org').innerHTML = h || '<div class="empty">ยังไม่มีข้อมูล</div>';
+  playOrg();
 }
 function renderRanks(ranks, off, nco){
   const max = Math.max(1, ...ranks.map(r=>r[1]));
@@ -470,6 +517,7 @@ function renderPublic(d, animate){
   $('kSplitO').style.width = (d.officers/t*100)+'%'; $('kSplitN').style.width = (d.ncos/t*100)+'%';
   $('kSplit').title = `สัญญาบัตร ${d.officers} · ประทวน ${d.ncos}`;
   renderOrg(d.positions || []); renderRanks(d.ranks || [], d.officers, d.ncos);
+  if(animate && !reduceMotion){ const t = document.querySelector('.kpi.total'); t.classList.remove('shine'); void t.offsetWidth; t.classList.add('shine'); }
   $('asof').textContent = 'ข้อมูล ณ วันที่ ' + new Date(d.updated || Date.now()).toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
   STAFF = Array.isArray(d.rows) ? d.rows : null;
   renderChips(); renderPeople();
@@ -490,7 +538,8 @@ async function loadPublic(){
 }
 
 /* ---------- รายชื่อ ---------- */
-let STAFF = null, FILTER = '';
+const SK_PEOPLE = Array.from({length:8}, ()=>'<div class="person" aria-hidden="true"><span class="skb" style="width:44px;height:44px;border-radius:50%;flex:none"></span><div class="t" style="display:flex;flex-direction:column;gap:7px"><span class="skb" style="width:70%"></span><span class="skb" style="width:45%;height:9px"></span></div></div>').join('');
+let STAFF = null, FILTER = '', animPeople = true;
 const COL = r=>/^พ\.ต\./.test(r) ? '#b7791f' : /^ร\.ต\./.test(r) ? '#c2410c' : '#2563eb';
 const initial = (name, rank)=>{ const s = String(name).replace(/\s+/g,'').slice(String(rank||'').length); return (s.match(/[\u0E01-\u0E2E]|[A-Za-z]/) || ['•'])[0]; };
 const card = p=>`<div class="person"><div class="av" style="--c:${COL(p.rank)}">${esc(initial(p.name, p.rank === 'อื่นๆ' ? '' : p.rank))}</div><div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="ps">${esc(p.pos || '–')}</div>${p.cs ? `<div class="cs">📻 ${esc(p.cs)}</div>` : ''}</div></div>`;
@@ -504,16 +553,18 @@ function renderChips(){
   $('chips').innerHTML = groups().map(([k,l,n])=>`<button type="button" class="chip${FILTER===k?' on':''}" data-k="${esc(k)}">${esc(l)} · ${fmt(n)}</button>`).join('');
 }
 function renderPeople(){
-  if(!STAFF){ $('people').innerHTML = '<div class="empty" style="grid-column:1/-1">'+(PUB ? 'ยังไม่มีรายชื่อ — อัปเดต Apps Script ในชีตเป็นเวอร์ชันล่าสุด' : 'กำลังโหลดรายชื่อ…')+'</div>'; $('rosterNote').textContent = ''; return; }
+  if(!STAFF){ $('people').innerHTML = PUB ? '<div class="empty" style="grid-column:1/-1">ยังไม่มีรายชื่อ — อัปเดต Apps Script ในชีตเป็นเวอร์ชันล่าสุด</div>' : SK_PEOPLE; $('rosterNote').textContent = ''; return; }
   const q = $('q').value.trim().toLowerCase().replace(/\s+/g,'');
   const list = STAFF.filter(p=>(!FILTER || (FILTER==='@off' ? p.officer : p.pos===FILTER)) && (!q || (p.name+p.pos+p.cs).toLowerCase().replace(/\s+/g,'').includes(q)));
   $('people').innerHTML = list.length ? list.map(card).join('') : '<div class="empty" style="grid-column:1/-1">ไม่พบรายชื่อที่ค้นหา</div>';
+  if(animPeople){ animPeople = false; reveal($('people').querySelectorAll('.person'), 30); }
   $('rosterNote').textContent = `แสดง ${fmt(list.length)} จาก ${fmt(STAFF.length)} นาย`;
 }
-$('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; FILTER = b.dataset.k; renderChips(); renderPeople(); });
+$('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; FILTER = b.dataset.k; animPeople = true; renderChips(); renderPeople(); });
 $('q').addEventListener('input', renderPeople);
 
-renderChips();
+renderChips(); renderPeople();
+reveal(document.querySelectorAll('main > section.kpis > .kpi, main > section.grid2 > .card, main > section.roster-card'), 70);
 loadPublic();
 </script>
 </body>
