@@ -1094,6 +1094,46 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 #shareCard td:last-child{width:110px}
 .ck-week{position:relative}
 .ck-week.team-0{margin-top:18px}
+/* แตะทั้งแถวเพื่อติ๊ก */
+.sh-tbl tbody tr:has(.cb.can){cursor:pointer}
+.sh-tbl tbody tr:has(.cb.can):active{background:rgba(37,99,235,.08)}
+/* ===== มือถือ: แถวแบบการ์ด (เลขข้อ · หัวข้อ+เกณฑ์ เต็มความกว้าง · ช่องติ๊กมุมขวา) ===== */
+@media (max-width:700px){
+  #panelCheck .cm-head{margin-bottom:10px}
+  #panelCheck .cm-head h2{font-size:17px}
+  #panelCheck .wk-bar{display:grid;grid-template-columns:40px minmax(0,1fr) 40px auto;gap:8px;width:100%}
+  #panelCheck .wk-nav{width:40px;height:40px}
+  .sh-date{width:100%!important;min-width:0;height:40px;white-space:nowrap;text-align:center;font-size:15px;padding:0 8px}
+  #dNow{grid-column:4;grid-row:1;height:40px;padding:0 12px;white-space:nowrap}
+  .sh-seg{grid-column:1/-1;grid-row:2;display:flex}
+  .sh-seg button{flex:1;padding:8px 6px;font-size:14px}
+  .ck-legend{gap:6px 12px;font-size:12px;margin-bottom:10px}
+  .ck-legend .cb{--size:18px}
+  .ck-legend .ck-hint{flex-basis:100%;font-size:12.5px}
+  .ck-week.team-0{margin-top:22px}
+  .sh-tbl thead{display:none}
+  .sh-tbl,.sh-tbl tbody,.sh-tbl tfoot{display:block;width:100%}
+  .sh-tbl tbody tr{display:grid;grid-template-columns:minmax(0,1fr) 48px;align-items:start;border-bottom:1px solid var(--border-soft)}
+  .sh-tbl tbody tr:last-child{border-bottom:none}
+  .sh-tbl tbody td{display:block;border-bottom:none!important}
+  .sh-tbl td.t{grid-column:1;width:100%;min-width:0;padding:12px 4px 12px 12px;font-size:15px;line-height:1.5}
+  .sh-tbl td.t .tx{flex:1;min-width:0}
+  .sh-tbl td.t .row{align-items:flex-start;gap:10px}
+  .sh-tbl .no{width:26px;height:26px;font-size:13px;margin-top:1px}
+  .sh-tbl td.c{grid-column:2;width:100%;min-width:0;padding:12px 12px 0 0;text-align:right}
+  .crit-m{display:block;margin-top:7px;font-size:12.5px;padding:6px 9px;font-weight:600}
+  .crit-m small{font-size:12px}
+  .sh-tbl tfoot tr{display:flex;justify-content:space-between;align-items:center}
+  .sh-tbl tfoot td{border-top:2px solid var(--border)!important}
+  .sh-tbl tfoot td:first-child{flex:1;padding-left:12px}
+  .sh-tbl tfoot td:last-child{padding-right:14px}
+  .ck-side{padding:12px 14px;gap:4px 10px}
+  .ck-side .tic{font-size:24px}
+  .ck-side .wl{font-size:16px}
+  .ck-side .wd{font-size:13.5px}
+  .ck-side .wm{font-size:12px}
+  .sh-foot{font-size:12.5px}
+}
 </style>
 </head>
 <body>
@@ -1149,7 +1189,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
         <button class="wk-now" id="dNow" type="button">⏱ ผลัดนี้</button>
       </div>
     </div>
-    <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 กดที่ช่องเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที)</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>ผลัดผ่านไปแล้ว ยังไม่ได้ติ๊ก</span></div>
+    <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 แตะที่แถวเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที)</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>ผลัดผ่านไปแล้ว ยังไม่ได้ติ๊ก</span></div>
     <div id="ckTeams"><div class="ck-skel"></div><div class="ck-skel"></div></div>
     <div class="sh-foot">
       <span class="ok">✔ ทุกการลงระบบ มีการตรวจสอบความถูกต้องจาก ตร.</span>
@@ -1466,7 +1506,8 @@ async function tick(p){
   }catch(err){ DONE.set(k, prev); if(same()) renderCheck(false); toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ const e2 = el(); if(e2) e2.classList.remove('busy'); }
 }
-$('ckTeams').addEventListener('click', e=>{ const b = e.target.closest('.cb.can'); if(!b || b.classList.contains('busy')) return; tick({date:SEL.date, shift:SEL.shift, team:+b.dataset.team, no:+b.dataset.no}); });
+/* แตะตรงไหนของแถวก็ติ๊กได้ (ไม่ต้องเล็งช่องเล็กๆ บนมือถือ) */
+$('ckTeams').addEventListener('click', e=>{ if(e.target.closest('.ck-snap')) return; const tr = e.target.closest('.sh-tbl tbody tr'), b = e.target.closest('.cb.can') || (tr && tr.querySelector('.cb.can')); if(!b || b.classList.contains('busy')) return; tick({date:SEL.date, shift:SEL.shift, team:+b.dataset.team, no:+b.dataset.no}); });
 $('ckTeams').addEventListener('keydown', e=>{ if((e.key===' '||e.key==='Enter') && e.target.classList.contains('can')){ e.preventDefault(); e.target.click(); } });
 
 /* ---------- หน้า "สรุป" รายเดือน ---------- */
