@@ -1581,6 +1581,7 @@ function setChooserStat(){
   if(HUB.leave) document.getElementById('hcLeaveStat').textContent = HUB.leave;
   if(HUB.local) document.getElementById('hcLocalStat').textContent = HUB.local;
   if(HUB.pers) document.getElementById('hcPersStat').textContent = HUB.pers;
+  if(HUB.shift) document.getElementById('hcShiftStat').textContent = HUB.shift;
   fetch(LEAVE_API + '?year=', ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
     if(!j || !j.ok || !Array.isArray(j.rows)) return;
     const wait = j.rows.filter(r=>r.status==='รออนุมัติ').length;
@@ -1605,6 +1606,16 @@ function setChooserStat(){
     if(!j || !j.ok) return;
     const t = `${j.total} นาย · สัญญาบัตร ${j.officers} · ประทวน ${j.ncos}`;
     document.getElementById('hcPersStat').textContent = t; hubSave('pers', t);
+  }).catch(()=>{});
+  // เช็คลิสต์ประจำผลัด: ความคืบหน้าของผลัดปัจจุบัน (เช้า 08–20 น. · ดึก 20–08 น.)
+  const SHIFT_API = 'https://script.google.com/macros/s/AKfycbxbmqF4ot9LG9zXtRXg6yAf5gRPh2qbzEjgwFB59TEOPDdYt2dUlwCDO9z7y-M6BhYW2A/exec';
+  fetch(SHIFT_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
+    if(!j || !j.ok || !j.items) return;
+    const n = new Date(), h = n.getHours(), d = new Date(n); if(h < 8) d.setDate(d.getDate()-1);
+    const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`, sh = h >= 8 && h < 20 ? 'เช้า' : 'ดึก';
+    const part = t=>{ const r = (j.rows||[]).find(x=>x.date===iso && x.shift===sh && x.team===t); return `${t} ${(r ? r.done.length : 0)}/${(j.items[t]||[]).length}`; };
+    const t = `ผลัด${sh} · ` + (j.teams||[]).map(part).join(' · ');
+    document.getElementById('hcShiftStat').textContent = t; hubSave('shift', t);
   }).catch(()=>{});
   function hcPending(id, n){
     const b = document.getElementById(id); n = Number(n) || 0;
