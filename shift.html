@@ -1084,6 +1084,16 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 @media (max-width:700px){ .sh-tbl td.cr,.sh-tbl th:nth-child(2){display:none} .crit-m{display:block;margin-top:6px} .sh-tbl td.t{font-size:13.5px} .crit{font-size:12px;padding:6px 8px} .sh-tbl .no{width:26px;height:26px;font-size:13px} .sh-tbl td.t .row{gap:8px} .sh-date{width:150px} .sh-seg button{padding:6px 9px;font-size:12.5px} }
 @media print{ .sh-seg,#dNow{display:none!important} .crit,.sh-tbl .no{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
 @media (prefers-reduced-motion:reduce){ .sh-seg-bg{transition:none} }
+/* ภาพแชร์ประจำผลัด (ต่อจากรูปแบบภาพแชร์หน้าผู้บังคับบัญชา) */
+#shareCard tr.sc-team td{background:#fdf3d7;color:#0f172a;font-size:24px;font-weight:700;text-align:left;padding:14px 36px;border-bottom:2px solid #d4a017}
+#shareCard tr.sc-team td:last-child{text-align:center;padding-right:30px}
+#shareCard td.sc-no{width:84px;padding-left:36px}
+#shareCard td.sc-no span{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#0f1d3a;color:#fff;font-size:20px;font-weight:700}
+#shareCard td.sc-it{white-space:normal;font-size:21px;font-weight:600;line-height:1.45;padding-left:6px}
+#shareCard td.sc-it .sc-cr{display:block;margin:4px 0 0;font-size:16px;font-weight:600;color:#a16207}
+#shareCard td:last-child{width:110px}
+.ck-week{position:relative}
+.ck-week.team-0{margin-top:18px}
 </style>
 </head>
 <body>
@@ -1211,7 +1221,6 @@ const SHIFT_TXT = {'เช้า':'08.00 – 20.00 น.', 'ดึก':'20.00 –
 const DEF_ITEMS = {
   'ร้อยเวร 20': [
     {no:1, text:'ปล่อยแถวในระบบ Police 4.0', crit:'ทุกครั้ง 0–30 นาที ก่อนเข้าเวร', note:''},
-    {no:2, text:'ตรวจจุดตรวจบังคับ / จุดตรวจรอง', crit:'1 ใน 4 ของจุดตรวจทั้งหมด', note:''},
     {no:3, text:'รายงานผลการปฏิบัติในผลัดที่ปฏิบัติหน้าที่', crit:'ก่อนออกเวร', note:'ผลัดดึกรายงานรวมทั้งผลัดที่ 1 และผลัดที่ 2 ก่อนเวลา 08.00 น. ของวันรุ่งขึ้น'},
     {no:4, text:'รายงานผลการปฏิบัติในหัวข้อต่างๆ เช่น ผลการจับกุม ผลการยึดรถ ผลการตั้งจุดตรวจ การตรวจค้น และอื่นๆ พร้อมรายละเอียด', crit:'ทุกครั้งที่มีผลการปฏิบัติ', note:''},
     {no:5, text:'เมื่อตั้งจุดตรวจ ต้องลงระบบ Police 4.0 และ TPCC', crit:'ทุกครั้งที่มีการตั้งจุดตรวจ', note:''},
@@ -1219,7 +1228,6 @@ const DEF_ITEMS = {
     {no:7, text:'เมื่อมีการปิดล้อมตรวจค้น ต้องลงระบบและรายงานผลการปฏิบัติในระบบ Police 4.0', crit:'ทุกครั้งที่มีการปิดล้อมตรวจค้น', note:''}
   ],
   'สายตรวจ': [
-    {no:1, text:'ตรวจจุดตรวจบังคับ / จุดตรวจรอง', crit:'ตรวจทุกจุดในเขตตรวจที่รับผิดชอบ', note:''},
     {no:2, text:'เมื่อไประงับเหตุ ลงข้อมูลในระบบ Police 4.0 เมนู Crime Mapping', crit:'ทุกครั้งที่มีการรับแจ้งเหตุ ต้องลงข้อมูลให้ครบ ถูกต้อง และพิกัดเกิดเหตุจริง', note:'*** กลุ่มคดี / ข้อหา เหตุทั่วไป อยู่ในตัวเลือก "กลุ่ม 5 เหตุอื่นๆ"'},
     {no:3, text:'ตรวจเยี่ยมประชาชน ลงข้อมูลในระบบ Police 4.0', crit:'ไม่น้อยกว่า 2 ราย / เขตตรวจ / ผลัด', note:''},
     {no:4, text:'ตรวจค้นบุคคล ยานพาหนะ', crit:'ไม่น้อยกว่า 1 ราย / เขตตรวจ / ผลัด', note:''},
@@ -1304,15 +1312,15 @@ function renderCheck(anim){
   const canTick = !!SHIFT_API && LOADED;
   $('ckTeams').innerHTML = TEAMS.map((team, ti)=>{
     const items = ITEMS[team] || [], d = doneOf(SEL.date, SEL.shift, team), s = statOf(SEL.date, SEL.shift, team);
-    return `<section class="ck-week team-${ti} ${ph}${anim?' ck-in':''}" style="--wd:${ti*110}ms">` +
+    return `<section class="ck-week team-${ti} ${ph}${anim?' ck-in':''}" style="--wd:${ti*110}ms">` + (ti === 0 ? ACTS : '') +
       `<div class="ck-side"><div class="tic">${TEAM_IC[team]||'📋'}</div><div class="wl">${esc(team)}</div><div class="wd">ผลัด${esc(SEL.shift)} · ${thDate(SEL.date)}</div><div class="wm">${SHIFT_TXT[SEL.shift]}</div><span class="wb">${PHASE_TXT[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
       `<div class="ck-tbl-wrap"><table class="ck-tbl sh-tbl"><thead><tr><th>หัวข้อที่ต้องดำเนินการ</th><th>เกณฑ์</th><th>ทำแล้ว</th></tr></thead><tbody>` +
       items.map((it, k)=>{ const on = d.includes(it.no), can = canTick && ph !== 'fut';
         const cls = (on ? 'on' : ph==='past' ? 'miss' : '') + (can ? ' can' : '');
         const crit = `${esc(it.crit)}${it.note?`<small>${esc(it.note)}</small>`:''}`;
-        return `<tr class="${on?'done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${it.no}</span><span class="tx">${esc(it.text)}<span class="crit crit-m">${crit}</span></span></div></td>` +
+        return `<tr class="${on?'done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${k+1}</span><span class="tx">${esc(it.text)}<span class="crit crit-m">${crit}</span></span></div></td>` +
           `<td class="cr"><span class="crit">${crit}</span></td>` +
-          `<td class="c"><span class="cb ${cls}" data-team="${ti}" data-no="${it.no}" role="${can?'checkbox':'img'}" aria-checked="${on}" aria-label="ข้อ ${it.no} ${esc(it.text)}" ${can?'tabindex="0"':''}>${NEON_IN}</span></td></tr>`; }).join('') +
+          `<td class="c"><span class="cb ${cls}" data-team="${ti}" data-no="${it.no}" role="${can?'checkbox':'img'}" aria-checked="${on}" aria-label="ข้อ ${k+1} ${esc(it.text)}" ${can?'tabindex="0"':''}>${NEON_IN}</span></td></tr>`; }).join('') +
       `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td><td class="cr"></td><td style="color:${pctColor(s.pct)}">${s.done}/${s.tot}</td></tr></tfoot></table></div></section>`;
   }).join('');
   const bars = document.querySelectorAll('#ckTeams .wbar i');
@@ -1327,6 +1335,106 @@ $('dSel').addEventListener('change', e=>{ if(/^\d{4}-\d{2}-\d{2}$/.test(e.target
 $('sSeg').addEventListener('click', e=>{ const b = e.target.closest('button[data-s]'); if(!b || b.dataset.s===SEL.shift) return; goShift({date:SEL.date, shift:b.dataset.s}); });
 addEventListener('resize', ()=>renderSeg());
 
+const ACTS = '<div class="ck-acts"><button class="ck-snap ck-share" type="button" data-share="1" title="แชร์ภาพผลัดนี้ เช่น ส่งเข้ากลุ่ม LINE" aria-label="แชร์ภาพเช็คลิสต์ผลัดนี้">📤<span class="tx"> แชร์</span></button><button class="ck-snap" type="button" data-snap="1" title="บันทึกภาพ PNG ความละเอียดสูง สำหรับรายงาน" aria-label="บันทึกภาพเช็คลิสต์ผลัดนี้">📷<span class="tx"> บันทึกภาพ</span></button></div>';
+
+/* ---------- แชร์ / บันทึกภาพเช็คลิสต์ผลัด (PNG ความละเอียดสูง · ใช้ระบบเดียวกับหน้าผู้บังคับบัญชา) ---------- */
+let h2iP = null;
+function loadH2I(){
+  if(window.htmlToImage) return Promise.resolve();
+  return h2iP || (h2iP = new Promise((res, rej)=>{ const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'; sc.onload = res; sc.onerror = ()=>{ h2iP = null; rej(new Error('load')); }; document.head.appendChild(sc); }));
+}
+let fontCSSP = null;   // ฟอนต์ Prompt (ไทย+อังกฤษ) ฝังลงภาพ
+function snapFontCSS(){
+  const toData = u=>fetch(u).then(r=>r.blob()).then(b=>new Promise(res=>{ const fr = new FileReader(); fr.onload = ()=>res(fr.result); fr.readAsDataURL(b); }));
+  return fontCSSP || (fontCSSP = fetch('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap').then(r=>r.text()).then(async css=>{
+    const out = [];
+    for(const b of css.split(/(?=\/\* )/).filter(b=>/\/\* (thai|latin) \*\//.test(b))){ const m = b.match(/url\((https:[^)]+)\)/); out.push(m ? b.replace(m[1], await toData(m[1])) : b); }
+    return out.join('\n');
+  }).catch(()=>{ fontCSSP = null; return undefined; }));
+}
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IN_APP = /Line\/|FBAN|FBAV|Instagram/i.test(navigator.userAgent);
+const imgFile = (blob, name)=>{ try{ return new File([blob], name, {type:'image/png'}); }catch(_){ return null; } };
+const canShareFile = f=>!!(f && navigator.canShare && navigator.share && (()=>{ try{ return navigator.canShare({files:[f]}); }catch(_){ return false; } })());
+async function shareFile(f, name){
+  try{ await navigator.share({files:[f], title:name.replace(/\.png$/,'').replace(/_/g,' ')}); return 'ok'; }
+  catch(err){ return err && err.name === 'AbortError' ? 'abort' : 'fail'; }
+}
+let IMG_URL = null;
+function showImgDlg(blob, name){
+  let d = $('imgDlg');
+  if(!d){
+    d = document.createElement('dialog'); d.id = 'imgDlg';
+    d.innerHTML = '<div class="id-hd"><b>ภาพเช็คลิสต์ประจำผลัด</b><button class="id-x" type="button" aria-label="ปิด">✕</button></div><div class="id-body"><img alt="ภาพเช็คลิสต์ประจำผลัด"></div><div class="id-tip"></div><div class="id-acts"><button class="line" type="button" data-act="share">📤 แชร์ (LINE ฯลฯ)</button><a data-act="dl">⬇️ ดาวน์โหลดไฟล์</a></div>';
+    document.body.appendChild(d);
+    d.querySelector('.id-x').onclick = ()=>d.close();
+    d.addEventListener('click', e=>{ if(e.target === d) d.close(); });
+    d.addEventListener('close', ()=>{ if(IMG_URL){ URL.revokeObjectURL(IMG_URL); IMG_URL = null; } });
+  }
+  if(IMG_URL) URL.revokeObjectURL(IMG_URL);
+  IMG_URL = URL.createObjectURL(blob);
+  const f = imgFile(blob, name), sh = canShareFile(f);
+  d.querySelector('img').src = IMG_URL;
+  const dl = d.querySelector('[data-act="dl"]'); dl.href = IMG_URL; dl.download = name;
+  const sb = d.querySelector('[data-act="share"]'); sb.hidden = !sh;
+  sb.onclick = async ()=>{ const r = await shareFile(f, name); if(r === 'ok'){ BB.haptic('ok'); d.close(); } else if(r === 'fail') toast('⚠️ แชร์ไม่ได้ในเบราว์เซอร์นี้ · กดค้างที่รูปแล้วเลือกบันทึก/แชร์'); };
+  d.querySelector('.id-tip').textContent = (sh ? 'กด "แชร์" แล้วเลือก LINE และกลุ่มที่ต้องการ · ' : '') + 'หรือกดค้างที่รูป แล้วเลือก "บันทึกรูปภาพ" / "แชร์" (ภาพความละเอียดสูง)';
+  d.showModal();
+}
+const btnBusy = (btn, on, old)=>{ btn.disabled = on; btn.innerHTML = on ? '⏳<span class="tx"> กำลังสร้างภาพ…</span>' : old; };
+function shareCardHtml(sel){
+  const ph = phaseOf(sel.date, sel.shift), st = TEAMS.map(t=>statOf(sel.date, sel.shift, t));
+  const done = st.reduce((a,s)=>a+s.done, 0), tot = st.reduce((a,s)=>a+s.tot, 0), pct = tot ? Math.round(done/tot*100) : 0;
+  return `<div class="sc-hd"><div class="sc-r1"><h1>${sel.shift==='ดึก'?'🌙':'☀️'} ผลัด${esc(sel.shift)}</h1><span class="dt">${esc(thDateLong(sel.date).replace(/^วัน\S*ที่ /,''))}</span><span class="st">${PHASE_TXT[ph]}</span></div>
+    <div class="sc-r2"><span>CHECKLIST การปฏิบัติในแต่ละผลัด · ${SHIFT_TXT[sel.shift]}</span><b>ดำเนินการแล้ว ${done}/${tot} (${pct}%)</b></div><div class="sc-bar"><i style="width:${pct}%"></i></div></div>
+  <table>` + TEAMS.map((t, ti)=>{ const d = doneOf(sel.date, sel.shift, t), s = st[ti];
+    return `<tr class="sc-team"><td colspan="2">${TEAM_IC[t]||''} ${esc(t)}</td><td style="color:${pctColor(s.pct)}">${s.done}/${s.tot}</td></tr>` +
+      (ITEMS[t]||[]).map((it, k)=>{ const on = d.includes(it.no), miss = !on && ph==='past';
+        return `<tr><td class="sc-no"><span>${k+1}</span></td><td class="t sc-it">${esc(it.text)}<span class="sc-cr">${esc(it.crit)}</span></td><td><span class="sc-ck ${on?'ok':miss?'no':'wait'}">${on?'✓':''}</span></td></tr>`; }).join(''); }).join('') +
+  `</table><div class="sc-ft"><span>สถานีตำรวจภูธรบางบ่อ · เช็คลิสต์ประจำผลัด</span><span>✔ ทุกการลงระบบ มีการตรวจสอบความถูกต้องจาก ตร.</span></div>`;
+}
+async function shareImage(sel){
+  const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
+  try{ await document.fonts.ready; }catch(_){}
+  let el = $('shareCard'); if(!el){ el = document.createElement('div'); el.id = 'shareCard'; document.body.appendChild(el); }
+  el.innerHTML = shareCardHtml(sel);
+  const opt = { pixelRatio: 2, backgroundColor: '#ffffff', fontEmbedCSS: fontCSS, width: 1080, height: el.offsetHeight, style: { left: '0', top: '0', position: 'static' } };
+  try{
+    await htmlToImage.toBlob(el, opt);                 // รอบแรกให้ฟอนต์โหลดครบ (Safari)
+    const blob = await htmlToImage.toBlob(el, opt);
+    if(!blob) throw new Error('blob');
+    const name = (`CHECKLIST_ผลัด${sel.shift}_${thDate(sel.date)}`).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_').trim() + '.png';
+    return {blob, name};
+  } finally { el.innerHTML = ''; }
+}
+async function shareShift(btn){
+  const old = btn.innerHTML; btnBusy(btn, true);
+  try{
+    const {blob, name} = await shareImage(SEL);
+    const f = imgFile(blob, name);
+    if(canShareFile(f)){
+      const r = await shareFile(f, name);              // เปิดหน้าแชร์ของมือถือ → เลือก LINE
+      if(r === 'ok'){ BB.haptic('ok'); return; }
+      if(r === 'abort') return;
+    }
+    showImgDlg(blob, name);                            // แชร์ตรงไม่ได้ → แสดงภาพพร้อมปุ่ม
+  }catch(err){ toast('⚠️ สร้างภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+  finally{ btnBusy(btn, false, old); }
+}
+async function snapShift(btn){
+  const old = btn.innerHTML; btnBusy(btn, true);
+  try{
+    const {blob, name} = await shareImage(SEL);
+    if(IS_IOS || IN_APP){ showImgDlg(blob, name); return; }   // iPhone / ในแอป LINE: ให้กดค้างบันทึกรูป
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 30000);
+    toast('📷 บันทึกภาพแล้ว · ' + name);
+  }catch(err){ toast('⚠️ บันทึกภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+  finally{ btnBusy(btn, false, old); }
+}
+$('ckTeams').addEventListener('click', e=>{ const b = e.target.closest('.ck-snap'); if(!b) return; e.stopPropagation(); if(b.disabled) return; if(b.dataset.share != null) shareShift(b); else snapShift(b); });
+
 /* ---------- ติ๊ก → บันทึกลงชีต (รหัสตรวจที่ฝั่งสคริปต์) ---------- */
 let PIN = ''; try{ PIN = sessionStorage.getItem('shift-pin') || ''; }catch(_){}
 let pendingTick = null;
@@ -1336,7 +1444,7 @@ $('pinClose').onclick = ()=>{ pendingTick = null; $('pinDlg').close(); };
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); PIN = $('pinInput').value.trim(); if(!PIN) return; try{ sessionStorage.setItem('shift-pin', PIN); }catch(_){} $('pinDlg').close(); if(pendingTick){ const p = pendingTick; pendingTick = null; tick(p); } });
 async function tick(p){
   if(!PIN){ pendingTick = p; return openPin(); }
-  const team = TEAMS[p.team], k = key(p.date, p.shift, team), prev = (DONE.get(k) || []).slice();
+  const team = TEAMS[p.team], k = key(p.date, p.shift, team), prev = (DONE.get(k) || []).slice(), shown = (ITEMS[team] || []).findIndex(x=>x.no===p.no) + 1;
   const on = !prev.includes(p.no);
   DONE.set(k, on ? prev.concat(p.no) : prev.filter(n=>n!==p.no));
   const same = ()=>SEL.date===p.date && SEL.shift===p.shift;
@@ -1354,7 +1462,7 @@ async function tick(p){
     DONE.set(k, (j.done || []).map(Number));
     if(same()){ const keepJust = el() && el().classList.contains('just'); renderCheck(false); if(keepJust && el()) el().classList.add('just'); }
     saveCache(); if(VIEW==='sum') renderSum();
-    toast(on ? `✓ ติ๊กแล้ว · ${team} ข้อ ${p.no}` : `เอาติ๊กออกแล้ว · ${team} ข้อ ${p.no}`);
+    toast(on ? `✓ ติ๊กแล้ว · ${team} ข้อ ${shown}` : `เอาติ๊กออกแล้ว · ${team} ข้อ ${shown}`);
   }catch(err){ DONE.set(k, prev); if(same()) renderCheck(false); toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
   finally{ const e2 = el(); if(e2) e2.classList.remove('busy'); }
 }
@@ -1412,9 +1520,9 @@ function renderSum(){
   $('smTitle').textContent = `${monLabel(MON)} · ผลัดเช้า ${SHIFT_TXT['เช้า']} · ผลัดดึก ${SHIFT_TXT['ดึก']}`;
   // แยกหัวข้อ
   const list = [];
-  TEAMS.forEach((t, ti)=>(ITEMS[t]||[]).forEach(it=>list.push({t, ti, it, p: shiftsPassed[ti] ? itemHit[ti][it.no] / shiftsPassed[ti] : 0, n: itemHit[ti][it.no], of: shiftsPassed[ti]})));
+  TEAMS.forEach((t, ti)=>(ITEMS[t]||[]).forEach((it, k)=>list.push({t, ti, it, k, p: shiftsPassed[ti] ? itemHit[ti][it.no] / shiftsPassed[ti] : 0, n: itemHit[ti][it.no], of: shiftsPassed[ti]})));
   list.sort((a,b)=>a.p - b.p || a.ti - b.ti || a.it.no - b.it.no);
-  $('itemRp').innerHTML = list.map(x=>`<div class="rp-row"><div class="top"><span class="nm">${TEAM_IC[x.t]} ข้อ ${x.it.no} · <span style="font-weight:500">${esc(x.it.text)}</span></span><span class="pc" style="color:${pctColor(x.p)}">${Math.round(x.p*100)}%<small>${x.n}/${x.of}</small></span></div><div class="rp-bar"><i data-w="${x.p*100}" style="background:${pctColor(x.p)}"></i></div></div>`).join('') || '<div class="cm-note">ยังไม่มีข้อมูล</div>';
+  $('itemRp').innerHTML = list.map(x=>`<div class="rp-row"><div class="top"><span class="nm">${TEAM_IC[x.t]} ข้อ ${x.k+1} · <span style="font-weight:500">${esc(x.it.text)}</span></span><span class="pc" style="color:${pctColor(x.p)}">${Math.round(x.p*100)}%<small>${x.n}/${x.of}</small></span></div><div class="rp-bar"><i data-w="${x.p*100}" style="background:${pctColor(x.p)}"></i></div></div>`).join('') || '<div class="cm-note">ยังไม่มีข้อมูล</div>';
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('#itemRp .rp-bar i').forEach(b=>b.style.width = b.dataset.w + '%')));
   if(!reduceMotion) document.querySelectorAll('#panelSum .kpi, #panelSum .card').forEach((c,i)=>{ c.classList.remove('cm-in'); void c.offsetWidth; c.style.setProperty('--d', i*60+'ms'); c.classList.add('cm-in'); });
 }
