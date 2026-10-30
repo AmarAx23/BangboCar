@@ -1201,7 +1201,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
    ข้อมูลอยู่ในชีต "เช็คลิสต์ผลัด" ผ่าน Apps Script
    GET  → {items:{ชุด:[{no,text,crit,note}]}, rows:[{date,shift,team,done:[ข้อ]}]}  (ไม่มีข้อมูลส่วนบุคคล)
    POST {action:'tick', pin, date, shift, team, no, on} → ติ๊ก / เอาติ๊กออก (รหัสตรวจที่ฝั่งสคริปต์) */
-const SHIFT_API = '';   // ← URL เว็บแอป Apps Script ของชีตเช็คลิสต์ผลัด (ลงท้าย /exec)
+const SHIFT_API = 'https://script.google.com/macros/s/AKfycbxbmqF4ot9LG9zXtRXg6yAf5gRPh2qbzEjgwFB59TEOPDdYt2dUlwCDO9z7y-M6BhYW2A/exec';   // ← URL เว็บแอป Apps Script ของชีตเช็คลิสต์ผลัด (ลงท้าย /exec)
 const TEAMS = ['ร้อยเวร 20', 'สายตรวจ'];
 const TEAM_IC = {'ร้อยเวร 20':'👮', 'สายตรวจ':'🚓'};
 const SHIFTS = ['เช้า', 'ดึก'];
