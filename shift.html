@@ -1191,29 +1191,56 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   .sh-tbl.zt td.cr + td.c.sum + td.c{grid-column:2}
   .sh-tbl.zt tfoot td.zf.zs::before{content:"ครบทุกเขต "}
 }
-/* สายตรวจ ข้อระงับเหตุ: กรอกจำนวนเหตุ / ลงข้อมูลแล้ว ต่อเขต */
+/* สายตรวจ ข้อระงับเหตุ: กรอกจำนวนเหตุ / ลงข้อมูลแล้ว ต่อเขต (กล่องเล็กใต้ติ๊ก) */
 .sh-tbl.zt td.c{vertical-align:top}
-.sh-tbl .inc{display:flex;flex-direction:column;gap:4px;margin-top:8px;cursor:default}
-.sh-tbl .inc label{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.sh-tbl .inc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;margin:10px auto 0;max-width:128px;padding:8px;border-radius:12px;background:var(--surface,#fff);border:1px solid var(--border-soft);box-shadow:0 1px 3px rgba(15,23,42,.06);cursor:default;text-align:center}
 .sh-tbl .inc .ls{display:none}
-.sh-tbl .inc input{width:46px;padding:3px 2px;border:1.5px solid var(--border);border-radius:8px;text-align:center;font:700 14px Prompt,sans-serif;color:var(--text);background:var(--card,#fff);-moz-appearance:textfield}
+.sh-tbl .inc .f{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.sh-tbl .inc input{width:100%;max-width:52px;height:32px;padding:0 2px;border:1.5px solid var(--border);border-radius:9px;text-align:center;font:700 16px Prompt,sans-serif;color:var(--text);background:var(--bg,#f8fafc);-moz-appearance:textfield;transition:border-color .2s,box-shadow .2s}
 .sh-tbl .inc input::-webkit-inner-spin-button,.sh-tbl .inc input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .sh-tbl .inc input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
 .sh-tbl .inc input:disabled{opacity:.55}
-.sh-tbl .inc .st{font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px;text-align:center}
+.sh-tbl .inc .st{grid-column:1/-1;font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px}
 .sh-tbl .inc .st.ok{background:#dcfce7;color:#15803d}
 .sh-tbl .inc .st.bad{background:#fee2e2;color:#b91c1c}
 :root[data-theme="dark"] .sh-tbl .inc .st.ok{background:#14532d;color:#86efac}
 :root[data-theme="dark"] .sh-tbl .inc .st.bad{background:#7f1d1d;color:#fecaca}
+/* จอใหญ่: คุมความกว้างให้อ่านง่าย · คอลัมน์ติ๊กกว้างคงที่ */
+@media (min-width:701px){
+#panelCheck{max-width:1480px;margin:0 auto}
+.sh-tbl{table-layout:auto}
+.sh-tbl td.cr{width:34%}
+.sh-tbl td.c{width:96px}
+.sh-tbl.zt td.cr{width:24%}
+.sh-tbl.zt td.t{min-width:300px}
+.sh-tbl.zt td.c,.sh-tbl.zt th.zh{width:128px}
+.sh-tbl.zt td.c.sum,.sh-tbl.zt th.zs{width:88px}
+}
+.sh-tbl.zt th.zh{position:relative}
+.sh-tbl.zt th.zh::after{content:"";position:absolute;left:50%;bottom:6px;width:22px;height:3px;border-radius:3px;background:#2563eb;transform:translateX(-50%);opacity:.5}
+.sh-tbl.zt tbody td.c[data-z]{background:rgba(37,99,235,.03)}
+.sh-tbl.zt tbody tr.done td.c[data-z]{background:rgba(22,163,74,.05)}
 @media (max-width:700px){
   .sh-tbl.zt td.c.cnt-td{flex-direction:column;align-items:stretch;gap:4px;padding:6px 5px}
-  .sh-tbl.zt td.c.cnt-td::before{text-align:center}
   .sh-tbl.zt td.c.cnt-td > .cb{align-self:center}
-  .sh-tbl .inc{margin-top:2px}
+  .sh-tbl .inc{margin:2px 0 0;padding:6px 5px;gap:4px;max-width:none;box-shadow:none}
+  .sh-tbl .inc input{height:30px;font-size:15px}
+  .sh-tbl .inc .f{font-size:10.5px}
   .sh-tbl .inc .lf{display:none}
   .sh-tbl .inc .ls{display:inline}
-  .sh-tbl .inc input{width:40px;font-size:15px}
+  .sh-tbl .inc input{max-width:none}
+  .sh-tbl.zt tbody td.c[data-z],.sh-tbl.zt tbody tr.done td.c[data-z]{background:rgba(100,116,139,.1)}
 }
+/* ภาพแชร์ทั้งวัน (ผลัดเช้า + ผลัดดึก) */
+#shareCard .s2-day .s2-top{margin-bottom:10px}
+#shareCard .s2-sh{margin-top:26px;padding:26px 28px 18px;border-radius:30px;background:#fff;box-shadow:0 10px 30px rgba(15,23,42,.07);border-top:10px solid #f59e0b}
+#shareCard .s2-sh.night{border-top-color:#1e3a8a}
+#shareCard .s2-shh{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+#shareCard .s2-shh b{font-size:38px;font-weight:700;color:#0f172a}
+#shareCard .s2-sht{font-size:22px;color:#64748b}
+#shareCard .s2-shp{margin-left:auto;font-size:30px;font-weight:700}
+#shareCard .s2-sh .s2-rings{margin:20px 0 6px}
+#shareCard .s2-sh .s2-rg{box-shadow:none;background:#f8fafc}
 </style>
 </head>
 <body>
@@ -1459,7 +1486,7 @@ function renderCheck(anim){
           us.map((z, zi)=>{ const o = ons[zi], cnt = isCnt(team, it), cn = cnt ? cntOf(SEL.date, SEL.shift, team, z) : null, tc = can && !cnt;
             const cls = (o ? 'on' : ph==='past' ? 'miss' : '') + (tc ? ' can' : '');
             const box = cnt ? (()=>{ const a = cn ? cn.inc : 0, b = cn ? cn.rec : 0, ok = b >= a, dis = can ? '' : ' disabled', at = `data-team="${ti}" data-no="${it.no}" data-zone="${z}"`;
-              return `<div class="inc"><label><span class="lf">จำนวนเหตุ</span><span class="ls">เหตุ</span><input type="number" min="0" inputmode="numeric" class="cnt" data-f="inc" ${at} value="${cn ? a : ''}" placeholder="0" aria-label="จำนวนเหตุ เขต ${z}"${dis}></label><label><span class="lf">ลงข้อมูลแล้ว</span><span class="ls">ลงแล้ว</span><input type="number" min="0" inputmode="numeric" class="cnt" data-f="rec" ${at} value="${cn ? b : ''}" placeholder="0" aria-label="ลงข้อมูลแล้ว เขต ${z}"${dis}></label><span class="st ${ok?'ok':'bad'}">${a===0 ? 'ไม่มีเหตุ' : ok ? '✓ ครบ' : 'ขาด ' + (a-b)}</span></div>`; })() : '';
+              return `<div class="inc"><label class="f"><span class="lf">จำนวนเหตุ</span><span class="ls">เหตุ</span><input type="number" min="0" inputmode="numeric" class="cnt" data-f="inc" ${at} value="${cn ? a : ''}" placeholder="0" aria-label="จำนวนเหตุ เขต ${z}"${dis}></label><label class="f"><span>ลงแล้ว</span><input type="number" min="0" inputmode="numeric" class="cnt" data-f="rec" ${at} value="${cn ? b : ''}" placeholder="0" aria-label="ลงข้อมูลแล้ว เขต ${z}"${dis}></label><span class="st ${ok?'ok':'bad'}">${a===0 ? 'ไม่มีเหตุ' : ok ? '✓ ครบ' : 'ขาด ' + (a-b)}</span></div>`; })() : '';
             return `<td class="c${cnt?' cnt-td':''}"${z?` data-z="${z}"`:''}><span class="cb ${cls}" data-team="${ti}" data-no="${it.no}" data-zone="${z}" role="${tc?'checkbox':'img'}" aria-checked="${o}" aria-label="ข้อ ${k+1}${z?' เขต '+z:''} ${esc(it.text)}" ${tc?'tabindex="0"':''}>${NEON_IN}</span>${box}</td>`; }).join('') + `</tr>`; }).join('') +
       `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td><td class="cr"></td>` + (zt ? (()=>{ const n = items.filter(it=>ds.every(d=>d.includes(it.no))).length, p = items.length ? n/items.length : 0; return `<td class="zf zs" style="color:${pctColor(p)}">${n}/${items.length}</td>`; })() + us.map((z, zi)=>{ const n = ds[zi].filter(x=>items.some(y=>y.no===x)).length, p = items.length ? n/items.length : 0; return `<td class="zf" data-z="${z}" style="color:${pctColor(p)}">${n}/${items.length}</td>`; }).join('') : `<td style="color:${pctColor(s.pct)}">${s.done}/${s.tot}</td>`) + `</tr></tfoot></table></div></section>`;
   }).join('');
@@ -1476,7 +1503,7 @@ $('dSel').addEventListener('change', e=>{ if(/^\d{4}-\d{2}-\d{2}$/.test(e.target
 $('sSeg').addEventListener('click', e=>{ const b = e.target.closest('button[data-s]'); if(!b || b.dataset.s===SEL.shift) return; goShift({date:SEL.date, shift:b.dataset.s}); });
 addEventListener('resize', ()=>renderSeg());
 
-const ACTS = '<div class="ck-acts"><button class="ck-snap ck-share" type="button" data-share="1" title="แชร์ภาพผลัดนี้ เช่น ส่งเข้ากลุ่ม LINE" aria-label="แชร์ภาพเช็คลิสต์ผลัดนี้">📤<span class="tx"> แชร์</span></button><button class="ck-snap" type="button" data-snap="1" title="บันทึกภาพ PNG ความละเอียดสูง สำหรับรายงาน" aria-label="บันทึกภาพเช็คลิสต์ผลัดนี้">📷<span class="tx"> บันทึกภาพ</span></button></div>';
+const ACTS = '<div class="ck-acts"><button class="ck-snap ck-share" type="button" data-share="1" title="แชร์ภาพทั้งวัน (ผลัดเช้า + ผลัดดึก) เช่น ส่งเข้ากลุ่ม LINE" aria-label="แชร์ภาพเช็คลิสต์ผลัดเช้าและผลัดดึกของวันนี้">📤<span class="tx"> แชร์</span></button><button class="ck-snap" type="button" data-snap="1" title="บันทึกภาพ PNG ความละเอียดสูง สำหรับรายงาน" aria-label="บันทึกภาพเช็คลิสต์ผลัดนี้">📷<span class="tx"> บันทึกภาพ</span></button></div>';
 
 /* ---------- แชร์ / บันทึกภาพเช็คลิสต์ผลัด (PNG ความละเอียดสูง · ใช้ระบบเดียวกับหน้าผู้บังคับบัญชา) ---------- */
 let h2iP = null;
@@ -1524,35 +1551,49 @@ function showImgDlg(blob, name){
 }
 const btnBusy = (btn, on, old)=>{ btn.disabled = on; btn.innerHTML = on ? '⏳<span class="tx"> กำลังสร้างภาพ…</span>' : old; };
 /* ภาพแชร์ (แบบ "วงกลมสรุป"): วงกลม % ของแต่ละชุดด้านบน + รายการข้อ (ทำแล้ว = ตัวเข้ม ✓ · ยังไม่ทำ = สีเทา) */
-function shareCardHtml(sel){
-  const ph = phaseOf(sel.date, sel.shift), st = TEAMS.map(t=>statOf(sel.date, sel.shift, t));
-  const done = st.reduce((a,s)=>a+s.done, 0), tot = st.reduce((a,s)=>a+s.tot, 0), pct = tot ? Math.round(done/tot*100) : 0;
-  const ring = (p, c)=>{ const r = 70, C = 2*Math.PI*r; return `<svg viewBox="0 0 180 180" width="180" height="180"><circle cx="90" cy="90" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="18"/>${p > 0 ? `<circle cx="90" cy="90" r="${r}" fill="none" stroke="${c}" stroke-width="18" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" transform="rotate(-90 90 90)"/>` : ''}</svg>`; };
-  return `<div class="s2"><div class="s2-top"><div><h1>${sel.shift==='ดึก'?'🌙':'☀️'} ผลัด${esc(sel.shift)} · ${esc(thDateLong(sel.date).replace(/^วัน\S*ที่ /,''))}</h1><p>CHECKLIST การปฏิบัติในแต่ละผลัด · ${SHIFT_TXT[sel.shift]}</p></div><span class="s2-ph ${ph}">${PHASE_TXT[ph]}</span></div>
-  <div class="s2-rings">` + TEAMS.map((t, ti)=>{ const s = st[ti]; return `<div class="s2-rg"><div class="s2-rw">${ring(s.pct, pctColor(s.pct))}<b>${Math.round(s.pct*100)}%</b></div><span>${TEAM_IC[t]||''} ${esc(t)}</span><small>${s.done}/${s.tot} ข้อ</small></div>`; }).join('') + `</div>` +
+const SH_IC = {'เช้า':'☀️', 'ดึก':'🌙'};
+const ringSvg = (p, c)=>{ const r = 70, C = 2*Math.PI*r; return `<svg viewBox="0 0 180 180" width="180" height="180"><circle cx="90" cy="90" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="18"/>${p > 0 ? `<circle cx="90" cy="90" r="${r}" fill="none" stroke="${c}" stroke-width="18" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" transform="rotate(-90 90 90)"/>` : ''}</svg>`; };
+function shiftTotals(sel){ const st = TEAMS.map(t=>statOf(sel.date, sel.shift, t)), done = st.reduce((a,s)=>a+s.done, 0), tot = st.reduce((a,s)=>a+s.tot, 0); return {st, done, tot, pct: tot ? Math.round(done/tot*100) : 0}; }
+/* วงกลม % ของแต่ละชุด + รายการข้อ ของผลัดหนึ่ง */
+function shiftBody(sel, st){
+  return `<div class="s2-rings">` + TEAMS.map((t, ti)=>{ const s = st[ti]; return `<div class="s2-rg"><div class="s2-rw">${ringSvg(s.pct, pctColor(s.pct))}<b>${Math.round(s.pct*100)}%</b></div><span>${TEAM_IC[t]||''} ${esc(t)}</span><small>${s.done}/${s.tot} ข้อ</small></div>`; }).join('') + `</div>` +
   TEAMS.map(t=>{ const us = unitsOf(t), ds = us.map(z=>doneOf(sel.date, sel.shift, t, z));
     if(us.length > 1) return `<h3>${TEAM_IC[t]||''} ${esc(t)} <small>(เขตตรวจ ${us.join(' · ')})</small></h3>` + (ITEMS[t]||[]).map(it=>{ const ons = ds.map(d=>d.includes(it.no)), on = ons.every(Boolean); return `<div class="s2-li${on?' ok':''}"><i>${on?'✓':ons.some(Boolean)?'•':'–'}</i><span>${esc(it.text)}</span>${us.map((z, zi)=>`<em class="s2-z${ons[zi]?' on':''}">${ons[zi]?'✓ ':''}${z}${(()=>{ const c = isCnt(t, it) && cntOf(sel.date, sel.shift, t, z); return c && c.inc ? ` · ${c.rec}/${c.inc}` : ''; })()}</em>`).join('')}</div>`; }).join('');
-    return `<h3>${TEAM_IC[t]||''} ${esc(t)}</h3>` + (ITEMS[t]||[]).map(it=>{ const on = ds[0].includes(it.no); return `<div class="s2-li${on?' ok':''}"><i>${on?'✓':'–'}</i><span>${esc(it.text)}</span></div>`; }).join(''); }).join('') +
-  `<div class="s2-ft"><span>สภ.บางบ่อ · เช็คลิสต์ประจำผลัด</span><span>รวม ${done}/${tot} ข้อ (${pct}%)</span></div></div>`;
+    return `<h3>${TEAM_IC[t]||''} ${esc(t)}</h3>` + (ITEMS[t]||[]).map(it=>{ const on = ds[0].includes(it.no); return `<div class="s2-li${on?' ok':''}"><i>${on?'✓':'–'}</i><span>${esc(it.text)}</span></div>`; }).join(''); }).join('');
 }
-async function shareImage(sel){
+const dateTxt = iso=>esc(thDateLong(iso).replace(/^วัน\S*ที่ /,''));
+/* ภาพแชร์ (แบบ "วงกลมสรุป"): ผลัดเดียว */
+function shareCardHtml(sel){
+  const ph = phaseOf(sel.date, sel.shift), T = shiftTotals(sel);
+  return `<div class="s2"><div class="s2-top"><div><h1>${SH_IC[sel.shift]} ผลัด${esc(sel.shift)} · ${dateTxt(sel.date)}</h1><p>CHECKLIST การปฏิบัติในแต่ละผลัด · ${SHIFT_TXT[sel.shift]}</p></div><span class="s2-ph ${ph}">${PHASE_TXT[ph]}</span></div>` +
+  shiftBody(sel, T.st) + `<div class="s2-ft"><span>สภ.บางบ่อ · เช็คลิสต์ประจำผลัด</span><span>รวม ${T.done}/${T.tot} ข้อ (${T.pct}%)</span></div></div>`;
+}
+/* ภาพแชร์ทั้งวัน: ผลัดเช้า + ผลัดดึก ในภาพเดียว (ปุ่มแชร์บนมือถือ) */
+function shareDayHtml(date){
+  const Ts = SHIFTS.map(sh=>({sh, ph: phaseOf(date, sh), T: shiftTotals({date, shift: sh})}));
+  const done = Ts.reduce((a,x)=>a+x.T.done, 0), tot = Ts.reduce((a,x)=>a+x.T.tot, 0);
+  return `<div class="s2 s2-day"><div class="s2-top"><div><h1>📋 ${dateTxt(date)}</h1><p>CHECKLIST การปฏิบัติในแต่ละผลัด · ผลัดเช้า และ ผลัดดึก</p></div></div>` +
+  Ts.map(({sh, ph, T})=>`<div class="s2-sh ${sh==='ดึก'?'night':''}"><div class="s2-shh"><b>${SH_IC[sh]} ผลัด${esc(sh)}</b><span class="s2-sht">${SHIFT_TXT[sh]}</span><span class="s2-ph ${ph}">${PHASE_TXT[ph]}</span><span class="s2-shp" style="color:${pctColor(T.tot ? T.done/T.tot : 0)}">${T.done}/${T.tot} · ${T.pct}%</span></div>${shiftBody({date, shift: sh}, T.st)}</div>`).join('') +
+  `<div class="s2-ft"><span>สภ.บางบ่อ · เช็คลิสต์ประจำผลัด</span><span>รวมทั้งวัน ${done}/${tot} ข้อ (${tot ? Math.round(done/tot*100) : 0}%)</span></div></div>`;
+}
+async function shareImage(sel, day){
   const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
   try{ await document.fonts.ready; }catch(_){}
   let el = $('shareCard'); if(!el){ el = document.createElement('div'); el.id = 'shareCard'; document.body.appendChild(el); }
-  el.innerHTML = shareCardHtml(sel);
-  const opt = { pixelRatio: 2, backgroundColor: '#ffffff', fontEmbedCSS: fontCSS, width: 1080, height: el.offsetHeight, style: { left: '0', top: '0', position: 'static' } };
+  el.innerHTML = day ? shareDayHtml(sel.date) : shareCardHtml(sel);
+  const opt = { pixelRatio: day ? 1.6 : 2, backgroundColor: '#ffffff', fontEmbedCSS: fontCSS, width: 1080, height: el.offsetHeight, style: { left: '0', top: '0', position: 'static' } };
   try{
     await htmlToImage.toBlob(el, opt);                 // รอบแรกให้ฟอนต์โหลดครบ (Safari)
     const blob = await htmlToImage.toBlob(el, opt);
     if(!blob) throw new Error('blob');
-    const name = (`CHECKLIST_ผลัด${sel.shift}_${thDate(sel.date)}`).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_').trim() + '.png';
+    const name = (day ? `CHECKLIST_ผลัดเช้า-ดึก_${thDate(sel.date)}` : `CHECKLIST_ผลัด${sel.shift}_${thDate(sel.date)}`).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_').trim() + '.png';
     return {blob, name};
   } finally { el.innerHTML = ''; }
 }
 async function shareShift(btn){
   const old = btn.innerHTML; btnBusy(btn, true);
   try{
-    const {blob, name} = await shareImage(SEL);
+    const {blob, name} = await shareImage(SEL, true);   // แชร์ครั้งเดียวได้ทั้งผลัดเช้าและผลัดดึกของวันนั้น
     const f = imgFile(blob, name);
     if(canShareFile(f)){
       const r = await shareFile(f, name);              // เปิดหน้าแชร์ของมือถือ → เลือก LINE
