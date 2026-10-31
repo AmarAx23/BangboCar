@@ -1613,7 +1613,8 @@ function setChooserStat(){
     if(!j || !j.ok || !j.items) return;
     const n = new Date(), h = n.getHours(), d = new Date(n); if(h < 8) d.setDate(d.getDate()-1);
     const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`, sh = h >= 8 && h < 20 ? 'เช้า' : 'ดึก';
-    const part = t=>{ const r = (j.rows||[]).find(x=>x.date===iso && x.shift===sh && x.team===t); const its = j.items[t]||[], hasDef = its.some(x=>'def' in x), d0 = hasDef ? its.filter(x=>x.def).length : (t==='ร้อยเวร 20' ? its.filter(x=>/^เมื่อ(ตั้งจุดตรวจ|มีการปิดล้อม)/.test(x.text)).length : 0); return `${t} ${(r ? r.done.length : d0)}/${its.length}`; };
+    const part = t=>{ const its = j.items[t]||[], hasDef = its.some(x=>'def' in x), dflt = x=>hasDef ? !!x.def : /^เมื่อ(ตั้งจุดตรวจ|มีการปิดล้อม|ไประงับเหตุ)/.test(x.text), d0 = its.filter(dflt).length, us = t==='สายตรวจ' ? ['121','122','123'] : [''];
+      const n = us.reduce((a,z)=>{ const r = (j.rows||[]).find(x=>x.date===iso && x.shift===sh && x.team===(z ? t+' '+z : t)); return a + (r ? r.done.length : d0); }, 0); return `${t} ${n}/${its.length*us.length}`; };
     const t = `ผลัด${sh} · ` + (j.teams||[]).map(part).join(' · ');
     document.getElementById('hcShiftStat').textContent = t; hubSave('shift', t);
   }).catch(()=>{});
