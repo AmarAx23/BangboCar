@@ -1134,6 +1134,34 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   .ck-side .wm{font-size:12px}
   .sh-foot{font-size:12.5px}
 }
+/* ภาพแชร์แบบ "วงกลมสรุป" */
+#shareCard .s2{background:linear-gradient(180deg,#eef2ff,#fff 40%);padding:44px 48px 36px}
+#shareCard .s2-top > div{flex:1;min-width:0}
+#shareCard .s2-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+#shareCard .s2-top h1{font-size:44px;font-weight:700;color:#0f172a;line-height:1.25}
+#shareCard .s2-top p{font-size:23px;color:#64748b;margin-top:6px}
+#shareCard .s2-ph{flex:none;color:#fff;font-size:22px;font-weight:700;padding:8px 22px;border-radius:99px;background:#94a3b8;white-space:nowrap}
+#shareCard .s2-ph.cur{background:linear-gradient(90deg,#f7ba2b,#ea5358)}
+#shareCard .s2-ph.past{background:#64748b}
+#shareCard .s2-rings{display:flex;gap:30px;margin:32px 0 22px}
+#shareCard .s2-rg{flex:1;background:#fff;border-radius:28px;box-shadow:0 10px 30px rgba(15,23,42,.08);padding:26px 20px 24px;text-align:center}
+#shareCard .s2-rw{position:relative;width:180px;height:180px;margin:0 auto}
+#shareCard .s2-rw b{position:absolute;inset:0;display:grid;place-items:center;font-size:44px;font-weight:700;color:#0f172a}
+#shareCard .s2-rg span{display:block;font-size:30px;font-weight:700;color:#0f172a;margin-top:12px}
+#shareCard .s2-rg small{display:block;font-size:22px;color:#64748b;margin-top:2px}
+#shareCard .s2 h3{font-size:28px;font-weight:700;color:#1e3a8a;margin:22px 0 6px}
+#shareCard .s2-li{display:flex;gap:16px;align-items:flex-start;font-size:23px;color:#94a3b8;padding:9px 0;line-height:1.4}
+#shareCard .s2-li i{flex:none;font-style:normal;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#f1f5f9;color:#94a3b8;font-weight:700;font-size:20px}
+#shareCard .s2-li span{flex:1;min-width:0}
+#shareCard .s2-li.ok{color:#0f172a;font-weight:600}
+#shareCard .s2-li.ok i{background:#16a34a;color:#fff}
+#shareCard .s2-ft span{white-space:nowrap}
+#shareCard .s2-ft{margin-top:26px;padding-top:18px;border-top:2px dashed #cbd5e1;font-size:20px;color:#64748b;display:flex;justify-content:space-between;gap:20px}
+/* ข้อไม่บังคับ (ติ๊กไว้ก่อน) */
+.sh-tbl .opt{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:99px;background:#e0f2fe;color:#0369a1;font-size:11.5px;font-weight:700;vertical-align:2px;white-space:nowrap}
+:root[data-theme="dark"] .sh-tbl .opt{background:#0c3550;color:#7dd3fc}
+.opt-lg{white-space:nowrap;padding:1px 9px;border-radius:99px;background:#e0f2fe;color:#0369a1;font-size:11.5px}
+:root[data-theme="dark"] .opt-lg{background:#0c3550;color:#7dd3fc}
 </style>
 </head>
 <body>
@@ -1189,7 +1217,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
         <button class="wk-now" id="dNow" type="button">⏱ ผลัดนี้</button>
       </div>
     </div>
-    <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 แตะที่แถวเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที)</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>ผลัดผ่านไปแล้ว ยังไม่ได้ติ๊ก</span></div>
+    <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 แตะที่แถวเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที)</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>ผลัดผ่านไปแล้ว ยังไม่ได้ติ๊ก</span><span><b class="opt-lg">ไม่บังคับ</b> ติ๊กไว้ให้ก่อน — ถ้าผลัดนั้นต้องทำแต่ยังไม่ได้ทำ ให้เอาติ๊กออก</span></div>
     <div id="ckTeams"><div class="ck-skel"></div><div class="ck-skel"></div></div>
     <div class="sh-foot">
       <span class="ok">✔ ทุกการลงระบบ มีการตรวจสอบความถูกต้องจาก ตร.</span>
@@ -1263,9 +1291,9 @@ const DEF_ITEMS = {
     {no:1, text:'ปล่อยแถวในระบบ Police 4.0', crit:'ทุกครั้ง 0–30 นาที ก่อนเข้าเวร', note:''},
     {no:3, text:'รายงานผลการปฏิบัติในผลัดที่ปฏิบัติหน้าที่', crit:'ก่อนออกเวร', note:'ผลัดดึกรายงานรวมทั้งผลัดที่ 1 และผลัดที่ 2 ก่อนเวลา 08.00 น. ของวันรุ่งขึ้น'},
     {no:4, text:'รายงานผลการปฏิบัติในหัวข้อต่างๆ เช่น ผลการจับกุม ผลการยึดรถ ผลการตั้งจุดตรวจ การตรวจค้น และอื่นๆ พร้อมรายละเอียด', crit:'ทุกครั้งที่มีผลการปฏิบัติ', note:''},
-    {no:5, text:'เมื่อตั้งจุดตรวจ ต้องลงระบบ Police 4.0 และ TPCC', crit:'ทุกครั้งที่มีการตั้งจุดตรวจ', note:''},
-    {no:6, text:'เมื่อตั้งจุดตรวจ ต้องลงผลการปฏิบัติในระบบ Police 4.0 และ TPCC', crit:'ทุกครั้งที่มีการตั้งจุดตรวจ', note:''},
-    {no:7, text:'เมื่อมีการปิดล้อมตรวจค้น ต้องลงระบบและรายงานผลการปฏิบัติในระบบ Police 4.0', crit:'ทุกครั้งที่มีการปิดล้อมตรวจค้น', note:''}
+    {no:5, text:'เมื่อตั้งจุดตรวจ ต้องลงระบบ Police 4.0 และ TPCC', crit:'ทุกครั้งที่มีการตั้งจุดตรวจ', note:'', def:true},
+    {no:6, text:'เมื่อตั้งจุดตรวจ ต้องลงผลการปฏิบัติในระบบ Police 4.0 และ TPCC', crit:'ทุกครั้งที่มีการตั้งจุดตรวจ', note:'', def:true},
+    {no:7, text:'เมื่อมีการปิดล้อมตรวจค้น ต้องลงระบบและรายงานผลการปฏิบัติในระบบ Police 4.0', crit:'ทุกครั้งที่มีการปิดล้อมตรวจค้น', note:'', def:true}
   ],
   'สายตรวจ': [
     {no:2, text:'เมื่อไประงับเหตุ ลงข้อมูลในระบบ Police 4.0 เมนู Crime Mapping', crit:'ทุกครั้งที่มีการรับแจ้งเหตุ ต้องลงข้อมูลให้ครบ ถูกต้อง และพิกัดเกิดเหตุจริง', note:'*** กลุ่มคดี / ข้อหา เหตุทั่วไป อยู่ในตัวเลือก "กลุ่ม 5 เหตุอื่นๆ"'},
@@ -1322,9 +1350,15 @@ function stepShift(sel, dir){
 /* ---------- ข้อมูล ---------- */
 let ITEMS = DEF_ITEMS, DONE = new Map(), LOADED = false;
 const key = (date, shift, team)=>`${date}|${shift}|${team}`;
-const doneOf = (date, shift, team)=>DONE.get(key(date, shift, team)) || [];
+/* ข้อ "ไม่บังคับ" (คอลัมน์ "ติ๊กไว้ก่อน" ในแท็บหัวข้อ) = ติ๊กเขียวไว้ให้ตั้งแต่ต้นผลัด · ผลัดที่ยังไม่มีใครแตะ ถือว่าข้อเหล่านี้ทำแล้ว */
+const defOf = team=>(ITEMS[team] || []).filter(x=>x.def).map(x=>x.no);
+const doneOf = (date, shift, team)=>{ const k = key(date, shift, team); return DONE.has(k) ? DONE.get(k) : defOf(team); };
 function setData(j){
-  if(j.items && TEAMS.every(t=>Array.isArray(j.items[t]) && j.items[t].length)) ITEMS = j.items;
+  if(j.items && TEAMS.every(t=>Array.isArray(j.items[t]) && j.items[t].length)){
+    ITEMS = j.items;
+    // สคริปต์รุ่นเก่ายังไม่ส่ง def → ใช้ค่าตั้งต้นของหน้าเว็บ (จับคู่จากชื่อหัวข้อ)
+    if(!TEAMS.some(t=>ITEMS[t].some(x=>'def' in x))) TEAMS.forEach(t=>ITEMS[t].forEach(x=>{ x.def = (DEF_ITEMS[t]||[]).some(y=>y.def && y.text===x.text); }));
+  }
   DONE = new Map((j.rows || []).map(r=>[key(r.date, r.shift, r.team), (r.done || []).map(Number)]));
   START = (j.rows || []).map(r=>r.date).filter(Boolean).sort()[0] || currentShift().date;
 }
@@ -1358,7 +1392,7 @@ function renderCheck(anim){
       items.map((it, k)=>{ const on = d.includes(it.no), can = canTick && ph !== 'fut';
         const cls = (on ? 'on' : ph==='past' ? 'miss' : '') + (can ? ' can' : '');
         const crit = `${esc(it.crit)}${it.note?`<small>${esc(it.note)}</small>`:''}`;
-        return `<tr class="${on?'done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${k+1}</span><span class="tx">${esc(it.text)}<span class="crit crit-m">${crit}</span></span></div></td>` +
+        return `<tr class="${on?'done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${k+1}</span><span class="tx">${esc(it.text)}${it.def?'<span class="opt">ไม่บังคับ · ติ๊กไว้ก่อน</span>':''}<span class="crit crit-m">${crit}</span></span></div></td>` +
           `<td class="cr"><span class="crit">${crit}</span></td>` +
           `<td class="c"><span class="cb ${cls}" data-team="${ti}" data-no="${it.no}" role="${can?'checkbox':'img'}" aria-checked="${on}" aria-label="ข้อ ${k+1} ${esc(it.text)}" ${can?'tabindex="0"':''}>${NEON_IN}</span></td></tr>`; }).join('') +
       `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td><td class="cr"></td><td style="color:${pctColor(s.pct)}">${s.done}/${s.tot}</td></tr></tfoot></table></div></section>`;
@@ -1422,16 +1456,16 @@ function showImgDlg(blob, name){
   d.showModal();
 }
 const btnBusy = (btn, on, old)=>{ btn.disabled = on; btn.innerHTML = on ? '⏳<span class="tx"> กำลังสร้างภาพ…</span>' : old; };
+/* ภาพแชร์ (แบบ "วงกลมสรุป"): วงกลม % ของแต่ละชุดด้านบน + รายการข้อ (ทำแล้ว = ตัวเข้ม ✓ · ยังไม่ทำ = สีเทา) */
 function shareCardHtml(sel){
   const ph = phaseOf(sel.date, sel.shift), st = TEAMS.map(t=>statOf(sel.date, sel.shift, t));
   const done = st.reduce((a,s)=>a+s.done, 0), tot = st.reduce((a,s)=>a+s.tot, 0), pct = tot ? Math.round(done/tot*100) : 0;
-  return `<div class="sc-hd"><div class="sc-r1"><h1>${sel.shift==='ดึก'?'🌙':'☀️'} ผลัด${esc(sel.shift)}</h1><span class="dt">${esc(thDateLong(sel.date).replace(/^วัน\S*ที่ /,''))}</span><span class="st">${PHASE_TXT[ph]}</span></div>
-    <div class="sc-r2"><span>CHECKLIST การปฏิบัติในแต่ละผลัด · ${SHIFT_TXT[sel.shift]}</span><b>ดำเนินการแล้ว ${done}/${tot} (${pct}%)</b></div><div class="sc-bar"><i style="width:${pct}%"></i></div></div>
-  <table>` + TEAMS.map((t, ti)=>{ const d = doneOf(sel.date, sel.shift, t), s = st[ti];
-    return `<tr class="sc-team"><td colspan="2">${TEAM_IC[t]||''} ${esc(t)}</td><td style="color:${pctColor(s.pct)}">${s.done}/${s.tot}</td></tr>` +
-      (ITEMS[t]||[]).map((it, k)=>{ const on = d.includes(it.no), miss = !on && ph==='past';
-        return `<tr><td class="sc-no"><span>${k+1}</span></td><td class="t sc-it">${esc(it.text)}<span class="sc-cr">${esc(it.crit)}</span></td><td><span class="sc-ck ${on?'ok':miss?'no':'wait'}">${on?'✓':''}</span></td></tr>`; }).join(''); }).join('') +
-  `</table><div class="sc-ft"><span>สถานีตำรวจภูธรบางบ่อ · เช็คลิสต์ประจำผลัด</span><span>✔ ทุกการลงระบบ มีการตรวจสอบความถูกต้องจาก ตร.</span></div>`;
+  const ring = (p, c)=>{ const r = 70, C = 2*Math.PI*r; return `<svg viewBox="0 0 180 180" width="180" height="180"><circle cx="90" cy="90" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="18"/>${p > 0 ? `<circle cx="90" cy="90" r="${r}" fill="none" stroke="${c}" stroke-width="18" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" transform="rotate(-90 90 90)"/>` : ''}</svg>`; };
+  return `<div class="s2"><div class="s2-top"><div><h1>${sel.shift==='ดึก'?'🌙':'☀️'} ผลัด${esc(sel.shift)} · ${esc(thDateLong(sel.date).replace(/^วัน\S*ที่ /,''))}</h1><p>CHECKLIST การปฏิบัติในแต่ละผลัด · ${SHIFT_TXT[sel.shift]}</p></div><span class="s2-ph ${ph}">${PHASE_TXT[ph]}</span></div>
+  <div class="s2-rings">` + TEAMS.map((t, ti)=>{ const s = st[ti]; return `<div class="s2-rg"><div class="s2-rw">${ring(s.pct, pctColor(s.pct))}<b>${Math.round(s.pct*100)}%</b></div><span>${TEAM_IC[t]||''} ${esc(t)}</span><small>${s.done}/${s.tot} ข้อ</small></div>`; }).join('') + `</div>` +
+  TEAMS.map(t=>{ const d = doneOf(sel.date, sel.shift, t);
+    return `<h3>${TEAM_IC[t]||''} ${esc(t)}</h3>` + (ITEMS[t]||[]).map(it=>{ const on = d.includes(it.no); return `<div class="s2-li${on?' ok':''}"><i>${on?'✓':'–'}</i><span>${esc(it.text)}</span></div>`; }).join(''); }).join('') +
+  `<div class="s2-ft"><span>สภ.บางบ่อ · เช็คลิสต์ประจำผลัด</span><span>รวม ${done}/${tot} ข้อ (${pct}%)</span></div></div>`;
 }
 async function shareImage(sel){
   const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
@@ -1484,8 +1518,8 @@ $('pinClose').onclick = ()=>{ pendingTick = null; $('pinDlg').close(); };
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); PIN = $('pinInput').value.trim(); if(!PIN) return; try{ sessionStorage.setItem('shift-pin', PIN); }catch(_){} $('pinDlg').close(); if(pendingTick){ const p = pendingTick; pendingTick = null; tick(p); } });
 async function tick(p){
   if(!PIN){ pendingTick = p; return openPin(); }
-  const team = TEAMS[p.team], k = key(p.date, p.shift, team), prev = (DONE.get(k) || []).slice(), shown = (ITEMS[team] || []).findIndex(x=>x.no===p.no) + 1;
-  const on = !prev.includes(p.no);
+  const team = TEAMS[p.team], k = key(p.date, p.shift, team), prev = doneOf(p.date, p.shift, team).slice(), shown = (ITEMS[team] || []).findIndex(x=>x.no===p.no) + 1;
+  const on = !prev.includes(p.no), fresh = !DONE.has(k);
   DONE.set(k, on ? prev.concat(p.no) : prev.filter(n=>n!==p.no));
   const same = ()=>SEL.date===p.date && SEL.shift===p.shift;
   if(same()) renderCheck(false);
@@ -1499,7 +1533,13 @@ async function tick(p){
       else toast('⚠️ ' + (j.error || 'บันทึกไม่สำเร็จ'));
       return;
     }
-    DONE.set(k, (j.done || []).map(Number));
+    let got = (j.done || []).map(Number);
+    /* ผลัดที่เพิ่งมีแถวแรกในชีต: ถ้าสคริปต์ไม่ได้ใส่ข้อ "ติ๊กไว้ก่อน" ให้ ส่งเพิ่มทีละข้อ เพื่อให้ชีตตรงกับหน้าจอ */
+    const need = fresh ? defOf(team).filter(n=>n!==p.no && !got.includes(n)) : [];
+    for(const n of need){
+      try{ const j2 = await fetch(SHIFT_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'tick', pin:PIN, date:p.date, shift:p.shift, team, no:n, on:true})}).then(r=>r.json()); if(j2.ok) got = (j2.done || []).map(Number); }catch(_){}
+    }
+    DONE.set(k, got);
     if(same()){ const keepJust = el() && el().classList.contains('just'); renderCheck(false); if(keepJust && el()) el().classList.add('just'); }
     saveCache(); if(VIEW==='sum') renderSum();
     toast(on ? `✓ ติ๊กแล้ว · ${team} ข้อ ${shown}` : `เอาติ๊กออกแล้ว · ${team} ข้อ ${shown}`);
