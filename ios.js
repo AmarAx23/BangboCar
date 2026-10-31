@@ -37,7 +37,8 @@
 @keyframes iosSheetDown{to{transform:translateY(105%)}}
 @keyframes iosFade{from{opacity:0}}
 /* ---- 4) splash ---- */
-#iosSplash{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;background:var(--bg,#f1f5f9);transition:opacity .35s ease,visibility .35s}
+#iosSplash{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;background:var(--bg,#f1f5f9);transition:opacity .35s ease,visibility .35s;pointer-events:none;animation:iosSplashOut .4s ease 1.8s forwards}
+@keyframes iosSplashOut{to{opacity:0;visibility:hidden}}
 #iosSplash.out{opacity:0;visibility:hidden}
 #iosSplash .lg{width:96px;height:111px;background:center/contain no-repeat;filter:drop-shadow(0 8px 18px rgba(15,23,42,.28));animation:iosLogo .7s cubic-bezier(.2,.9,.25,1.2) both}
 #iosSplash .nm{margin-top:14px;font:600 15px 'Prompt',sans-serif;color:var(--muted,#64748b);text-align:center;animation:iosFade .6s .15s ease both}
@@ -161,5 +162,8 @@
     const hide = ()=>setTimeout(()=>{ sp.classList.add('out'); setTimeout(()=>sp.remove(), 400); }, Math.max(0, 750 - (Date.now() - t0)));
     if(document.readyState === 'complete') hide(); else addEventListener('load', hide);
     setTimeout(hide, 2500);                                                       // เน็ตช้า → ไม่ค้างหน้าโลโก้
+    addEventListener('pageshow', hide);                                           // กลับมาจากพื้นหลัง (iPhone หยุดตัวจับเวลาไว้)
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) hide(); });
+    /* กันค้าง: CSS ซ่อนหน้าโลโก้เองหลัง 1.8 วิ แม้สคริปต์จะไม่ได้ทำงาน · แตะทะลุได้ตลอด */
   }
 })();
