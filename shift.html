@@ -1174,7 +1174,6 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   .sh-tbl.zt tbody tr{grid-template-columns:36px repeat(3,minmax(0,1fr));padding:0 8px 12px 0}
   .sh-tbl.zt td.t{grid-column:1/-1;padding-right:12px}
   .sh-tbl.zt td.c{grid-column:auto;display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 6px;margin:0 4px;width:auto;text-align:center;border-radius:12px;background:rgba(100,116,139,.1);border:1px solid var(--border-soft)}
-  .sh-tbl.zt td.cr + td.c{grid-column:2}
   .sh-tbl.zt td.c::before{content:attr(data-z);font-size:13px;font-weight:700;color:var(--muted)}
   .sh-tbl.zt tfoot tr{flex-wrap:wrap}
   .sh-tbl.zt tfoot td.zf{padding:8px 8px;border-top:2px solid var(--border)!important}
@@ -1183,6 +1182,15 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 #shareCard .s2 h3 small{font-size:20px;font-weight:600;color:#64748b}
 #shareCard .s2-z{flex:none;font-style:normal;font-size:18px;font-weight:700;padding:3px 12px;border-radius:99px;background:#f1f5f9;color:#94a3b8;align-self:center}
 #shareCard .s2-z.on{background:#dcfce7;color:#15803d}
+.sh-tbl.zt th.zs{text-align:center;width:80px;line-height:1.3}
+.sh-tbl.zt th.zs small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+.sh-tbl.zt td.c.sum{cursor:default;width:80px;border-right:1px dashed var(--border-soft)}
+.sh-tbl.zt td.c.sum .cb{cursor:default}
+@media (max-width:700px){
+  .sh-tbl.zt td.c.sum{display:none!important}   /* มือถือ: เลขข้อเป็นสีเขียวเมื่อครบทุกเขตแทน */
+  .sh-tbl.zt td.cr + td.c.sum + td.c{grid-column:2}
+  .sh-tbl.zt tfoot td.zf.zs::before{content:"ครบทุกเขต "}
+}
 </style>
 </head>
 <body>
@@ -1414,14 +1422,15 @@ function renderCheck(anim){
     const items = ITEMS[team] || [], us = unitsOf(team), zt = us.length > 1, ds = us.map(z=>doneOf(SEL.date, SEL.shift, team, z)), s = statOf(SEL.date, SEL.shift, team);
     return `<section class="ck-week team-${ti} ${ph}${anim?' ck-in':''}" style="--wd:${ti*110}ms">` + (ti === 0 ? ACTS : '') +
       `<div class="ck-side"><div class="tic">${TEAM_IC[team]||'📋'}</div><div class="wl">${esc(team)}</div><div class="wd">ผลัด${esc(SEL.shift)} · ${thDate(SEL.date)}</div><div class="wm">${SHIFT_TXT[SEL.shift]}</div><span class="wb">${PHASE_TXT[ph]}</span><div class="wp">ดำเนินการแล้ว ${s.done}/${s.tot} (${Math.round(s.pct*100)}%)</div><div class="wbar"><i data-w="${s.pct*100}"></i></div></div>` +
-      `<div class="ck-tbl-wrap"><table class="ck-tbl sh-tbl${zt?' zt':''}"><thead>` + (zt ? `<tr><th rowspan="2">หัวข้อที่ต้องดำเนินการ</th><th rowspan="2">เกณฑ์</th><th colspan="${us.length}" class="zg">ทำแล้ว · เขตตรวจ</th></tr><tr>${us.map(z=>`<th class="zh">${z}</th>`).join('')}</tr>` : `<tr><th>หัวข้อที่ต้องดำเนินการ</th><th>เกณฑ์</th><th>ทำแล้ว</th></tr>`) + `</thead><tbody>` +
+      `<div class="ck-tbl-wrap"><table class="ck-tbl sh-tbl${zt?' zt':''}"><thead>` + (zt ? `<tr><th rowspan="2">หัวข้อที่ต้องดำเนินการ</th><th rowspan="2">เกณฑ์</th><th rowspan="2" class="zs">ทำแล้ว<small>ครบ ${us.length} เขต</small></th><th colspan="${us.length}" class="zg">เขตตรวจ</th></tr><tr>${us.map(z=>`<th class="zh">${z}</th>`).join('')}</tr>` : `<tr><th>หัวข้อที่ต้องดำเนินการ</th><th>เกณฑ์</th><th>ทำแล้ว</th></tr>`) + `</thead><tbody>` +
       items.map((it, k)=>{ const ons = ds.map(d=>d.includes(it.no)), on = ons.every(Boolean), can = canTick && ph !== 'fut';
         const crit = `${esc(it.crit)}${it.note?`<small>${esc(it.note)}</small>`:''}`;
         return `<tr class="${on?'done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${k+1}</span><span class="tx">${esc(it.text)}${it.def?'<span class="opt">ไม่บังคับ · ติ๊กไว้ก่อน</span>':''}<span class="crit crit-m">${crit}</span></span></div></td>` +
           `<td class="cr"><span class="crit">${crit}</span></td>` +
+          (zt ? `<td class="c sum" title="ขึ้นเขียวเองเมื่อติ๊กครบทุกเขต"><span class="cb ${on ? 'on' : ph==='past' ? 'miss' : ''}" role="img" aria-checked="${on}" aria-label="ข้อ ${k+1} ครบทุกเขต">${NEON_IN}</span></td>` : '') +
           us.map((z, zi)=>{ const o = ons[zi], cls = (o ? 'on' : ph==='past' ? 'miss' : '') + (can ? ' can' : '');
             return `<td class="c"${z?` data-z="${z}"`:''}><span class="cb ${cls}" data-team="${ti}" data-no="${it.no}" data-zone="${z}" role="${can?'checkbox':'img'}" aria-checked="${o}" aria-label="ข้อ ${k+1}${z?' เขต '+z:''} ${esc(it.text)}" ${can?'tabindex="0"':''}>${NEON_IN}</span></td>`; }).join('') + `</tr>`; }).join('') +
-      `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td><td class="cr"></td>` + (zt ? us.map((z, zi)=>{ const n = ds[zi].filter(x=>items.some(y=>y.no===x)).length, p = items.length ? n/items.length : 0; return `<td class="zf" data-z="${z}" style="color:${pctColor(p)}">${n}/${items.length}</td>`; }).join('') : `<td style="color:${pctColor(s.pct)}">${s.done}/${s.tot}</td>`) + `</tr></tfoot></table></div></section>`;
+      `</tbody><tfoot><tr><td style="text-align:left">ดำเนินการแล้ว</td><td class="cr"></td>` + (zt ? (()=>{ const n = items.filter(it=>ds.every(d=>d.includes(it.no))).length, p = items.length ? n/items.length : 0; return `<td class="zf zs" style="color:${pctColor(p)}">${n}/${items.length}</td>`; })() + us.map((z, zi)=>{ const n = ds[zi].filter(x=>items.some(y=>y.no===x)).length, p = items.length ? n/items.length : 0; return `<td class="zf" data-z="${z}" style="color:${pctColor(p)}">${n}/${items.length}</td>`; }).join('') : `<td style="color:${pctColor(s.pct)}">${s.done}/${s.tot}</td>`) + `</tr></tfoot></table></div></section>`;
   }).join('');
   const bars = document.querySelectorAll('#ckTeams .wbar i');
   if(!anim || reduceMotion) bars.forEach(b=>{ b.style.transition = 'none'; b.style.width = b.dataset.w + '%'; });
