@@ -1246,7 +1246,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
         <button class="wk-now" id="dNow" type="button">⏱ ผลัดนี้</button>
       </div>
     </div>
-    <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 แตะที่แถวเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที) · สายตรวจ แตะช่องของเขตตรวจ 121 · 122 · 123</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>ผลัดผ่านไปแล้ว ยังไม่ได้ติ๊ก</span><span><b class="opt-lg">ไม่บังคับ</b> ติ๊กไว้ให้ก่อน — ถ้าผลัดนั้นต้องทำแต่ยังไม่ได้ทำ ให้เอาติ๊กออก</span></div>
+    <div class="ck-legend"><span class="ck-hint" id="ckHint" hidden>👆 แตะที่แถวเพื่อติ๊ก / เอาติ๊กออก (บันทึกลงชีตทันที) · สายตรวจ แตะช่องของเขตตรวจ 121 · 122 · 123</span><span><i class="cb on"></i>ดำเนินการแล้ว</span><span><i class="cb"></i>ยังไม่ได้ดำเนินการ</span><span><i class="cb miss"></i>ผลัดผ่านไปแล้ว ยังไม่ได้ติ๊ก</span></div>
     <div id="ckTeams"><div class="ck-skel"></div><div class="ck-skel"></div></div>
     <div class="sh-foot">
       <span class="ok">✔ ทุกการลงระบบ มีการตรวจสอบความถูกต้องจาก ตร.</span>
@@ -1323,7 +1323,7 @@ const DEF_ITEMS = {
   'ร้อยเวร 20': [
     {no:1, text:'ปล่อยแถวในระบบ Police 4.0', crit:'ทุกครั้ง 0–30 นาที ก่อนเข้าเวร', note:''},
     {no:3, text:'รายงานผลการปฏิบัติในผลัดที่ปฏิบัติหน้าที่', crit:'ก่อนออกเวร', note:'ผลัดดึกรายงานรวมทั้งผลัดที่ 1 และผลัดที่ 2 ก่อนเวลา 08.00 น. ของวันรุ่งขึ้น'},
-    {no:4, text:'รายงานผลการปฏิบัติในหัวข้อต่างๆ เช่น ผลการจับกุม ผลการยึดรถ ผลการตั้งจุดตรวจ การตรวจค้น และอื่นๆ พร้อมรายละเอียด', crit:'ทุกครั้งที่มีผลการปฏิบัติ', note:''},
+    {no:4, text:'รายงานผลการปฏิบัติในหัวข้อต่างๆ เช่น ผลการจับกุม ผลการยึดรถ ผลการตั้งจุดตรวจ การตรวจค้น และอื่นๆ พร้อมรายละเอียด', crit:'ทุกครั้งที่มีผลการปฏิบัติ', note:'', def:true},
     {no:5, text:'เมื่อตั้งจุดตรวจ ต้องลงระบบ Police 4.0 และ TPCC', crit:'ทุกครั้งที่มีการตั้งจุดตรวจ', note:'', def:true},
     {no:6, text:'เมื่อตั้งจุดตรวจ ต้องลงผลการปฏิบัติในระบบ Police 4.0 และ TPCC', crit:'ทุกครั้งที่มีการตั้งจุดตรวจ', note:'', def:true},
     {no:7, text:'เมื่อมีการปิดล้อมตรวจค้น ต้องลงระบบและรายงานผลการปฏิบัติในระบบ Police 4.0', crit:'ทุกครั้งที่มีการปิดล้อมตรวจค้น', note:'', def:true}
@@ -1425,7 +1425,7 @@ function renderCheck(anim){
       `<div class="ck-tbl-wrap"><table class="ck-tbl sh-tbl${zt?' zt':''}"><thead>` + (zt ? `<tr><th rowspan="2">หัวข้อที่ต้องดำเนินการ</th><th rowspan="2">เกณฑ์</th><th rowspan="2" class="zs">ทำแล้ว<small>ครบ ${us.length} เขต</small></th><th colspan="${us.length}" class="zg">เขตตรวจ</th></tr><tr>${us.map(z=>`<th class="zh">${z}</th>`).join('')}</tr>` : `<tr><th>หัวข้อที่ต้องดำเนินการ</th><th>เกณฑ์</th><th>ทำแล้ว</th></tr>`) + `</thead><tbody>` +
       items.map((it, k)=>{ const ons = ds.map(d=>d.includes(it.no)), on = ons.every(Boolean), can = canTick && ph !== 'fut';
         const crit = `${esc(it.crit)}${it.note?`<small>${esc(it.note)}</small>`:''}`;
-        return `<tr class="${on?'done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${k+1}</span><span class="tx">${esc(it.text)}${it.def?'<span class="opt">ไม่บังคับ · ติ๊กไว้ก่อน</span>':''}<span class="crit crit-m">${crit}</span></span></div></td>` +
+        return `<tr class="${on?'done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${k+1}</span><span class="tx">${esc(it.text)}<span class="crit crit-m">${crit}</span></span></div></td>` +
           `<td class="cr"><span class="crit">${crit}</span></td>` +
           (zt ? `<td class="c sum" title="ขึ้นเขียวเองเมื่อติ๊กครบทุกเขต"><span class="cb ${on ? 'on' : ph==='past' ? 'miss' : ''}" role="img" aria-checked="${on}" aria-label="ข้อ ${k+1} ครบทุกเขต">${NEON_IN}</span></td>` : '') +
           us.map((z, zi)=>{ const o = ons[zi], cls = (o ? 'on' : ph==='past' ? 'miss' : '') + (can ? ' can' : '');
