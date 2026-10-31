@@ -40,8 +40,9 @@
 #iosSplash{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;background:var(--bg,#f1f5f9);transition:opacity .35s ease,visibility .35s;pointer-events:none;animation:iosSplashOut .4s ease 1.8s forwards}
 @keyframes iosSplashOut{to{opacity:0;visibility:hidden}}
 #iosSplash.out{opacity:0;visibility:hidden}
-#iosSplash .lg{width:96px;height:111px;background:center/contain no-repeat;filter:drop-shadow(0 8px 18px rgba(15,23,42,.28));animation:iosLogo .7s cubic-bezier(.2,.9,.25,1.2) both}
-#iosSplash .nm{margin-top:14px;font:600 15px 'Prompt',sans-serif;color:var(--muted,#64748b);text-align:center;animation:iosFade .6s .15s ease both}
+#iosSplash > div{display:flex;flex-direction:column;align-items:center;text-align:center}
+#iosSplash .lg{width:104px;height:120px;margin:0 auto;background:center/contain no-repeat;filter:drop-shadow(0 8px 18px rgba(15,23,42,.28));animation:iosLogo .7s cubic-bezier(.2,.9,.25,1.2) both}
+#iosSplash .nm{margin-top:16px;font:600 16px 'Prompt',sans-serif;letter-spacing:.2px;color:var(--text-strong,#1e293b);text-align:center;animation:iosFade .6s .15s ease both}
 @keyframes iosLogo{from{opacity:0;transform:scale(.6) rotateY(-90deg)}}
 @media (prefers-reduced-motion:reduce){ .ios-pressable{transition:none} dialog.ios-sheet[open],dialog.ios-sheet.ios-closing,#iosSplash .lg{animation:none!important} }`;
   const st = document.createElement('style'); st.id = 'ios-app'; st.textContent = css; (document.head || document.documentElement).appendChild(st);
