@@ -1615,7 +1615,7 @@ function setChooserStat(){
     const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`, sh = h >= 8 && h < 20 ? 'เช้า' : 'ดึก';
     const part = t=>{ const its = j.items[t]||[], hasDef = its.some(x=>'def' in x), dflt = x=>hasDef ? !!x.def : /^(เมื่อ(ตั้งจุดตรวจ|มีการปิดล้อม|ไประงับเหตุ)|รายงานผลการปฏิบัติในหัวข้อต่างๆ)/.test(x.text), zs = t==='สายตรวจ' ? ['121','122','123'] : [''];
       const unitsFor = x=>t==='สายตรวจ' && /ตรวจยึดรถ/.test(x.text) ? [''] : zs;   // ตรวจยึดรถต้องสงสัย = ติ๊กช่องเดียวทั้งชุด
-      let n = 0, all = 0; its.forEach(x=>unitsFor(x).forEach(z=>{ all++; const r = (j.rows||[]).find(y=>y.date===iso && y.shift===sh && y.team===(z ? t+' '+z : t)); if(r ? r.done.includes(x.no) : dflt(x)) n++; })); return `${t} ${n}/${all}`; };
+      let n = 0, all = 0; its.forEach(x=>unitsFor(x).forEach(z=>{ const r = (j.rows||[]).find(y=>y.date===iso && y.shift===sh && y.team===(z ? t+' '+z : t)), d = !!(r && r.done.includes(x.no)); if(d || !dflt(x)){ all++; if(d) n++; } })); return `${t} ${n}/${all}`; };   // ข้อไม่บังคับนับเมื่อติ๊กเท่านั้น
     const t = `ผลัด${sh} · ` + (j.teams||[]).map(part).join(' · ');
     document.getElementById('hcShiftStat').textContent = t; hubSave('shift', t);
   }).catch(()=>{});
