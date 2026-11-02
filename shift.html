@@ -1525,7 +1525,7 @@ function renderCheck(anim){
         if(one) return `<tr class="one${on?' done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${k+1}</span><span class="tx">${esc(it.text)}<span class="crit crit-m">${crit}</span></span></div></td>` +
           `<td class="cr"><span class="crit">${crit}</span></td>` +
           `<td class="c sum one-c" data-z="ทั้งชุด"><span class="cb ${(on ? 'on' : ph==='past' ? 'miss' : '') + (can ? ' can' : '')}" data-team="${ti}" data-no="${it.no}" data-zone="" role="${can?'checkbox':'img'}" aria-checked="${on}" aria-label="ข้อ ${k+1} ${esc(it.text)} (ทั้งชุด)" ${can?'tabindex="0"':''}>${NEON_IN}</span></td>` +
-          `<td class="one-note" colspan="${us.length}"><span>ติ๊กช่องเดียว · ทั้งชุด ไม่แยกเขต</span></td></tr>`;
+          `<td class="one-note" colspan="${us.length}"></td></tr>`;
         return `<tr class="${on?'done':''}" style="--rd:${k*45}ms"><td class="t"><div class="row"><span class="no">${k+1}</span><span class="tx">${esc(it.text)}<span class="crit crit-m">${crit}</span></span></div></td>` +
           `<td class="cr"><span class="crit">${crit}</span></td>` +
           (zt ? `<td class="c sum" title="ขึ้นเขียวเองเมื่อติ๊กครบทุกเขต"><span class="cb ${on ? 'on' : ph==='past' ? 'miss' : ''}" role="img" aria-checked="${on}" aria-label="ข้อ ${k+1} ครบทุกเขต">${NEON_IN}</span></td>` : '') +
