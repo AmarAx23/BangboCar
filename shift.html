@@ -1590,7 +1590,7 @@ $('dSel').addEventListener('change', e=>{ if(/^\d{4}-\d{2}-\d{2}$/.test(e.target
 $('sSeg').addEventListener('click', e=>{ const b = e.target.closest('button[data-s]'); if(!b || b.dataset.s===SEL.shift) return; goShift({date:SEL.date, shift:b.dataset.s}); });
 addEventListener('resize', ()=>renderSeg());
 
-const ACTS = '<div class="ck-acts"><button class="ck-snap ck-share" type="button" data-share="1" title="แชร์ภาพทั้งวัน (ผลัดเช้า + ผลัดดึก) เช่น ส่งเข้ากลุ่ม LINE" aria-label="แชร์ภาพเช็คลิสต์ผลัดเช้าและผลัดดึกของวันนี้">📤<span class="tx"> แชร์</span></button><button class="ck-snap" type="button" data-snap="1" title="บันทึกภาพ PNG ความละเอียดสูง สำหรับรายงาน" aria-label="บันทึกภาพเช็คลิสต์ผลัดนี้">📷<span class="tx"> บันทึกภาพ</span></button></div>';
+const ACTS = '<div class="ck-acts"><button class="ck-snap ck-share" type="button" data-share="shift" title="แชร์ภาพเฉพาะผลัดที่เลือกอยู่ เช่น ส่งเข้ากลุ่ม LINE" aria-label="แชร์ภาพเช็คลิสต์เฉพาะผลัดนี้">📤<span class="tx"> ผลัดนี้</span></button><button class="ck-snap ck-share" type="button" data-share="day" title="แชร์ภาพทั้งวัน (ผลัดเช้า + ผลัดดึก) เช่น ส่งเข้ากลุ่ม LINE" aria-label="แชร์ภาพเช็คลิสต์ผลัดเช้าและผลัดดึกของวันนี้">📤<span class="tx"> เช้า+ดึก</span></button><button class="ck-snap" type="button" data-snap="1" title="บันทึกภาพ PNG ความละเอียดสูง สำหรับรายงาน" aria-label="บันทึกภาพเช็คลิสต์ผลัดนี้">📷<span class="tx"> บันทึกภาพ</span></button></div>';
 
 /* ---------- แชร์ / บันทึกภาพเช็คลิสต์ผลัด (PNG ความละเอียดสูง · ใช้ระบบเดียวกับหน้าผู้บังคับบัญชา) ---------- */
 let h2iP = null;
@@ -1687,7 +1687,7 @@ async function shareImage(sel, day){
 async function shareShift(btn){
   const old = btn.innerHTML; btnBusy(btn, true);
   try{
-    const {blob, name} = await shareImage(SEL, true);   // แชร์ครั้งเดียวได้ทั้งผลัดเช้าและผลัดดึกของวันนั้น
+    const {blob, name} = await shareImage(SEL, btn.dataset.share !== 'shift');   // "เช้า+ดึก" = ทั้งวันในภาพเดียว · "ผลัดนี้" = เฉพาะผลัดที่เลือก
     const f = imgFile(blob, name);
     if(canShareFile(f)){
       const r = await shareFile(f, name);              // เปิดหน้าแชร์ของมือถือ → เลือก LINE
