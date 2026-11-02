@@ -1259,6 +1259,26 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 #shareCard .s2-z:not(.on){background:#fee2e2;color:#dc2626}
 /* ติ๊กแล้ววงแสงขยาย → ไม่ให้เกิดแถบเลื่อนด้านขวา */
 .ck-tbl-wrap{overflow-y:hidden}
+/* ไม่ใช้แถบเลื่อนแนวนอน: ตารางพอดีกรอบทุกขนาดจอ */
+.ck-tbl-wrap{overflow-x:hidden}
+.sh-tbl{width:100%}
+@media (min-width:701px) and (max-width:1250px){
+  .sh-tbl.zt td.t{min-width:0}
+  .sh-tbl.zt td.cr{width:22%}
+  .sh-tbl.zt td.c,.sh-tbl.zt th.zh{width:92px}
+  .sh-tbl.zt td.c.sum,.sh-tbl.zt th.zs{width:64px}
+  .sh-tbl .inc{max-width:88px;padding:6px 5px;gap:4px}
+  .sh-tbl .inc .lf{display:none}
+  .sh-tbl .inc .ls{display:inline}
+  .sh-tbl td.cr{width:30%}
+}
+.sh-tbl .inc .st{min-width:0;padding:2px 4px;white-space:nowrap;overflow:hidden}
+@media (min-width:701px) and (max-width:900px){
+  .sh-tbl.zt td.c,.sh-tbl.zt th.zh{width:80px}
+  .sh-tbl.zt td.c.sum,.sh-tbl.zt th.zs{width:56px}
+  .sh-tbl .inc{max-width:78px}
+  .sh-tbl .inc .st{font-size:10px}
+}
 </style>
 </head>
 <body>
