@@ -1278,6 +1278,16 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   .sh-tbl .inc{max-width:78px}
   .sh-tbl .inc .st{font-size:10px}
 }
+/* ช่องวันที่: แสดงเป็น วัน/เดือน/ปี เสมอ (ไม่ขึ้นกับภาษาของเบราว์เซอร์) */
+.dwrap{position:relative;display:inline-block}
+.dwrap .sh-date{cursor:pointer}
+.dwrap .sh-date::-webkit-datetime-edit,.dwrap .sh-date::-webkit-date-and-time-value{opacity:0}
+@supports (-moz-appearance:none){ .dwrap .sh-date{color:transparent} }
+.dtxt{position:absolute;inset:0;display:flex;align-items:center;padding:0 34px 0 11px;pointer-events:none;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:700px){
+  .dwrap{display:block;min-width:0}
+  .dtxt{justify-content:center;padding:0 30px;font-size:15px}
+}
 </style>
 </head>
 <body>
@@ -1327,7 +1337,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
       </div>
       <div class="wk-bar">
         <button class="wk-nav" id="dPrev" type="button" aria-label="ผลัดก่อนหน้า">‹</button>
-        <input type="date" class="wk-sel sh-date" id="dSel" aria-label="เลือกวันที่">
+        <span class="dwrap"><input type="date" class="wk-sel sh-date" id="dSel" aria-label="เลือกวันที่"><span class="dtxt" id="dTxt" aria-hidden="true"></span></span>
         <button class="wk-nav" id="dNext" type="button" aria-label="ผลัดถัดไป">›</button>
         <div class="sh-seg" id="sSeg" role="group" aria-label="เลือกผลัด"><button type="button" data-s="เช้า">☀️ ผลัดเช้า</button><button type="button" data-s="ดึก">🌙 ผลัดดึก</button><i class="sh-seg-bg" aria-hidden="true"></i></div>
         <button class="wk-now" id="dNow" type="button">⏱ ผลัดนี้</button>
@@ -1513,7 +1523,7 @@ function footCells(team){
   return `<td style="text-align:left">ดำเนินการแล้ว</td><td class="cr"></td>` + (zt ? (()=>{ const n = items.filter(it=>isOne(team, it) ? doneOf(SEL.date, SEL.shift, team, '').includes(it.no) : ds.every(d=>d.includes(it.no))).length, p = items.length ? n/items.length : 0; return `<td class="zf zs" style="color:${pctColor(p)}">${n}/${items.length}</td>`; })() + us.map((z, zi)=>{ const zi2 = items.filter(y=>!isOne(team, y)), n = ds[zi].filter(x=>zi2.some(y=>y.no===x)).length, p = zi2.length ? n/zi2.length : 0; return `<td class="zf" data-z="${z}" style="color:${pctColor(p)}">${n}/${zi2.length}</td>`; }).join('') : `<td style="color:${pctColor(s.pct)}">${s.done}/${s.tot}</td>`);
 }
 function renderCheck(anim){
-  $('dSel').value = SEL.date; renderSeg();
+  $('dSel').value = SEL.date; $('dTxt').textContent = SEL.date.split('-').reverse().join('/'); renderSeg();   // วัน/เดือน/ปี
   const ph = phaseOf(SEL.date, SEL.shift), cur = currentShift(), isNow = cur.date===SEL.date && cur.shift===SEL.shift;
   $('dNow').disabled = isNow;
   $('ckSub').textContent = `${thDateLong(SEL.date)} · ผลัด${SEL.shift} (${SHIFT_TXT[SEL.shift]})${isNow ? ' · ผลัดปัจจุบัน' : ''}`;
@@ -1569,6 +1579,7 @@ function goShift(sel, anim){ SEL = sel; renderCheck(anim !== false); }
 $('dPrev').addEventListener('click', ()=>goShift(stepShift(SEL, -1)));
 $('dNext').addEventListener('click', ()=>goShift(stepShift(SEL, 1)));
 $('dNow').addEventListener('click', ()=>goShift(currentShift()));
+$('dSel').addEventListener('click', e=>{ try{ e.target.showPicker(); }catch(_){} });
 $('dSel').addEventListener('change', e=>{ if(/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) goShift({date:e.target.value, shift:SEL.shift}); });
 $('sSeg').addEventListener('click', e=>{ const b = e.target.closest('button[data-s]'); if(!b || b.dataset.s===SEL.shift) return; goShift({date:SEL.date, shift:b.dataset.s}); });
 addEventListener('resize', ()=>renderSeg());
