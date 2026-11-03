@@ -1368,7 +1368,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   <div class="pl-card"><div class="pl-card2">
   <form class="pl-form login-box" id="pinForm" method="dialog" autocomplete="off">
     <div class="lg-title">🔒 ยืนยันเจ้าหน้าที่</div>
-    <div class="lg-sub">ใส่รหัสเพื่อดูรายชื่อ / บันทึก<br>(ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์)</div>
+    <div class="lg-sub">ใส่รหัสหน้ารายชื่อกลุ่มเสี่ยง<br>(ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์)</div>
     <div class="pl-field"><svg class="pl-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><input type="password" class="pl-input" id="pinInput" required inputmode="numeric" autocomplete="off" placeholder="รหัสผ่าน" aria-label="รหัสผ่าน"></div>
     <div class="lg-err" id="pinErr"></div>
     <div class="pl-btns">
@@ -1465,7 +1465,7 @@ const LV = t=>/แดง/.test(t||'') ? 'r' : /เหลือง/.test(t||'') ?
 const LV_COLOR = {r:'#dc2626', y:'#d97706', g:'#16a34a', n:'#94a3b8'};
 const PAGE = window.innerWidth < 700 ? 20 : 40;
 let R = [], OPTS = {}, STAFF = null, PIN = '', SHOW = PAGE;
-try{ PIN = sessionStorage.getItem('risk-pin') || ''; }catch(_){}
+try{ PIN = sessionStorage.getItem('risk-list-pin') || ''; }catch(_){}
 const uniq = a=>[...new Set(a.map(s=>String(s||'').trim()).filter(Boolean))];
 // ถ้าคอลัมน์ในชีตมี dropdown ใช้เฉพาะตัวเลือกจากชีต ไม่งั้นใช้ค่าที่มีในชีต + ค่าเริ่มต้น
 const optsOf = k=>uniq([...(OPTS[k]||[]), ...R.map(r=>r[k]), ...((OPTS[k]||[]).length ? [] : (DEF[k]||[]))]);
@@ -1583,9 +1583,9 @@ $('cMonth').addEventListener('click', e=>{ const c = e.target.closest('[data-m]'
 let pending = null;
 function openPin(err){ $('pinErr').textContent = err || ''; $('pinInput').value = ''; $('pinDlg').showModal(); setTimeout(()=>$('pinInput').focus(), 50); }
 $('pinClose').addEventListener('click', ()=>{ pending = null; $('pinDlg').close(); });
-$('pinForm').addEventListener('submit', e=>{ e.preventDefault(); const v = $('pinInput').value.trim(); if(!v) return; PIN = v; try{ sessionStorage.setItem('risk-pin', PIN); }catch(_){} $('pinDlg').close(); const p = pending; pending = null; if(p) p(); });
+$('pinForm').addEventListener('submit', e=>{ e.preventDefault(); const v = $('pinInput').value.trim(); if(!v) return; PIN = v; try{ sessionStorage.setItem('risk-list-pin', PIN); }catch(_){} $('pinDlg').close(); const p = pending; pending = null; if(p) p(); });
 function needPin(fn){ if(!PIN){ pending = fn; openPin(); return true; } return false; }
-function authFail(j, retry){ HAPTIC('err'); PIN = ''; try{ sessionStorage.removeItem('risk-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); }
+function authFail(j, retry){ HAPTIC('err'); PIN = ''; try{ sessionStorage.removeItem('risk-list-pin'); }catch(_){} pending = retry; openPin(j.error || 'รหัสไม่ถูกต้อง'); }
 async function enterStaff(){
   if(!RISK_API) return toast('⚠️ ยังไม่ได้เชื่อมต่อ Apps Script');
   if(needPin(enterStaff)) return;
