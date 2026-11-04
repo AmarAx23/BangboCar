@@ -95,6 +95,23 @@ h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
 .person .px-l .u{color:var(--text)}
 .person .px-l .pw{color:#b45309}
 .person .px-l .na{color:var(--muted);font-weight:500}
+.chip.px-snap{background:#0b1b3a;border-color:#0b1b3a;color:#facc15}
+.chip.px-snap:hover:not(:disabled){background:#13264f;color:#fde68a;border-color:#13264f}
+.chip.px-snap:disabled{opacity:.7;cursor:progress}
+/* ภาพแชร์ (แบบ 3 ตารางทางการ) · วาดนอกจอ */
+#rosterCard{position:fixed;left:-99999px;top:0;width:1080px;background:#fff;padding:44px 40px;font-family:Prompt,sans-serif;color:#0f172a}
+#rosterCard .hd{display:flex;align-items:center;gap:22px}
+#rosterCard .hd img{width:92px;height:auto}
+#rosterCard h1{font-size:44px;line-height:1.15;font-weight:700}
+#rosterCard .sub{font-size:22px;color:#64748b;margin-top:4px}
+#rosterCard table{width:100%;border-collapse:collapse;margin-top:28px;font-size:22px}
+#rosterCard th{background:#0b1b3a;color:#facc15;padding:16px 12px;text-align:left;font-size:21px;font-weight:700}
+#rosterCard td{padding:14px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top;word-break:break-word}
+#rosterCard tr:nth-child(even) td{background:#f8fafc}
+#rosterCard td.n{color:#64748b;width:52px;text-align:center}
+#rosterCard td.tel{color:#1d4ed8;font-weight:700;white-space:nowrap}
+#rosterCard td.pw{color:#b45309;font-weight:600}
+#rosterCard .ft{margin-top:24px;text-align:center;font-size:19px;color:#94a3b8}
 /* Motion: ปุ่มเปิด/ปิด · บรรทัดใหม่ไหลลงมา · บรรทัดที่ปิดยุบหายไป */
 .chip.px-m{position:relative;overflow:hidden;transition:background .25s,border-color .25s,color .25s,transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
 .chip.px-m::before{content:"✓";display:inline-block;width:0;opacity:0;transform:scale(0) rotate(-45deg);transition:width .25s,opacity .2s,transform .3s cubic-bezier(.34,1.56,.64,1),margin .25s}
@@ -643,7 +660,8 @@ function line(p, MODE){
 const card = p=>`<div class="person"><div class="av" style="--c:${COL(p.rank)}">${esc(initial(p.name, p.rank === 'อื่นๆ' ? '' : p.rank))}</div><div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="ps">${esc(p.pos || '–')}</div>${lines(p)}</div></div>`;
 function modeChips(){
   const n = fmt(STAFF ? STAFF.length : 0), lk = SECRET ? '' : '<span class="lk">🔒</span>';
-  return '<span class="px-sep" aria-hidden="true"></span>' + [['cs','นามเรียกขาน',''],['tel','เบอร์โทร',lk],['acc','บัญชีผู้ใช้งาน',lk]].map(([m,l,x])=>`<button type="button" class="chip px-m${SHOWN.has(m)?' on':''}" data-m="${m}" aria-pressed="${SHOWN.has(m)}">${l} · ${n}${x}</button>`).join('');
+  return '<span class="px-sep" aria-hidden="true"></span>' + [['cs','นามเรียกขาน',''],['tel','เบอร์โทร',lk],['acc','บัญชีผู้ใช้งาน',lk]].map(([m,l,x])=>`<button type="button" class="chip px-m${SHOWN.has(m)?' on':''}" data-m="${m}" aria-pressed="${SHOWN.has(m)}">${l} · ${n}${x}</button>`).join('') +
+    `<button type="button" class="chip px-snap" data-snap="1" title="${IS_TOUCH ? 'แชร์ภาพรายชื่อตามที่เลือกอยู่ (LINE ฯลฯ)' : 'บันทึกภาพรายชื่อตามที่เลือกอยู่ (PNG)'}">${IS_TOUCH ? '📤 แชร์' : '📷 บันทึกภาพ'}</button>`;
 }
 async function loadSecret(m){
   if(!PERSONNEL_API) return;
@@ -689,16 +707,69 @@ function groups(){
 function renderChips(){
   $('chips').innerHTML = groups().map(([k,l,n])=>`<button type="button" class="chip${FILTER===k?' on':''}" data-k="${esc(k)}">${esc(l)} · ${fmt(n)}</button>`).join('') + modeChips();
 }
+function curList(){
+  const q = $('q').value.trim().toLowerCase().replace(/\s+/g,'');
+  return (STAFF || []).filter(p=>(!FILTER || (FILTER==='@off' ? p.officer : p.pos===FILTER)) && (!q || (p.name+p.pos+p.cs+(SECRET ? (secOf(p).tel||'')+(secOf(p).user||'') : '')).toLowerCase().replace(/\s+/g,'').includes(q)));
+}
 function renderPeople(){
   if(!STAFF){ $('people').innerHTML = PUB ? '<div class="empty" style="grid-column:1/-1">ยังไม่มีรายชื่อ — อัปเดต Apps Script ในชีตเป็นเวอร์ชันล่าสุด</div>' : SK_PEOPLE; $('rosterNote').textContent = ''; return; }
-  const q = $('q').value.trim().toLowerCase().replace(/\s+/g,'');
-  const list = STAFF.filter(p=>(!FILTER || (FILTER==='@off' ? p.officer : p.pos===FILTER)) && (!q || (p.name+p.pos+p.cs+(SECRET ? (secOf(p).tel||'')+(secOf(p).user||'') : '')).toLowerCase().replace(/\s+/g,'').includes(q)));
+  const list = curList();
   $('people').innerHTML = list.length ? list.map(card).join('') : '<div class="empty" style="grid-column:1/-1">ไม่พบรายชื่อที่ค้นหา</div>';
   if(animPeople){ animPeople = false; reveal($('people').querySelectorAll('.person'), 30); }
   $('rosterNote').textContent = `แสดง ${fmt(list.length)} จาก ${fmt(STAFF.length)} นาย`;
 }
-$('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; if(b.dataset.m){ LAST_EV = e; return setMode(b.dataset.m); } FILTER = b.dataset.k; animPeople = true; renderChips(); renderPeople(); });
+$('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; if(b.dataset.snap) return snapRoster(b);
+  if(b.dataset.m){ LAST_EV = e; return setMode(b.dataset.m); } FILTER = b.dataset.k; animPeople = true; renderChips(); renderPeople(); });
 $('q').addEventListener('input', renderPeople);
+
+/* ---------- บันทึกภาพ / แชร์ รายชื่อตามที่เลือกอยู่ (แบบตารางทางการ) ---------- */
+const IS_TOUCH = (window.matchMedia && matchMedia('(pointer:coarse)').matches) || 'ontouchstart' in window;
+let h2iP = null, fontCSSP = null;
+function loadH2I(){
+  if(window.htmlToImage) return Promise.resolve();
+  return h2iP || (h2iP = new Promise((res, rej)=>{ const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'; sc.onload = res; sc.onerror = ()=>{ h2iP = null; rej(new Error('load')); }; document.head.appendChild(sc); }));
+}
+function snapFontCSS(){
+  const toData = u=>fetch(u).then(r=>r.blob()).then(b=>new Promise(res=>{ const fr = new FileReader(); fr.onload = ()=>res(fr.result); fr.readAsDataURL(b); }));
+  return fontCSSP || (fontCSSP = fetch('https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap').then(r=>r.text()).then(async css=>{
+    const out = [];
+    for(const b of css.split(/(?=\/\* )/).filter(b=>/\/\* (thai|latin) \*\//.test(b))){ const m = b.match(/url\((https:[^)]+)\)/); out.push(m ? b.replace(m[1], await toData(m[1])) : b); }
+    return out.join('\n');
+  }).catch(()=>{ fontCSSP = null; return undefined; }));
+}
+function rosterHtml(list){
+  const cols = [['cs','นามเรียกขาน'], ['tel','เบอร์โทร'], ['user','ชื่อผู้ใช้'], ['pw','รหัสผ่าน']].filter(([k])=>k==='cs' ? SHOWN.has('cs') : k==='tel' ? SHOWN.has('tel') && SECRET : SHOWN.has('acc') && SECRET);
+  const grp = (groups().find(([k])=>k===FILTER) || [,'ทั้งหมด'])[1], q = $('q').value.trim();
+  const date = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
+  const cell = (p, k)=>{ const s = secOf(p); const v = k==='cs' ? p.cs : k==='tel' ? s.tel : k==='user' ? s.user : s.pw; return `<td class="${k}">${esc(v || '–')}</td>`; };
+  return `<div class="hd"><img src="logo.webp" alt=""><div><h1>📋 รายชื่อกำลังพล</h1><div class="sub">งานป้องกันปราบปราม · สภ.บางบ่อ · ${esc(grp)}${q ? ' · ค้นหา "' + esc(q) + '"' : ''} · ${date} · ${fmt(list.length)} นาย</div></div></div>` +
+    `<table><tr><th>#</th><th>ยศ ชื่อ – สกุล</th><th>ตำแหน่ง</th>${cols.map(([,l])=>`<th>${l}</th>`).join('')}</tr>` +
+    list.map((p, i)=>`<tr><td class="n">${i + 1}</td><td>${esc(p.name)}</td><td>${esc(p.pos || '–')}</td>${cols.map(([k])=>cell(p, k)).join('')}</tr>`).join('') + '</table>' +
+    '<div class="ft">สภ.บางบ่อ · สถานภาพกำลังพล · ข้อมูลภายใน ห้ามเผยแพร่</div>';
+}
+async function snapRoster(btn){
+  const list = curList(); if(!list.length) return toast('ไม่มีรายชื่อให้บันทึก');
+  const old = btn.innerHTML; btn.disabled = true; btn.textContent = '⏳ กำลังสร้างภาพ…';
+  try{
+    const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
+    try{ await document.fonts.ready; }catch(_){}
+    let el = $('rosterCard'); if(!el){ el = document.createElement('div'); el.id = 'rosterCard'; document.body.appendChild(el); }
+    el.innerHTML = rosterHtml(list);
+    await Promise.all([...el.querySelectorAll('img')].map(i=>i.complete ? 0 : new Promise(r=>{ i.onload = i.onerror = r; })));
+    const opt = {pixelRatio: list.length > 45 ? 1.5 : 2, backgroundColor:'#ffffff', fontEmbedCSS: fontCSS, width:1080, height: el.offsetHeight, style:{left:'0', top:'0', position:'static'}};
+    await htmlToImage.toBlob(el, opt);                 // รอบแรกให้ฟอนต์/รูปโหลดครบ (Safari)
+    const blob = await htmlToImage.toBlob(el, opt); el.innerHTML = '';
+    if(!blob) throw new Error('blob');
+    const name = ('รายชื่อกำลังพล_' + new Date().toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'})).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_') + '.png';
+    let f = null; try{ f = new File([blob], name, {type:'image/png'}); }catch(_){}
+    if(IS_TOUCH && f && navigator.canShare && navigator.share && (()=>{ try{ return navigator.canShare({files:[f]}); }catch(_){ return false; } })()){
+      try{ await navigator.share({files:[f], title:'รายชื่อกำลังพล'}); return; }catch(err){ if(err && err.name === 'AbortError') return; }
+    }
+    const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 30000); toast('📷 บันทึกภาพแล้ว · ' + name);
+  }catch(err){ toast('⚠️ สร้างภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+  finally{ btn.disabled = false; btn.innerHTML = old; }
+}
 /* แตะ นามเรียกขาน / เบอร์โทร / ชื่อผู้ใช้ / รหัสผ่าน → คัดลอก */
 $('people').addEventListener('click', async e=>{
   const c = e.target.closest('.cp'); if(!c || !c.dataset.cp) return;
