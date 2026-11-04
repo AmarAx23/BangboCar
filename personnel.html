@@ -109,6 +109,24 @@ h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
 .person .px-out{animation:pxOut .2s ease-in forwards}
 @keyframes pxIn{from{opacity:0;max-height:0;transform:translateY(-6px)}to{opacity:1;max-height:3em;transform:none}}
 @keyframes pxOut{from{opacity:1;max-height:3em}to{opacity:0;max-height:0;transform:translateY(-4px)}}
+/* Motion ในบรรทัด: ไอคอนขยับเมื่อชี้/แตะ · ปุ่มโทรมีคลื่นเบาๆ · แตะข้อความเพื่อคัดลอก */
+.person .ic{display:inline-block;font-style:normal;transform-origin:50% 60%;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.person:hover .ic-tel,.person .cp:active .ic-tel{animation:icRing .7s ease-in-out}
+.person:hover .ic-cs{animation:icWave .9s ease-in-out}
+.person:hover .ic-k{transform:rotate(-35deg) scale(1.1)}
+.person:hover .ic-u{transform:translateY(-2px) scale(1.1)}
+.person .cp{cursor:copy;border-radius:7px;padding:0 3px;margin:0 -3px;transition:background .2s}
+.person .cp:hover{background:rgba(37,99,235,.08)}
+.person .cp.copied{animation:cpFlash .7s ease-out}
+.person .call{position:relative;display:inline-block;padding:0 9px;border-radius:99px;background:rgba(22,163,74,.12);color:#16a34a;font-weight:700;text-decoration:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s}
+.person .call::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 0 0 rgba(22,163,74,.45);animation:callPulse 2.4s ease-out infinite}
+.person .call:hover{background:#16a34a;color:#fff;transform:scale(1.06)}
+.person .call:active{transform:scale(.92)}
+@keyframes icRing{0%,100%{transform:rotate(0)}15%{transform:rotate(-18deg)}30%{transform:rotate(16deg)}45%{transform:rotate(-12deg)}60%{transform:rotate(8deg)}75%{transform:rotate(-4deg)}}
+@keyframes icWave{0%,100%{transform:scale(1)}40%{transform:scale(1.18) rotate(-6deg)}70%{transform:scale(.96) rotate(4deg)}}
+@keyframes callPulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,.45)}70%,100%{box-shadow:0 0 0 7px rgba(22,163,74,0)}}
+@keyframes cpFlash{0%{background:rgba(22,163,74,.35)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){ .person .ic,.person .call{transition:none} .person:hover .ic,.person .cp.copied,.person .call::after{animation:none!important;transform:none} }
 @media (prefers-reduced-motion:reduce){ .chip.px-m,.chip.px-m::before{transition:none} .chip.px-m.pop,.chip.px-m .rp,.person .px-in,.person .px-out{animation:none} }
 #pinDlg{padding:0;border:none;background:transparent;box-shadow:none;width:min(380px,92vw);max-width:none;overflow:visible;color:#fff}
 #pinDlg[open]{margin:auto;animation:pinPop .45s cubic-bezier(.34,1.56,.64,1)}
@@ -617,10 +635,10 @@ let JUST = '';   // บรรทัดที่เพิ่งเปิด → �
 const lines = p=>['cs','tel','acc'].filter(m=>SHOWN.has(m)).map(m=>line(p, m).replace(/^<div class="([^"]*)"/, (x, c)=>`<div class="${c} px-ln-${m}${m===JUST?' px-in':''}"`)).join('');
 function line(p, MODE){
   if(MODE === 'tel'){ const t = secOf(p).tel || '', d = (t.match(/\d[\d-]{7,}/) || [''])[0].replace(/-/g, '');
-    return `<div class="cs px-l">${t ? `📞 ${esc(t)}${d ? ` <a href="tel:${d}">โทร</a>` : ''}` : '<span class="na">📞 ไม่มีเบอร์ในชีต</span>'}</div>`; }
+    return `<div class="cs px-l">${t ? `<span class="cp" data-cp="${esc(t)}" data-lb="เบอร์โทร"><i class="ic ic-tel">📞</i> ${esc(t)}</span>${d ? ` <a class="call" href="tel:${d}">โทร</a>` : ''}` : '<span class="na">📞 ไม่มีเบอร์ในชีต</span>'}</div>`; }
   if(MODE === 'acc'){ const s = secOf(p);
-    return `<div class="cs px-l">${s.user || s.pw ? `<span class="u">👤 ${esc(s.user || '–')}</span><span class="pw">🔑 ${esc(s.pw || '–')}</span>` : '<span class="na">👤 ไม่มีบัญชีในชีต</span>'}</div>`; }
-  return p.cs ? `<div class="cs">📻 ${esc(p.cs)}</div>` : '';
+    return `<div class="cs px-l">${s.user || s.pw ? `<span class="u cp" data-cp="${esc(s.user || '')}" data-lb="ชื่อผู้ใช้"><i class="ic ic-u">👤</i> ${esc(s.user || '–')}</span><span class="pw cp" data-cp="${esc(s.pw || '')}" data-lb="รหัสผ่าน"><i class="ic ic-k">🔑</i> ${esc(s.pw || '–')}</span>` : '<span class="na">👤 ไม่มีบัญชีในชีต</span>'}</div>`; }
+  return p.cs ? `<div class="cs"><span class="cp" data-cp="${esc(p.cs)}" data-lb="นามเรียกขาน"><i class="ic ic-cs">📻</i> ${esc(p.cs)}</span></div>` : '';
 }
 const card = p=>`<div class="person"><div class="av" style="--c:${COL(p.rank)}">${esc(initial(p.name, p.rank === 'อื่นๆ' ? '' : p.rank))}</div><div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="ps">${esc(p.pos || '–')}</div>${lines(p)}</div></div>`;
 function modeChips(){
@@ -681,6 +699,15 @@ function renderPeople(){
 }
 $('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; if(b.dataset.m){ LAST_EV = e; return setMode(b.dataset.m); } FILTER = b.dataset.k; animPeople = true; renderChips(); renderPeople(); });
 $('q').addEventListener('input', renderPeople);
+/* แตะ นามเรียกขาน / เบอร์โทร / ชื่อผู้ใช้ / รหัสผ่าน → คัดลอก */
+$('people').addEventListener('click', async e=>{
+  const c = e.target.closest('.cp'); if(!c || !c.dataset.cp) return;
+  try{ await navigator.clipboard.writeText(c.dataset.cp); }
+  catch(_){ const ta = document.createElement('textarea'); ta.value = c.dataset.cp; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(__){} ta.remove(); }
+  c.classList.remove('copied'); void c.offsetWidth; c.classList.add('copied');
+  if(navigator.vibrate) try{ navigator.vibrate(12); }catch(_){}
+  toast('📋 คัดลอก' + (c.dataset.lb || '') + 'แล้ว');
+});
 
 renderChips(); renderPeople();
 reveal(document.querySelectorAll('main > section.kpis > .kpi, main > section.grid2 > .card, main > section.roster-card'), 70);
