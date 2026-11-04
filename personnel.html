@@ -594,20 +594,22 @@ let STAFF = null, FILTER = '', animPeople = true;
 const COL = r=>/^พ\.ต\./.test(r) ? '#b7791f' : /^ร\.ต\./.test(r) ? '#c2410c' : '#2563eb';
 const initial = (name, rank)=>{ const s = String(name).replace(/\s+/g,'').slice(String(rank||'').length); return (s.match(/[\u0E01-\u0E2E]|[A-Za-z]/) || ['•'])[0]; };
 /* บรรทัดล่างของการ์ด: นามเรียกขาน (ทุกคนดูได้) · เบอร์โทร / บัญชีผู้ใช้งาน (หลังใส่รหัส โหลดจาก Apps Script เก็บไว้ในหน่วยความจำเท่านั้น) */
-let MODE = 'cs', SECRET = null, PPIN = '', pendingMode = null;
+let SHOWN = new Set(['cs']), SECRET = null, PPIN = '', pendingMode = null;
 try{ PPIN = sessionStorage.getItem('pers-pin') || ''; }catch(_){}
 const secOf = p=>(SECRET && SECRET.get(p.name)) || {};
-function line(p){
+/* กดปุ่มเปิด/ปิดได้หลายอย่างพร้อมกัน: นามเรียกขาน · เบอร์โทร · บัญชีผู้ใช้งาน (เรียงตามนี้ใต้ชื่อ) */
+const lines = p=>['cs','tel','acc'].filter(m=>SHOWN.has(m)).map(m=>line(p, m)).join('');
+function line(p, MODE){
   if(MODE === 'tel'){ const t = secOf(p).tel || '', d = (t.match(/\d[\d-]{7,}/) || [''])[0].replace(/-/g, '');
     return `<div class="cs px-l">${t ? `📞 ${esc(t)}${d ? ` <a href="tel:${d}">โทร</a>` : ''}` : '<span class="na">📞 ไม่มีเบอร์ในชีต</span>'}</div>`; }
   if(MODE === 'acc'){ const s = secOf(p);
     return `<div class="cs px-l">${s.user || s.pw ? `<span class="u">👤 ${esc(s.user || '–')}</span><span class="pw">🔑 ${esc(s.pw || '–')}</span>` : '<span class="na">👤 ไม่มีบัญชีในชีต</span>'}</div>`; }
   return p.cs ? `<div class="cs">📻 ${esc(p.cs)}</div>` : '';
 }
-const card = p=>`<div class="person"><div class="av" style="--c:${COL(p.rank)}">${esc(initial(p.name, p.rank === 'อื่นๆ' ? '' : p.rank))}</div><div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="ps">${esc(p.pos || '–')}</div>${line(p)}</div></div>`;
+const card = p=>`<div class="person"><div class="av" style="--c:${COL(p.rank)}">${esc(initial(p.name, p.rank === 'อื่นๆ' ? '' : p.rank))}</div><div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="ps">${esc(p.pos || '–')}</div>${lines(p)}</div></div>`;
 function modeChips(){
   const n = fmt(STAFF ? STAFF.length : 0), lk = SECRET ? '' : '<span class="lk">🔒</span>';
-  return '<span class="px-sep" aria-hidden="true"></span>' + [['cs','นามเรียกขาน',''],['tel','เบอร์โทร',lk],['acc','บัญชีผู้ใช้งาน',lk]].map(([m,l,x])=>`<button type="button" class="chip px-m${MODE===m?' on':''}" data-m="${m}">${l} · ${n}${x}</button>`).join('');
+  return '<span class="px-sep" aria-hidden="true"></span>' + [['cs','นามเรียกขาน',''],['tel','เบอร์โทร',lk],['acc','บัญชีผู้ใช้งาน',lk]].map(([m,l,x])=>`<button type="button" class="chip px-m${SHOWN.has(m)?' on':''}" data-m="${m}" aria-pressed="${SHOWN.has(m)}">${l} · ${n}${x}</button>`).join('');
 }
 async function loadSecret(m){
   if(!PERSONNEL_API) return;
@@ -620,10 +622,10 @@ async function loadSecret(m){
       else toast('⚠️ ' + (j.error === 'ไม่รู้จักคำสั่ง' ? 'ต้องอัปเดต Apps Script ของชีตกำลังพลก่อน' : (j.error || 'โหลดไม่สำเร็จ')));
       return;
     }
-    SECRET = new Map((j.rows || []).map(r=>[r.name, r])); MODE = m; animPeople = true; renderChips(); renderPeople(); toast('🔓 แสดงข้อมูลแล้ว');
+    SECRET = new Map((j.rows || []).map(r=>[r.name, r])); SHOWN.add(m); animPeople = true; renderChips(); renderPeople(); toast('🔓 แสดงข้อมูลแล้ว');
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
 }
-function setMode(m){ if(m !== 'cs' && !SECRET) return loadSecret(m); MODE = m; animPeople = true; renderChips(); renderPeople(); }
+function setMode(m){ if(m !== 'cs' && !SECRET) return loadSecret(m); if(SHOWN.has(m)) SHOWN.delete(m); else SHOWN.add(m); renderChips(); renderPeople(); }
 function openPin(err){ $('pinErr').textContent = err || ''; $('pinInput').value = ''; $('pinDlg').showModal(); setTimeout(()=>$('pinInput').focus(), 50); if(err){ const b = $('pinForm'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
 $('pinClose').onclick = ()=>{ pendingMode = null; $('pinDlg').close(); };
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); PPIN = $('pinInput').value.trim(); if(!PPIN) return; try{ sessionStorage.setItem('pers-pin', PPIN); }catch(_){} $('pinDlg').close(); if(pendingMode){ const m = pendingMode; pendingMode = null; loadSecret(m); } });
@@ -639,7 +641,7 @@ function renderChips(){
 function renderPeople(){
   if(!STAFF){ $('people').innerHTML = PUB ? '<div class="empty" style="grid-column:1/-1">ยังไม่มีรายชื่อ — อัปเดต Apps Script ในชีตเป็นเวอร์ชันล่าสุด</div>' : SK_PEOPLE; $('rosterNote').textContent = ''; return; }
   const q = $('q').value.trim().toLowerCase().replace(/\s+/g,'');
-  const list = STAFF.filter(p=>(!FILTER || (FILTER==='@off' ? p.officer : p.pos===FILTER)) && (!q || (p.name+p.pos+p.cs+(MODE !== 'cs' ? (secOf(p).tel||'')+(secOf(p).user||'') : '')).toLowerCase().replace(/\s+/g,'').includes(q)));
+  const list = STAFF.filter(p=>(!FILTER || (FILTER==='@off' ? p.officer : p.pos===FILTER)) && (!q || (p.name+p.pos+p.cs+(SECRET ? (secOf(p).tel||'')+(secOf(p).user||'') : '')).toLowerCase().replace(/\s+/g,'').includes(q)));
   $('people').innerHTML = list.length ? list.map(card).join('') : '<div class="empty" style="grid-column:1/-1">ไม่พบรายชื่อที่ค้นหา</div>';
   if(animPeople){ animPeople = false; reveal($('people').querySelectorAll('.person'), 30); }
   $('rosterNote').textContent = `แสดง ${fmt(list.length)} จาก ${fmt(STAFF.length)} นาย`;
