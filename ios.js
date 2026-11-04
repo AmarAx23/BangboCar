@@ -2,7 +2,8 @@
    1) หน้าต่าง (dialog) บนมือถือ → เลื่อนขึ้นจากขอบล่าง (bottom sheet) · ปัดลงที่แถบด้านบนเพื่อปิด
    2) แตะปุ่มแล้วปุ่มยุบลงนิดๆ + สั่นเบาๆ
    3) สีแถบสถานะ/แถบเบราว์เซอร์ด้านบน = สีหัวเว็บ (เปลี่ยนตามโหมดมืด)
-   4) เปิดจากไอคอนหน้าจอโฮม → หน้าโลโก้สั้นๆ ก่อนเข้าหน้า (splash) */
+   4) เปิดจากไอคอนหน้าจอโฮม → หน้าโลโก้สั้นๆ ก่อนเข้าหน้า (splash)
+   5) มีเวอร์ชันใหม่บนเว็บ → ขึ้นแถบ "แตะเพื่อโหลด" (ไม่ต้องเติม ?v= เอง) */
 (function(){
   if(window.__bbIos) return; window.__bbIos = true;
   const me = document.currentScript, base = me ? me.src : location.href;
@@ -44,7 +45,14 @@
 #iosSplash .lg{width:104px;height:120px;margin:0 auto;background:center/contain no-repeat;filter:drop-shadow(0 8px 18px rgba(15,23,42,.28));animation:iosLogo .7s cubic-bezier(.2,.9,.25,1.2) both}
 #iosSplash .nm{margin-top:16px;font:600 16px 'Prompt',sans-serif;letter-spacing:.2px;color:var(--text-strong,#1e293b);text-align:center;animation:iosFade .6s .15s ease both}
 @keyframes iosLogo{from{opacity:0;transform:scale(.6) rotateY(-90deg)}}
-@media (prefers-reduced-motion:reduce){ .ios-pressable{transition:none} dialog.ios-sheet[open],dialog.ios-sheet.ios-closing,#iosSplash .lg{animation:none!important} }`;
+/* ---- 5) แถบมีเวอร์ชันใหม่ ---- */
+#bbUpd{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));z-index:2147482000;transform:translate(-50%,-160%);display:flex;align-items:center;gap:10px;width:max-content;max-width:calc(100vw - 24px);white-space:nowrap;
+  padding:10px 12px 10px 16px;border:0;border-radius:999px;background:#0b1b3a;color:#fff;font:600 14px 'Prompt',sans-serif;box-shadow:0 10px 30px rgba(2,6,23,.35);cursor:pointer;transition:transform .45s cubic-bezier(.2,.9,.25,1.15)}
+#bbUpd.on{transform:translate(-50%,0)}
+#bbUpd b{background:#facc15;color:#0b1b3a;border-radius:999px;padding:4px 12px;font-weight:700;white-space:nowrap}
+#bbUpd .x{background:none;border:0;color:#94a3b8;font:inherit;font-size:18px;line-height:1;padding:0 4px;cursor:pointer}
+#bbUpd.busy b{opacity:.6}
+@media (prefers-reduced-motion:reduce){ #bbUpd{transition:none} .ios-pressable{transition:none} dialog.ios-sheet[open],dialog.ios-sheet.ios-closing,#iosSplash .lg{animation:none!important} }`;
   const st = document.createElement('style'); st.id = 'ios-app'; st.textContent = css; (document.head || document.documentElement).appendChild(st);
 
   /* ---------- ตัวช่วยสั่น ---------- */
@@ -167,4 +175,39 @@
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) hide(); });
     /* กันค้าง: CSS ซ่อนหน้าโลโก้เองหลัง 1.8 วิ แม้สคริปต์จะไม่ได้ทำงาน · แตะทะลุได้ตลอด */
   }
+  /* ---------- 5) มีเวอร์ชันใหม่ → แถบแตะเพื่อโหลด ----------
+     เทียบ ETag ของหน้าที่เปิดอยู่ (จากแคชเครื่อง) กับของบนเว็บ · เช็กตอนเปิดหน้า และทุกครั้งที่กลับมาที่หน้า (ห่างกัน ≥ 3 นาที)
+     หน้าที่มี service worker (ฟอร์มสายตรวจ/แบบสำรวจ) โหลดของใหม่เองอยู่แล้ว → ข้าม */
+  (function(){
+    if(!window.fetch || location.protocol !== 'https:' || (navigator.serviceWorker && navigator.serviceWorker.controller)) return;
+    const url = location.href.split('#')[0];
+    let mine = null, last = 0, shown = false, busy = false;
+    const tag = r=>r && r.ok ? (r.headers.get('etag') || r.headers.get('last-modified')) : null;
+    function bar(){
+      if(shown) return; shown = true;
+      const b = document.createElement('div'); b.id = 'bbUpd'; b.setAttribute('role', 'status');
+      b.innerHTML = '🔄 มีเวอร์ชันใหม่ <b>แตะเพื่อโหลด</b><button type="button" class="x" aria-label="ปิด">✕</button>';
+      b.addEventListener('click', e=>{
+        if(e.target.closest('.x')){ b.classList.remove('on'); setTimeout(()=>b.remove(), 500); return; }
+        b.classList.add('busy');
+        // โหลดไฟล์ประกอบของเว็บ (js) ใหม่ด้วย แล้วรีเฟรช
+        const subs = [...document.querySelectorAll('script[src]')].map(s=>s.src).filter(u=>u.startsWith(location.origin));
+        Promise.all(subs.map(u=>fetch(u, {cache:'reload'}).catch(()=>0))).then(()=>location.reload());
+      });
+      (document.body || document.documentElement).appendChild(b);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('on')));
+    }
+    async function check(){
+      if(busy || shown || document.hidden || Date.now() - last < 180000) return;
+      busy = true; last = Date.now();
+      try{
+        if(mine === null) mine = tag(await fetch(url, {cache:'force-cache'})) || '';
+        const now = tag(await fetch(url, {cache:'reload'}));          // ได้ของล่าสุด + อัปเดตแคชเครื่องไปด้วย (รีเฟรชแล้วได้ของใหม่ทันที)
+        if(mine && now && now !== mine) bar();
+      }catch(_){} finally{ busy = false; }
+    }
+    addEventListener('load', ()=>setTimeout(check, 2500));
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) check(); });
+    addEventListener('pageshow', e=>{ if(e.persisted) check(); });
+  })();
 })();
