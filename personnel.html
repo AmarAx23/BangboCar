@@ -95,6 +95,21 @@ h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
 .person .px-l .u{color:var(--text)}
 .person .px-l .pw{color:#b45309}
 .person .px-l .na{color:var(--muted);font-weight:500}
+/* Motion: ปุ่มเปิด/ปิด · บรรทัดใหม่ไหลลงมา · บรรทัดที่ปิดยุบหายไป */
+.chip.px-m{position:relative;overflow:hidden;transition:background .25s,border-color .25s,color .25s,transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.chip.px-m::before{content:"✓";display:inline-block;width:0;opacity:0;transform:scale(0) rotate(-45deg);transition:width .25s,opacity .2s,transform .3s cubic-bezier(.34,1.56,.64,1),margin .25s}
+.chip.px-m.on::before{width:1em;opacity:1;transform:none;margin-right:2px}
+.chip.px-m.on{box-shadow:0 6px 16px -8px rgba(15,118,110,.8)}
+.chip.px-m.pop{animation:pxPop .45s cubic-bezier(.34,1.56,.64,1)}
+.chip.px-m .rp{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);animation:pxRipple .55s ease-out forwards;pointer-events:none}
+.chip.px-m:not(.on) .rp{background:rgba(15,118,110,.25)}
+@keyframes pxPop{0%{transform:scale(1)}35%{transform:scale(.9)}70%{transform:scale(1.07)}100%{transform:scale(1)}}
+@keyframes pxRipple{to{transform:scale(4);opacity:0}}
+.person .px-in{animation:pxIn .42s cubic-bezier(.2,.8,.2,1) both}
+.person .px-out{animation:pxOut .2s ease-in forwards}
+@keyframes pxIn{from{opacity:0;max-height:0;transform:translateY(-6px)}to{opacity:1;max-height:3em;transform:none}}
+@keyframes pxOut{from{opacity:1;max-height:3em}to{opacity:0;max-height:0;transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){ .chip.px-m,.chip.px-m::before{transition:none} .chip.px-m.pop,.chip.px-m .rp,.person .px-in,.person .px-out{animation:none} }
 #pinDlg{padding:0;border:none;background:transparent;box-shadow:none;width:min(380px,92vw);max-width:none;overflow:visible;color:#fff}
 #pinDlg[open]{margin:auto;animation:pinPop .45s cubic-bezier(.34,1.56,.64,1)}
 #pinDlg::backdrop{background:rgba(2,6,23,.6);backdrop-filter:blur(4px)}
@@ -598,7 +613,8 @@ let SHOWN = new Set(['cs']), SECRET = null, PPIN = '', pendingMode = null;
 try{ PPIN = sessionStorage.getItem('pers-pin') || ''; }catch(_){}
 const secOf = p=>(SECRET && SECRET.get(p.name)) || {};
 /* กดปุ่มเปิด/ปิดได้หลายอย่างพร้อมกัน: นามเรียกขาน · เบอร์โทร · บัญชีผู้ใช้งาน (เรียงตามนี้ใต้ชื่อ) */
-const lines = p=>['cs','tel','acc'].filter(m=>SHOWN.has(m)).map(m=>line(p, m)).join('');
+let JUST = '';   // บรรทัดที่เพิ่งเปิด → เล่นแอนิเมชันไหลลงมา
+const lines = p=>['cs','tel','acc'].filter(m=>SHOWN.has(m)).map(m=>line(p, m).replace(/^<div class="([^"]*)"/, (x, c)=>`<div class="${c} px-ln-${m}${m===JUST?' px-in':''}"`)).join('');
 function line(p, MODE){
   if(MODE === 'tel'){ const t = secOf(p).tel || '', d = (t.match(/\d[\d-]{7,}/) || [''])[0].replace(/-/g, '');
     return `<div class="cs px-l">${t ? `📞 ${esc(t)}${d ? ` <a href="tel:${d}">โทร</a>` : ''}` : '<span class="na">📞 ไม่มีเบอร์ในชีต</span>'}</div>`; }
@@ -622,10 +638,27 @@ async function loadSecret(m){
       else toast('⚠️ ' + (j.error === 'ไม่รู้จักคำสั่ง' ? 'ต้องอัปเดต Apps Script ของชีตกำลังพลก่อน' : (j.error || 'โหลดไม่สำเร็จ')));
       return;
     }
-    SECRET = new Map((j.rows || []).map(r=>[r.name, r])); SHOWN.add(m); animPeople = true; renderChips(); renderPeople(); toast('🔓 แสดงข้อมูลแล้ว');
+    SECRET = new Map((j.rows || []).map(r=>[r.name, r])); SHOWN.add(m); JUST = m; renderChips(); chipFx(m); renderPeople(); staggerIn(); toast('🔓 แสดงข้อมูลแล้ว');
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
 }
-function setMode(m){ if(m !== 'cs' && !SECRET) return loadSecret(m); if(SHOWN.has(m)) SHOWN.delete(m); else SHOWN.add(m); renderChips(); renderPeople(); }
+const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function chipFx(m, ev){
+  const b = document.querySelector(`.chip.px-m[data-m="${m}"]`); if(!b || RM) return;
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+  if(ev && ev.clientX){ const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height), s = document.createElement('span'); s.className = 'rp'; s.style.cssText = `width:${d}px;height:${d}px;left:${ev.clientX - r.left - d/2}px;top:${ev.clientY - r.top - d/2}px`; b.appendChild(s); setTimeout(()=>s.remove(), 600); }
+}
+function staggerIn(){ document.querySelectorAll('#people .px-in').forEach((el, i)=>{ el.style.animationDelay = Math.min(i, 30) * 16 + 'ms'; }); JUST = ''; }
+let LAST_EV = null;
+function setMode(m){
+  if(m !== 'cs' && !SECRET) return loadSecret(m);
+  const ev = LAST_EV; LAST_EV = null;
+  if(SHOWN.has(m)){
+    SHOWN.delete(m); renderChips(); chipFx(m, ev);
+    const out = document.querySelectorAll('#people .px-ln-' + m);
+    if(RM || !out.length) return renderPeople();
+    out.forEach(el=>el.classList.add('px-out')); setTimeout(renderPeople, 190);   // ยุบหายก่อน แล้วค่อยวาดใหม่
+  } else { SHOWN.add(m); JUST = m; renderChips(); chipFx(m, ev); renderPeople(); staggerIn(); }
+}
 function openPin(err){ $('pinErr').textContent = err || ''; $('pinInput').value = ''; $('pinDlg').showModal(); setTimeout(()=>$('pinInput').focus(), 50); if(err){ const b = $('pinForm'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } }
 $('pinClose').onclick = ()=>{ pendingMode = null; $('pinDlg').close(); };
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); PPIN = $('pinInput').value.trim(); if(!PPIN) return; try{ sessionStorage.setItem('pers-pin', PPIN); }catch(_){} $('pinDlg').close(); if(pendingMode){ const m = pendingMode; pendingMode = null; loadSecret(m); } });
@@ -646,7 +679,7 @@ function renderPeople(){
   if(animPeople){ animPeople = false; reveal($('people').querySelectorAll('.person'), 30); }
   $('rosterNote').textContent = `แสดง ${fmt(list.length)} จาก ${fmt(STAFF.length)} นาย`;
 }
-$('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; if(b.dataset.m) return setMode(b.dataset.m); FILTER = b.dataset.k; animPeople = true; renderChips(); renderPeople(); });
+$('chips').addEventListener('click', e=>{ const b = e.target.closest('.chip'); if(!b) return; if(b.dataset.m){ LAST_EV = e; return setMode(b.dataset.m); } FILTER = b.dataset.k; animPeople = true; renderChips(); renderPeople(); });
 $('q').addEventListener('input', renderPeople);
 
 renderChips(); renderPeople();
