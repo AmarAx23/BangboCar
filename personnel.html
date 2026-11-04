@@ -99,23 +99,19 @@ h2.sec small{font-weight:400;color:var(--muted);font-size:13px}
 .chip.px-snap:hover:not(:disabled){background:#13264f;color:#fde68a;border-color:#13264f}
 .chip.px-snap:disabled{opacity:.7;cursor:progress}
 /* ภาพแชร์ (แบบ 3 ตารางทางการ) · วาดนอกจอ */
-#rosterCard{position:fixed;left:-99999px;top:0;width:1080px;background:#fff;padding:44px 40px;font-family:Prompt,sans-serif;color:#0f172a}
+#rosterCard{position:fixed;left:-99999px;top:0;width:max-content;min-width:1080px;background:#fff;padding:40px 28px;font-family:Prompt,sans-serif;color:#0f172a}
 #rosterCard .hd{display:flex;align-items:center;gap:22px}
-#rosterCard .hd img{width:92px;height:auto}
-#rosterCard h1{font-size:44px;line-height:1.15;font-weight:700}
-#rosterCard .sub{font-size:22px;color:#64748b;margin-top:4px}
-#rosterCard .bar{display:flex;justify-content:space-between;align-items:center;margin-top:24px;background:#0b1b3a;color:#fff;border-radius:18px;padding:14px 24px;font-size:28px;font-weight:700}
-#rosterCard .bar b{color:#facc15}
-#rosterCard .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
-#rosterCard .rw{background:#f8fafc;border:2px solid #e2e8f0;border-radius:18px;padding:14px 18px 16px;min-width:0}
-#rosterCard .top{display:flex;align-items:center;gap:12px}
-#rosterCard .no{flex:none;width:44px;height:44px;border-radius:50%;background:#0b1b3a;color:#facc15;display:grid;place-items:center;font-size:21px;font-weight:700}
-#rosterCard .nm{font-size:29px;font-weight:700;line-height:1.25;color:#0f172a;min-width:0}
-#rosterCard .sb{font-size:22px;color:#475569;margin:4px 0 0 56px}
-#rosterCard .tel{font-size:33px;font-weight:700;color:#1d4ed8;margin:6px 0 0 56px;white-space:nowrap;letter-spacing:.3px}
-#rosterCard .ac{display:flex;gap:6px 22px;flex-wrap:wrap;font-size:24px;font-weight:600;color:#0f172a;margin:6px 0 0 56px}
-#rosterCard .ac .pw{color:#b45309}
-#rosterCard .ft{margin-top:26px;font-size:22px!important;text-align:center;font-size:19px;color:#94a3b8}
+#rosterCard .hd img{width:110px;height:auto}
+#rosterCard h1{font-size:56px;line-height:1.15;font-weight:700}
+#rosterCard .sub{font-size:28px;color:#64748b;margin-top:4px}
+#rosterCard table{width:100%;border-collapse:collapse;margin-top:28px;font-size:34px}
+#rosterCard th{background:#0b1b3a;color:#facc15;padding:18px 22px;text-align:left;font-size:30px;white-space:nowrap;font-weight:700}
+#rosterCard td{padding:16px 22px;border-bottom:2px solid #e2e8f0;vertical-align:middle;white-space:nowrap}
+#rosterCard tr:nth-child(even) td{background:#f8fafc}
+#rosterCard td.n{color:#64748b;width:60px;text-align:center}
+#rosterCard td.tel{color:#1d4ed8;font-weight:700;white-space:nowrap}
+#rosterCard td.pw{color:#b45309;font-weight:600}
+#rosterCard .ft{margin-top:24px;text-align:center;font-size:24px;color:#94a3b8}
 /* Motion: ปุ่มเปิด/ปิด · บรรทัดใหม่ไหลลงมา · บรรทัดที่ปิดยุบหายไป */
 .chip.px-m{position:relative;overflow:hidden;transition:background .25s,border-color .25s,color .25s,transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
 .chip.px-m::before{content:"✓";display:inline-block;width:0;opacity:0;transform:scale(0) rotate(-45deg);transition:width .25s,opacity .2s,transform .3s cubic-bezier(.34,1.56,.64,1),margin .25s}
@@ -741,19 +737,16 @@ function snapFontCSS(){
     return out.join('\n');
   }).catch(()=>{ fontCSSP = null; return undefined; }));
 }
-/* ภาพแชร์: การ์ด 2 คอลัมน์ ตัวใหญ่ อ่านง่ายในไลน์ */
 function rosterHtml(list, off, page, pages, total){
   off = off || 0; page = page || 1; pages = pages || 1; total = total || list.length;
-  const showCs = SHOWN.has('cs'), showTel = SHOWN.has('tel') && SECRET, showAcc = SHOWN.has('acc') && SECRET;
+  const cols = [['cs','นามเรียกขาน'], ['tel','เบอร์โทร'], ['user','ชื่อผู้ใช้'], ['pw','รหัสผ่าน']].filter(([k])=>k==='cs' ? SHOWN.has('cs') : k==='tel' ? SHOWN.has('tel') && SECRET : SHOWN.has('acc') && SECRET);
   const grp = (groups().find(([k])=>k===FILTER) || [,'ทั้งหมด'])[1], q = $('q').value.trim();
   const date = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
-  const row = (p, i)=>{ const s = secOf(p);
-    const sub = [p.pos || '', showCs && p.cs ? '📻 ' + p.cs : ''].filter(Boolean).map(esc).join('  ·  ');
-    const acc = showAcc ? `<div class="ac"><span>👤 ${esc(s.user || '–')}</span><span class="pw">🔑 ${esc(s.pw || '–')}</span></div>` : '';
-    return `<div class="rw"><div class="top"><span class="no">${off + i + 1}</span><span class="nm">${esc(p.name)}</span></div><div class="sb">${sub}</div>${showTel ? `<div class="tel">📞 ${esc(s.tel || '–')}</div>` : ''}${acc}</div>`; };
-  return `<div class="hd"><img src="logo.webp" alt=""><div><h1>📋 รายชื่อกำลังพล</h1><div class="sub">งานป้องกันปราบปราม · สภ.บางบ่อ · ${esc(grp)}${q ? ' · ค้นหา "' + esc(q) + '"' : ''} · ${date}</div></div></div>` +
-    `<div class="bar"><span>${fmt(total)} นาย</span>${pages > 1 ? `<b>หน้า ${page}/${pages} · ลำดับ ${off + 1}–${off + list.length}</b>` : ''}</div>` +
-    '<div class="grid">' + list.map(row).join('') + '</div><div class="ft">สภ.บางบ่อ · สถานภาพกำลังพล · ข้อมูลภายใน ห้ามเผยแพร่</div>';
+  const cell = (p, k)=>{ const s = secOf(p); const v = k==='cs' ? p.cs : k==='tel' ? s.tel : k==='user' ? s.user : s.pw; return `<td class="${k}">${esc(v || '–')}</td>`; };
+  return `<div class="hd"><img src="logo.webp" alt=""><div><h1>📋 รายชื่อกำลังพล</h1><div class="sub">งานป้องกันปราบปราม · สภ.บางบ่อ · ${esc(grp)}${q ? ' · ค้นหา "' + esc(q) + '"' : ''} · ${date} · ${fmt(total)} นาย${pages > 1 ? ` · <b style="color:#0b1b3a">หน้า ${page}/${pages} (ลำดับ ${off + 1}–${off + list.length})</b>` : ''}</div></div></div>` +
+    `<table><tr><th>#</th><th>ยศ ชื่อ – สกุล</th><th>ตำแหน่ง</th>${cols.map(([,l])=>`<th>${l}</th>`).join('')}</tr>` +
+    list.map((p, i)=>`<tr><td class="n">${off + i + 1}</td><td>${esc(p.name)}</td><td>${esc(p.pos || '–')}</td>${cols.map(([k])=>cell(p, k)).join('')}</tr>`).join('') + '</table>' +
+    '<div class="ft">สภ.บางบ่อ · สถานภาพกำลังพล · ข้อมูลภายใน ห้ามเผยแพร่</div>';
 }
 async function snapRoster(btn){
   const list = curList(); if(!list.length) return toast('ไม่มีรายชื่อให้บันทึก');
@@ -768,7 +761,7 @@ async function snapRoster(btn){
       if(pages > 1) btn.textContent = `⏳ สร้างภาพ ${pg + 1}/${pages}…`;
       el.innerHTML = rosterHtml(list.slice(pg * PER, pg * PER + PER), pg * PER, pg + 1, pages, list.length);
       await Promise.all([...el.querySelectorAll('img')].map(i=>i.complete ? 0 : new Promise(r=>{ i.onload = i.onerror = r; })));
-      const opt = {pixelRatio: 2, backgroundColor:'#ffffff', fontEmbedCSS: fontCSS, width:1080, height: el.offsetHeight, style:{left:'0', top:'0', position:'static'}};
+      const opt = {pixelRatio: 2, backgroundColor:'#ffffff', fontEmbedCSS: fontCSS, width: el.offsetWidth, height: el.offsetHeight, style:{left:'0', top:'0', position:'static'}};
       if(pg === 0) await htmlToImage.toBlob(el, opt);    // รอบแรกให้ฟอนต์/รูปโหลดครบ (Safari)
       const blob = await htmlToImage.toBlob(el, opt);
       if(!blob) throw new Error('blob');
