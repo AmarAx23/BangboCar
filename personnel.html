@@ -737,14 +737,15 @@ function snapFontCSS(){
     return out.join('\n');
   }).catch(()=>{ fontCSSP = null; return undefined; }));
 }
-function rosterHtml(list){
+function rosterHtml(list, off, page, pages, total){
+  off = off || 0; page = page || 1; pages = pages || 1; total = total || list.length;
   const cols = [['cs','นามเรียกขาน'], ['tel','เบอร์โทร'], ['user','ชื่อผู้ใช้'], ['pw','รหัสผ่าน']].filter(([k])=>k==='cs' ? SHOWN.has('cs') : k==='tel' ? SHOWN.has('tel') && SECRET : SHOWN.has('acc') && SECRET);
   const grp = (groups().find(([k])=>k===FILTER) || [,'ทั้งหมด'])[1], q = $('q').value.trim();
   const date = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
   const cell = (p, k)=>{ const s = secOf(p); const v = k==='cs' ? p.cs : k==='tel' ? s.tel : k==='user' ? s.user : s.pw; return `<td class="${k}">${esc(v || '–')}</td>`; };
-  return `<div class="hd"><img src="logo.webp" alt=""><div><h1>📋 รายชื่อกำลังพล</h1><div class="sub">งานป้องกันปราบปราม · สภ.บางบ่อ · ${esc(grp)}${q ? ' · ค้นหา "' + esc(q) + '"' : ''} · ${date} · ${fmt(list.length)} นาย</div></div></div>` +
+  return `<div class="hd"><img src="logo.webp" alt=""><div><h1>📋 รายชื่อกำลังพล</h1><div class="sub">งานป้องกันปราบปราม · สภ.บางบ่อ · ${esc(grp)}${q ? ' · ค้นหา "' + esc(q) + '"' : ''} · ${date} · ${fmt(total)} นาย${pages > 1 ? ` · <b style="color:#0b1b3a">หน้า ${page}/${pages} (ลำดับ ${off + 1}–${off + list.length})</b>` : ''}</div></div></div>` +
     `<table><tr><th>#</th><th>ยศ ชื่อ – สกุล</th><th>ตำแหน่ง</th>${cols.map(([,l])=>`<th>${l}</th>`).join('')}</tr>` +
-    list.map((p, i)=>`<tr><td class="n">${i + 1}</td><td>${esc(p.name)}</td><td>${esc(p.pos || '–')}</td>${cols.map(([k])=>cell(p, k)).join('')}</tr>`).join('') + '</table>' +
+    list.map((p, i)=>`<tr><td class="n">${off + i + 1}</td><td>${esc(p.name)}</td><td>${esc(p.pos || '–')}</td>${cols.map(([k])=>cell(p, k)).join('')}</tr>`).join('') + '</table>' +
     '<div class="ft">สภ.บางบ่อ · สถานภาพกำลังพล · ข้อมูลภายใน ห้ามเผยแพร่</div>';
 }
 async function snapRoster(btn){
@@ -754,19 +755,28 @@ async function snapRoster(btn){
     const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
     try{ await document.fonts.ready; }catch(_){}
     let el = $('rosterCard'); if(!el){ el = document.createElement('div'); el.id = 'rosterCard'; document.body.appendChild(el); }
-    el.innerHTML = rosterHtml(list);
-    await Promise.all([...el.querySelectorAll('img')].map(i=>i.complete ? 0 : new Promise(r=>{ i.onload = i.onerror = r; })));
-    const opt = {pixelRatio: list.length > 45 ? 1.5 : 2, backgroundColor:'#ffffff', fontEmbedCSS: fontCSS, width:1080, height: el.offsetHeight, style:{left:'0', top:'0', position:'static'}};
-    await htmlToImage.toBlob(el, opt);                 // รอบแรกให้ฟอนต์/รูปโหลดครบ (Safari)
-    const blob = await htmlToImage.toBlob(el, opt); el.innerHTML = '';
-    if(!blob) throw new Error('blob');
-    const name = ('รายชื่อกำลังพล_' + new Date().toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'})).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_') + '.png';
-    let f = null; try{ f = new File([blob], name, {type:'image/png'}); }catch(_){}
-    if(IS_TOUCH && f && navigator.canShare && navigator.share && (()=>{ try{ return navigator.canShare({files:[f]}); }catch(_){ return false; } })()){
-      try{ await navigator.share({files:[f], title:'รายชื่อกำลังพล'}); return; }catch(err){ if(err && err.name === 'AbortError') return; }
+    const PER = 20, pages = Math.ceil(list.length / PER), files = [];   // เกิน 20 คน → แยกเป็นหลายภาพ (1–20, 21–40, …)
+    const base = ('รายชื่อกำลังพล_' + new Date().toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'})).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, '_');
+    for(let pg = 0; pg < pages; pg++){
+      if(pages > 1) btn.textContent = `⏳ สร้างภาพ ${pg + 1}/${pages}…`;
+      el.innerHTML = rosterHtml(list.slice(pg * PER, pg * PER + PER), pg * PER, pg + 1, pages, list.length);
+      await Promise.all([...el.querySelectorAll('img')].map(i=>i.complete ? 0 : new Promise(r=>{ i.onload = i.onerror = r; })));
+      const opt = {pixelRatio: 2, backgroundColor:'#ffffff', fontEmbedCSS: fontCSS, width:1080, height: el.offsetHeight, style:{left:'0', top:'0', position:'static'}};
+      if(pg === 0) await htmlToImage.toBlob(el, opt);    // รอบแรกให้ฟอนต์/รูปโหลดครบ (Safari)
+      const blob = await htmlToImage.toBlob(el, opt);
+      if(!blob) throw new Error('blob');
+      files.push({blob, name: base + (pages > 1 ? `_หน้า${pg + 1}` : '') + '.png'});
     }
-    const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 30000); toast('📷 บันทึกภาพแล้ว · ' + name);
+    el.innerHTML = '';
+    let fs = null; try{ fs = files.map(x=>new File([x.blob], x.name, {type:'image/png'})); }catch(_){}
+    if(IS_TOUCH && fs && navigator.canShare && navigator.share && (()=>{ try{ return navigator.canShare({files:fs}); }catch(_){ return false; } })()){
+      try{ await navigator.share({files:fs, title:'รายชื่อกำลังพล'}); return; }catch(err){ if(err && err.name === 'AbortError') return; }
+    }
+    for(const x of files){                               // ดาวน์โหลดทีละไฟล์
+      const url = URL.createObjectURL(x.blob), a = document.createElement('a'); a.href = url; a.download = x.name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 30000); await new Promise(r=>setTimeout(r, 350));
+    }
+    toast(files.length > 1 ? `📷 บันทึกภาพแล้ว ${files.length} หน้า` : '📷 บันทึกภาพแล้ว · ' + files[0].name);
   }catch(err){ toast('⚠️ สร้างภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
   finally{ btn.disabled = false; btn.innerHTML = old; }
 }
