@@ -699,8 +699,9 @@ $('pinForm').addEventListener('submit',async e=>{
 $('lockBtn').onclick=()=>{ try{ sessionStorage.removeItem('map-pin'); }catch(_){} location.href='index.html'; };
 async function boot(){
   if(!PIN) return openPin();
-  try{ await checkPin(PIN); unlock(); }
-  catch(err){ if(err.auth){ PIN=''; try{ sessionStorage.removeItem('map-pin'); }catch(_){} openPin(err.message); } else openPin('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+  unlock();   // รหัสที่ผ่านแล้วในรอบนี้ → เปิดแผนที่ทันที แล้วตรวจรหัสซ้ำเบื้องหลัง
+  try{ await checkPin(PIN); }
+  catch(err){ if(err.auth){ PIN=''; try{ sessionStorage.removeItem('map-pin'); }catch(_){} document.body.classList.add('locked'); openPin(err.message); } }
 }
 
 /* ---------- แผนที่ ---------- */
@@ -740,26 +741,35 @@ function initMap(){
 }
 
 /* ---------- โหลดข้อมูล (หลังใส่รหัสแล้วเท่านั้น) ---------- */
-async function loadAll(){
-  $('mpLoad').hidden=false;
-  const [c,t,l]=await Promise.allSettled([
-    fetch(CRIME_API+'?t='+Date.now()).then(r=>r.json()),
-    fetch(THEFT_API+'?t='+Date.now()).then(r=>r.json()),
-    fetch(LOCAL_API+'?t='+Date.now()).then(r=>r.json())
-  ]);
-  try{ const j=c.value; if(c.status!=='fulfilled'||!j.ok) throw 0;
+/* เริ่มโหลดข้อมูลทันทีที่เปิดหน้า (ระหว่างรอใส่รหัส) · แสดงชุดที่จำไว้ในเครื่องก่อน แล้วอัปเดตเมื่อได้ของใหม่ */
+const PRE=[CRIME_API,THEFT_API,LOCAL_API].map(u=>fetch(u+'?t='+Date.now()).then(r=>r.json()).catch(()=>null));
+const CKEY='map-cache-v1';
+async function ingest(cj,tj,lj){
+  for(const k in ERR) delete ERR[k];
+  try{ const j=cj; if(!j||!j.ok) throw 0;
     buildGroups(j.types&&j.types.length?j.types:DEFAULT_TYPES);
     INC=(j.rows||[]).map(r=>({k:'crime',t:new Date(r.t),g:groupOf(r.type),type:r.type,lat:num(r.lat),lng:num(r.lng),place:r.place||'—',what:r.what||'',weapon:r.weapon||'',major:!!r.major})).filter(r=>!isNaN(r.t));
-  }catch(_){ ERR.crime=true; buildGroups(DEFAULT_TYPES); }
-  try{ const j=t.value; if(t.status!=='fulfilled'||!j.ok) throw 0;
+  }catch(_){ ERR.crime=true; buildGroups(DEFAULT_TYPES); INC=[]; }
+  try{ const j=tj; if(!j||!j.ok) throw 0;
     TF=(Array.isArray(j.main)?parseTheft({table:{rows:j.main.map(r=>({c:r.map(v=>({v}))}))}}):parseTheft(await gvizJSONP(THEFT_SHEET,THEFT_GID))).map(r=>({...r,k:'theft'}));
-  }catch(_){ ERR.theft=true; }
-  try{ const j=l.value; if(l.status!=='fulfilled'||!j.ok) throw 0;
+  }catch(_){ ERR.theft=true; TF=[]; }
+  try{ const j=lj; if(!j||!j.ok) throw 0;
     LOC=(j.rows||[]).map(r=>({k:'local',name:r.name||'—',type:String(r.type||'').trim()||'อื่นๆ',addr:r.addr||'',map:r.map||'',lat:num(r.lat),lng:num(r.lng)}));
-  }catch(_){ ERR.local=true; }
+  }catch(_){ ERR.local=true; LOC=[]; }
   [...INC,...TF,...LOC].forEach(r=>{ if(r.lat!=null&&!(r.lat>5&&r.lat<21&&r.lng>97&&r.lng<106)) r.lat=r.lng=null; r.zone=r.lat!=null?zoneOf(r.lat,r.lng):'ไม่ระบุ'; });
-  $('mpLoad').hidden=true;
   buildSubs(); render();
+}
+async function loadAll(){
+  let cached=null; try{ cached=JSON.parse(localStorage.getItem(CKEY)||'null'); }catch(_){}
+  if(cached) await ingest(cached.c,cached.t,cached.l); else $('mpLoad').hidden=false;
+  let [c,t,l]=await Promise.all(PRE);
+  const ok=j=>j&&j.ok;
+  if(cached){ if(!ok(c)) c=cached.c; if(!ok(t)) t=cached.t; if(!ok(l)) l=cached.l; }
+  const fresh={c,t,l,at:Date.now()};
+  const changed=!cached||JSON.stringify([c,t,l])!==JSON.stringify([cached.c,cached.t,cached.l]);
+  try{ localStorage.setItem(CKEY,JSON.stringify(fresh)); }catch(_){}
+  if(changed) await ingest(c,t,l);
+  $('mpLoad').hidden=true;
   const bad=Object.keys(ERR).map(k=>({crime:'จุดเกิดเหตุ',theft:'รถหาย',local:'สถานที่สำคัญ'}[k]));
   if(bad.length) toast('⚠️ โหลดไม่สำเร็จ: '+bad.join(', '));
 }
@@ -767,9 +777,9 @@ async function loadAll(){
 /* ---------- ตัวกรองย่อย (ประเภทเหตุ / ประเภทสถานที่) ---------- */
 function buildSubs(){
   const cc={}; INC.forEach(r=>cc[r.g]=(cc[r.g]||0)+1);
-  $('subCrime').innerHTML=GROUPS.filter(g=>cc[g.no]).map(g=>`<button type="button" class="sub" data-g="${g.no}" style="border-color:${g.c}55">${g.ic} ${esc(g.short)} <b>${fmt(cc[g.no])}</b></button>`).join('');
+  $('subCrime').innerHTML=GROUPS.filter(g=>cc[g.no]).map(g=>`<button type="button" class="sub${S.gOff.has(g.no)?' off':''}" data-g="${g.no}" style="border-color:${g.c}55">${g.ic} ${esc(g.short)} <b>${fmt(cc[g.no])}</b></button>`).join('');
   const tc={}; LOC.forEach(r=>tc[r.type]=(tc[r.type]||0)+1);
-  $('subLocal').innerHTML=Object.entries(tc).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<button type="button" class="sub" data-t="${esc(t)}">${locIc(t)} ${esc(t)} <b>${fmt(n)}</b></button>`).join('');
+  $('subLocal').innerHTML=Object.entries(tc).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<button type="button" class="sub${S.tOff.has(t)?' off':''}" data-t="${esc(t)}">${locIc(t)} ${esc(t)} <b>${fmt(n)}</b></button>`).join('');
 }
 $('subCrime').addEventListener('click',e=>{ const b=e.target.closest('.sub'); if(!b) return; const g=+b.dataset.g; S.gOff.has(g)?S.gOff.delete(g):S.gOff.add(g); b.classList.toggle('off',S.gOff.has(g)); bump(b,'press'); render(); });
 $('subLocal').addEventListener('click',e=>{ const b=e.target.closest('.sub'); if(!b) return; const t=b.dataset.t; S.tOff.has(t)?S.tOff.delete(t):S.tOff.add(t); b.classList.toggle('off',S.tOff.has(t)); bump(b,'press'); render(); });
@@ -954,7 +964,7 @@ $('meBtn').onclick=()=>{
 function closeSheet(){ $('side').classList.remove('open'); }
 $('sheetH').onclick=()=>{ $('side').classList.toggle('open'); render(); };
 
-function unlock(){ document.body.classList.add('unlocking'); document.body.classList.remove('locked'); stagger(); setTimeout(()=>document.body.classList.remove('unlocking'),1200); initMap(); setTimeout(()=>map.invalidateSize(),50); loadAll(); }
+function unlock(){ document.body.classList.add('unlocking'); document.body.classList.remove('locked'); stagger(); setTimeout(()=>document.body.classList.remove('unlocking'),1200); initMap(); setTimeout(()=>map.invalidateSize(),50); if(!unlock.done){ unlock.done=true; loadAll(); } }
 boot();
 </script>
 </body>
