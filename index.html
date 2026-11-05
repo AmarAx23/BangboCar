@@ -61,6 +61,8 @@ html.no-motion .nav-coin{animation:none}
 /* ===== Home chooser ===== */
 #homeChooser{position:fixed;inset:0;z-index:6000;background:var(--bg);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;transition:opacity .35s ease}
 #homeChooser[hidden]{display:none}
+/* หน้าเลือกระบบเปิดอยู่ → ซ่อนแถบเลื่อนของหน้ารถหายด้านหลัง (ไม่ให้มีแถบเลื่อนซ้อนสองอัน) */
+html:has(#homeChooser:not([hidden])),html:has(#homeChooser:not([hidden])) body{overflow:hidden}
 #homeChooser.leaving{opacity:0;pointer-events:none}
 .hc-inner{max-width:1180px;width:100%;text-align:center;margin:auto 0}
 .hc-logo{display:flex;justify-content:center;perspective:700px;margin-bottom:10px}
