@@ -468,6 +468,32 @@ body.unlocking .mp-wrap{transition:filter .7s ease}
 .cam-sq b{position:absolute;right:-8px;top:-8px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--c);color:#fff;font:700 10px/17px 'Prompt',sans-serif;text-align:center;border:1.5px solid #fff}
 .cam-sq:hover{transform:scale(1.2)}
 :root[data-theme="dark"] .cam-sq{background:#0f172a}
+
+/* ===== ดรอปดาวน์ติ๊กเลือกประเภท ===== */
+.subs{display:block;margin:-6px 0 2px;position:relative;z-index:30}
+.subs:has(.ms.open){z-index:60}
+.ms{position:relative}
+.ms-btn{width:100%;display:flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);border-radius:10px;padding:7px 12px;font:500 13px 'Prompt',sans-serif;cursor:pointer;text-align:left;transition:border-color .2s,background .2s}
+.ms-btn:hover{border-color:#93c5fd}
+.ms.open .ms-btn{border-color:#3b82f6;background:var(--surface);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.ms-l{color:var(--muted);white-space:nowrap}
+.ms-s{margin-left:auto;font-weight:700;color:var(--text-strong);white-space:nowrap}
+.ms-a{color:var(--faint);transition:transform .25s}
+.ms.open .ms-a{transform:rotate(180deg)}
+.ms-pop{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:50;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px rgba(15,23,42,.18);padding:6px;max-height:300px;overflow:auto;animation:msIn .22s cubic-bezier(.2,.9,.25,1.1)}
+.ms-pop[hidden]{display:none}
+@keyframes msIn{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+.ms-o{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:13.5px;color:var(--text)}
+.ms-o:hover{background:var(--surface2)}
+.ms-o input{width:16px;height:16px;accent-color:#2563eb;flex:none;margin:0}
+.ms-ic{width:20px;text-align:center;flex:none}
+.ms-n{flex:1;min-width:0;line-height:1.3}
+.ms-o b{font-size:12.5px;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+.ms-o:has(input:not(:checked)) .ms-n,.ms-o:has(input:not(:checked)) .ms-ic{opacity:.45}
+.ms-act{display:flex;gap:6px;border-top:1px solid var(--border);margin-top:4px;padding-top:6px}
+.ms-act button{flex:1;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);border-radius:8px;padding:5px;font:600 12.5px 'Prompt',sans-serif;cursor:pointer}
+.ms-act button:hover{background:var(--btn2)}
+@media (prefers-reduced-motion:reduce){ .ms-pop{animation:none} }
 </style>
 <script src="fx.js"></script>
 <!-- ให้เว็บรู้สึกเหมือนแอปบนมือถือ: หน้าต่างเลื่อนขึ้นจากล่าง · ปุ่มยุบตอนแตะ · สีแถบด้านบน · หน้าโลโก้ตอนเปิดแอป -->
@@ -775,18 +801,38 @@ async function loadAll(){
 }
 
 /* ---------- ตัวกรองย่อย (ประเภทเหตุ / ประเภทสถานที่) ---------- */
-function buildSubs(){
-  const cc={}; INC.forEach(r=>cc[r.g]=(cc[r.g]||0)+1);
-  $('subCrime').innerHTML=GROUPS.filter(g=>cc[g.no]).map(g=>`<button type="button" class="sub${S.gOff.has(g.no)?' off':''}" data-g="${g.no}" style="border-color:${g.c}55">${g.ic} ${esc(g.short)} <b>${fmt(cc[g.no])}</b></button>`).join('');
-  const tc={}; LOC.forEach(r=>tc[r.type]=(tc[r.type]||0)+1);
-  $('subLocal').innerHTML=Object.entries(tc).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<button type="button" class="sub${S.tOff.has(t)?' off':''}" data-t="${esc(t)}">${locIc(t)} ${esc(t)} <b>${fmt(n)}</b></button>`).join('');
+/* ตัวกรองประเภท: ดรอปดาวน์ติ๊กเลือก (แทนป้ายเรียงยาว) */
+function msHtml(id,label,items,off){
+  const on=items.filter(x=>!off.has(x.k)).length, sum=on===items.length?`ทุกประเภท (${items.length})`:on?`เลือก ${on} จาก ${items.length}`:'ไม่ได้เลือก';
+  return `<div class="ms" id="${id}Ms"><button type="button" class="ms-btn" aria-expanded="false"><span class="ms-l">${label}</span><span class="ms-s">${sum}</span><span class="ms-a">▾</span></button>
+  <div class="ms-pop" hidden>${items.map(x=>`<label class="ms-o"><input type="checkbox" data-k="${esc(String(x.k))}"${off.has(x.k)?'':' checked'}><span class="ms-ic">${x.ic}</span><span class="ms-n">${esc(x.name)}</span><b data-k="${esc(String(x.k))}">${fmt(x.n)}</b></label>`).join('')}
+  <div class="ms-act"><button type="button" data-a="all">เลือกทั้งหมด</button><button type="button" data-a="none">ไม่เลือก</button></div></div></div>`;
 }
-$('subCrime').addEventListener('click',e=>{ const b=e.target.closest('.sub'); if(!b) return; const g=+b.dataset.g; S.gOff.has(g)?S.gOff.delete(g):S.gOff.add(g); b.classList.toggle('off',S.gOff.has(g)); bump(b,'press'); render(); });
-$('subLocal').addEventListener('click',e=>{ const b=e.target.closest('.sub'); if(!b) return; const t=b.dataset.t; S.tOff.has(t)?S.tOff.delete(t):S.tOff.add(t); b.classList.toggle('off',S.tOff.has(t)); bump(b,'press'); render(); });
+let MSOPEN='';
+function buildSubs(){
+  const s=since(), cc={}; INC.forEach(r=>{ if(!s||r.t>=s) cc[r.g]=(cc[r.g]||0)+1; });
+  const gi=GROUPS.filter(g=>INC.some(r=>r.g===g.no)).map(g=>({k:g.no,ic:g.ic,name:g.name.length>26?g.short:g.name,n:cc[g.no]||0}));
+  const tc={}; LOC.forEach(r=>tc[r.type]=(tc[r.type]||0)+1);
+  const ti=Object.entries(tc).sort((a,b)=>b[1]-a[1]).map(([t,n])=>({k:t,ic:locIc(t),name:t,n}));
+  $('subCrime').innerHTML=gi.length?msHtml('subCrime','🏷️ ประเภทเหตุ',gi,S.gOff):'';
+  $('subLocal').innerHTML=ti.length?msHtml('subLocal','🏷️ ประเภทสถานที่',ti,S.tOff):'';
+  if(MSOPEN){ const p=document.querySelector('#'+MSOPEN+'Ms'); if(p){ p.querySelector('.ms-pop').hidden=false; p.classList.add('open'); } }
+}
+function msWire(id,set,parse){
+  $(id).addEventListener('click',e=>{
+    const btn=e.target.closest('.ms-btn'); const ms=e.target.closest('.ms'); if(!ms) return;
+    if(btn){ const pop=ms.querySelector('.ms-pop'), open=pop.hidden; document.querySelectorAll('.ms').forEach(x=>{ x.querySelector('.ms-pop').hidden=true; x.classList.remove('open'); });
+      pop.hidden=!open; ms.classList.toggle('open',open); btn.setAttribute('aria-expanded',open); MSOPEN=open?id:''; return; }
+    const a=e.target.closest('[data-a]'); if(a){ ms.querySelectorAll('input[type=checkbox]').forEach(cb=>{ const k=parse(cb.dataset.k); if(a.dataset.a==='all') set.delete(k); else set.add(k); }); buildSubs(); render(); }
+  });
+  $(id).addEventListener('change',e=>{ const cb=e.target.closest('input[type=checkbox]'); if(!cb) return; const k=parse(cb.dataset.k); cb.checked?set.delete(k):set.add(k); buildSubs(); render(); });
+}
+msWire('subCrime',S.gOff,Number); msWire('subLocal',S.tOff,String);
+document.addEventListener('click',e=>{ if(!e.target.closest('.ms')&&MSOPEN){ document.querySelectorAll('.ms').forEach(x=>{ x.querySelector('.ms-pop').hidden=true; x.classList.remove('open'); }); MSOPEN=''; } });
 document.querySelectorAll('.ly').forEach(b=>b.addEventListener('click',()=>{ bump(b,'press'); const k=b.dataset.ly;
   if(k==='cctv'&&!S.on.cctv&&!CAM){ askCctv(); return; }
   S.on[k]=!S.on[k]; b.classList.toggle('on',S.on[k]);
-  if(k==='crime'){ $('subCrime').hidden=!S.on.crime; if(S.on.crime) stagger('#subCrime .sub'); } if(k==='local'){ $('subLocal').hidden=!S.on.local; if(S.on.local) stagger('#subLocal .sub'); } render(); }));
+  if(k==='crime'){ $('subCrime').hidden=!S.on.crime; if(S.on.crime) stagger('#subCrime .ms'); } if(k==='local'){ $('subLocal').hidden=!S.on.local; if(S.on.local) stagger('#subLocal .ms'); } render(); }));
 $('segRange').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S.days=+b.dataset.d; [...b.parentNode.children].forEach(x=>x.classList.toggle('on',x===b)); render(); });
 $('segMode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S.mode=b.dataset.m; [...b.parentNode.children].forEach(x=>x.classList.toggle('on',x===b)); render(); });
 
@@ -863,7 +909,7 @@ function render(){
     CAM.forEach((g,i)=>{ const m=L.marker([g.lat,g.lng],{icon:camIcon(g,Math.round(i*stepC)),riseOnHover:true,zIndexOffset:-200}); m.bindPopup(()=>popupCam(g),{maxWidth:300,offset:[0,-6]}); m.addTo(ptLayer); }); }
   if(CAM) $('nCctv').textContent=fmt(CAM.total);
   const s2=since(), cc={}; INC.forEach(r=>{ if(!s2||r.t>=s2) cc[r.g]=(cc[r.g]||0)+1; });
-  document.querySelectorAll('#subCrime .sub').forEach(x=>{ countTo(x.querySelector('b'),cc[x.dataset.g]||0); });
+  document.querySelectorAll('#subCrime .ms-o b').forEach(x=>{ countTo(x,cc[x.dataset.k]||0); });
   renderHours(evAll); renderHot(geo);
   $('sheetSum').textContent=`${fmt(geo.length)} เหตุบนแผนที่ · แตะเพื่อ${$('side').classList.contains('open')?'ปิด':'เปิด'}`;
 }
@@ -945,9 +991,9 @@ $('qList').addEventListener('click',e=>{ const li=e.target.closest('li[data-i]')
   if(r.k==='local'&&!S.on.local){ S.on.local=true; document.querySelector('.ly[data-ly="local"]').classList.add('on'); $('subLocal').hidden=false; }
   if(r.k!=='local'){ S.days=0; S.hour=null; document.querySelectorAll('#segRange button').forEach(x=>x.classList.toggle('on',x.dataset.d==='0'));
     if(!S.on[r.k]){ S.on[r.k]=true; document.querySelector(`.ly[data-ly="${r.k}"]`).classList.add('on'); }
-    if(r.k==='crime'&&S.gOff.has(r.g)){ S.gOff.delete(r.g); const b=document.querySelector(`#subCrime [data-g="${r.g}"]`); if(b) b.classList.remove('off'); }
+    if(r.k==='crime'&&S.gOff.has(r.g)){ S.gOff.delete(r.g); buildSubs(); }
     if(S.mode!=='pt'){ S.mode='pt'; document.querySelectorAll('#segMode button').forEach(x=>x.classList.toggle('on',x.dataset.m==='pt')); } }
-  if(r.k==='local'&&S.tOff.has(r.type)){ S.tOff.delete(r.type); const b=[...document.querySelectorAll('#subLocal .sub')].find(x=>x.dataset.t===r.type); if(b) b.classList.remove('off'); }
+  if(r.k==='local'&&S.tOff.has(r.type)){ S.tOff.delete(r.type); buildSubs(); }
   render(); map.flyTo([r.lat,r.lng],17,{duration:.7}); setTimeout(()=>r.m&&r.m.openPopup(),750); closeSheet(); });
 
 /* ---------- ตำแหน่งฉัน ---------- */
