@@ -1004,6 +1004,16 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 .near-box .t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--text-strong)}
 .near-box .sec-tabs{margin:8px 0 4px}
 .near-box .sec-tabs button{font-size:12.5px;padding:4px 11px}
+.flt-h{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.3px;margin-bottom:-4px}
+.srch{position:relative}
+.srch input{width:100%;border:1px solid var(--input-border);border-radius:12px;padding:9px 12px 9px 34px;font:500 14px 'Prompt',sans-serif;background:var(--surface);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+.srch input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+.srch::before{content:'🔍';position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none}
+.seg{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:none;color:var(--text-2);font:500 13px 'Prompt',sans-serif;padding:7px 4px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,transform .15s}
+.seg button:active{transform:scale(.95)}
+.seg button.on{background:#0b1b3a;color:#facc15;font-weight:700}
+:root[data-theme="dark"] .seg button.on{background:#facc15;color:#0b1b3a}
 .side-hint{font-size:12.5px;color:var(--muted);line-height:1.6}
 .side-hint b{color:var(--text-strong)}
 .type-card.warn .kpi-val{color:#d97706}
@@ -1114,6 +1124,11 @@ main{transition:filter .6s}
           <div class="sec-tabs" id="nearR"><button type="button" data-r="200">200 ม.</button><button type="button" data-r="300" class="on">300 ม.</button><button type="button" data-r="500">500 ม.</button><button type="button" data-r="1000">1 กม.</button></div>
           <div class="side-hint" id="nearSum"></div>
         </div>
+        <div class="srch"><input id="mq" type="search" placeholder="ค้นหาสถานที่ / หน่วยงาน / ผู้ประสาน" autocomplete="off" aria-label="ค้นหา"></div>
+        <div class="flt-h">เจ้าของกล้อง</div>
+        <div class="seg" id="segOwner"><button type="button" data-v="all" class="on">ทั้งหมด</button><button type="button" data-v="pol">ของ ตร.</button><button type="button" data-v="oth">หน่วยงานอื่น</button></div>
+        <div class="flt-h">ระยะเวลาเก็บภาพ</div>
+        <div class="seg" id="segDays"><button type="button" data-v="" class="on">ทั้งหมด</button><button type="button" data-v="7">≤ 7 วัน</button><button type="button" data-v="20">8–20 วัน</button><button type="button" data-v="99">&gt; 20 วัน</button></div>
         <div class="card-title" id="sideH">จุดติดตั้ง</div>
         <div class="side-hint" id="sideHint">💡 แตะจุดใดก็ได้บนแผนที่ เช่น <b>ที่เกิดเหตุ</b> ระบบจะเรียงกล้องที่อยู่ใกล้ให้ พร้อมผู้ประสานขอภาพ</div>
         <div class="side-list" id="sideList"><div class="ld">⏳ กำลังโหลด…</div></div>
@@ -1254,7 +1269,7 @@ function pinIcon(g,d){ const s=g.n>=20?34:g.n>=8?28:g.n>=3?24:20; return L.divIc
 
 /* ---------- กรอง + วาด ---------- */
 function pass(g){
-  if(F.f==='pol'&&!isPol(g)) return false; if(F.f==='oth'&&isPol(g)) return false; if(F.f==='short'&&!(g.days!=null&&g.days<=7)) return false;
+  if(F.f==='pol'&&!isPol(g)) return false; if(F.f==='oth'&&isPol(g)) return false;
   if(F.days){ const d=g.days; if(d==null) return false; if(F.days==='7'&&d>7) return false; if(F.days==='20'&&(d<=7||d>20)) return false; if(F.days==='99'&&d<=20) return false; }
   if(F.q){ const q=F.q.toLowerCase().replace(/\s+/g,''); const hay=(g.place+g.agency+g.contacts.map(c=>c.name+c.tel).join('')).toLowerCase().replace(/\s+/g,''); if(!hay.includes(q)) return false; }
   return true;
@@ -1263,7 +1278,7 @@ function render(anim){
   const all=G.reduce((s,g)=>s+g.n,0), pol=G.filter(isPol).reduce((s,g)=>s+g.n,0);
   countTo($('kAll'),all); countTo($('kPol'),pol); countTo($('kOth'),all-pol); countTo($('kShort'),G.filter(g=>g.days!=null&&g.days<=7).reduce((s,g)=>s+g.n,0)); countTo($('kLoc'),G.length);
   $('kAllS').textContent=`${fmt(new Set(G.map(g=>g.agency)).size)} หน่วยงาน`; $('kPolS').textContent=all?Math.round(pol/all*100)+'%':''; $('kOthS').textContent=all?Math.round((all-pol)/all*100)+'%':''; $('kLocS').textContent=`${fmt(G.filter(g=>g.lat==null).length)} จุดไม่มีพิกัด`;
-  document.querySelectorAll('#typeRow .type-card').forEach(b=>b.classList.toggle('on',b.dataset.f===F.f));
+  syncUI();
   const vis=G.filter(pass);
   $('mapCount').textContent=`· ${fmt(vis.reduce((s,g)=>s+g.n,0))} กล้อง ${fmt(vis.filter(g=>g.lat!=null).length)} จุด`;
   layer.clearLayers();
@@ -1323,8 +1338,22 @@ $('nearR').addEventListener('click',e=>{ const b=e.target.closest('button'); if(
 $('nearX').onclick=()=>{ NEAR=null; if(dropMark){ dropMark.remove(); dropMark=null; } if(dropCircle){ dropCircle.remove(); dropCircle=null; } render(true); };
 
 /* ---------- ตัวกรอง / แท็บ ---------- */
-$('typeRow').addEventListener('click',e=>{ const b=e.target.closest('.type-card'); if(!b||b.dataset.f==='loc') return; F.f=F.f===b.dataset.f&&b.dataset.f!=='all'?'all':b.dataset.f; SHOW=40; render(true); });
-$('daysTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.days=b.dataset.d; [...b.parentNode.children].forEach(x=>x.classList.toggle('on',x===b)); render(true); });
+$('typeRow').addEventListener('click',e=>{ const b=e.target.closest('.type-card'); if(!b||b.dataset.f==='loc') return;
+  if(b.dataset.f==='short') F.days=F.days==='7'?'':'7'; else if(b.dataset.f==='all'){ F.f='all'; F.days=''; } else F.f=F.f===b.dataset.f?'all':b.dataset.f;
+  SHOW=40; render(true); });
+/* ตัวกรองทุกจุด (การ์ด · ปุ่มข้างแผนที่ · แท็บรายการ · ช่องค้นหา) ใช้ค่าเดียวกัน */
+function syncUI(){
+  document.querySelectorAll('#typeRow .type-card').forEach(b=>{ const f=b.dataset.f; b.classList.toggle('on', f==='short'?F.days==='7':f==='all'?(F.f==='all'&&!F.days):f===F.f); });
+  document.querySelectorAll('#segOwner button').forEach(x=>x.classList.toggle('on',x.dataset.v===F.f));
+  document.querySelectorAll('#segDays button').forEach(x=>x.classList.toggle('on',x.dataset.v===F.days));
+  document.querySelectorAll('#daysTabs button').forEach(x=>x.classList.toggle('on',x.dataset.d===F.days));
+  if($('mq').value.trim()!==F.q && document.activeElement!==$('mq')) $('mq').value=F.q;
+  if($('liSearch').value.trim()!==F.q && document.activeElement!==$('liSearch')) $('liSearch').value=F.q;
+}
+$('segOwner').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.f=b.dataset.v; SHOW=40; render(true); });
+$('segDays').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.days=b.dataset.v; SHOW=40; render(true); });
+let mqT; $('mq').addEventListener('input',()=>{ clearTimeout(mqT); mqT=setTimeout(()=>{ F.q=$('mq').value.trim(); SHOW=40; render(); },180); });
+$('daysTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.days=b.dataset.d; render(true); });
 let qT; $('liSearch').addEventListener('input',()=>{ clearTimeout(qT); qT=setTimeout(()=>{ F.q=$('liSearch').value.trim(); SHOW=40; render(); },180); });
 function showView(v,push){
   VIEW=v==='list'?'list':'map';
