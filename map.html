@@ -462,6 +462,12 @@ body.unlocking .mp-wrap{transition:filter .7s ease}
 :root[data-theme="dark"] .lc-pin{background:#0f172a}
 @keyframes lcPop{from{opacity:0;transform:scale(0)}}
 @media (prefers-reduced-motion:reduce){ .ev-pin,.lc-pin,.ev-ring{animation:none!important} .ev-ring{display:none} }
+
+.cam-sq{position:relative;width:26px;height:26px;border-radius:8px;background:#fff;border:2.5px solid var(--c);box-shadow:0 2px 6px rgba(15,23,42,.3);display:grid;place-items:center;animation:lcPop .4s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--d,0ms);transition:transform .2s}
+.cam-sq i{font-style:normal;font-size:13px;line-height:1}
+.cam-sq b{position:absolute;right:-8px;top:-8px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--c);color:#fff;font:700 10px/17px 'Prompt',sans-serif;text-align:center;border:1.5px solid #fff}
+.cam-sq:hover{transform:scale(1.2)}
+:root[data-theme="dark"] .cam-sq{background:#0f172a}
 </style>
 <script src="fx.js"></script>
 <!-- ให้เว็บรู้สึกเหมือนแอปบนมือถือ: หน้าต่างเลื่อนขึ้นจากล่าง · ปุ่มยุบตอนแตะ · สีแถบด้านบน · หน้าโลโก้ตอนเปิดแอป -->
@@ -512,8 +518,9 @@ a,button,label,summary,[role=button]{-webkit-tap-highlight-color:transparent}
     <button type="button" class="ly on" data-ly="crime" style="--c:#dc2626"><i></i>จุดเกิดเหตุ<span class="n" id="nCrime">–</span><span class="sw"></span></button>
     <div class="subs" id="subCrime"></div>
     <button type="button" class="ly on" data-ly="theft" style="--c:#0d9488"><i></i>รถจักรยานยนต์หาย<span class="n" id="nTheft">–</span><span class="sw"></span></button>
-    <button type="button" class="ly" data-ly="local" style="--c:#0284c7"><i></i>สถานที่สำคัญ / กล้อง<span class="n" id="nLocal">–</span><span class="sw"></span></button>
+    <button type="button" class="ly" data-ly="local" style="--c:#0284c7"><i></i>สถานที่สำคัญ<span class="n" id="nLocal">–</span><span class="sw"></span></button>
     <div class="subs" id="subLocal" hidden></div>
+    <button type="button" class="ly" data-ly="cctv" style="--c:#0891b2"><i></i>กล้องวงจรปิด 🔒<span class="n" id="nCctv">–</span><span class="sw"></span></button>
     <button type="button" class="ly on" data-ly="zone" style="--c:#475569"><i></i>เขตตรวจ<span class="n" id="nZone">3</span><span class="sw"></span></button>
     <h3>ช่วงเวลา (จุดเกิดเหตุ · รถหาย)</h3>
     <div class="seg" id="segRange"><button type="button" data-d="7">7 วัน</button><button type="button" data-d="30" class="on">30 วัน</button><button type="button" data-d="90">3 เดือน</button><button type="button" data-d="365">1 ปี</button><button type="button" data-d="0">ทั้งหมด</button></div>
@@ -660,14 +667,19 @@ function popIn(){ cancelAnimationFrame(popRaf); const ms=POP.slice(); if(RM||!ms
 /* ---------- สถานะ ---------- */
 let PIN=''; try{ PIN=sessionStorage.getItem('map-pin')||''; }catch(_){}
 let INC=[], TF=[], LOC=[];
-const S={on:{crime:true,theft:true,local:false,zone:true}, days:30, mode:'pt', hour:null, gOff:new Set(), tOff:new Set()};
+const S={on:{crime:true,theft:true,local:false,cctv:false,zone:true}, days:30, mode:'pt', hour:null, gOff:new Set(), tOff:new Set()};
 const ERR={};
 
 /* ---------- ใส่รหัส (ตรวจที่ Apps Script ของชีตวิเคราะห์อาชญากรรม) ---------- */
 const pinDlg=$('pinDlg');
-function openPin(msg){ $('pinErr').textContent=msg||''; $('pinInput').value=''; if(!pinDlg.open) pinDlg.showModal(); setTimeout(()=>$('pinInput').focus(),60); }
-pinDlg.addEventListener('cancel',e=>e.preventDefault());
-$('pinClose').onclick=()=>{ location.href='index.html'; };
+let PINMODE='map';
+function openPin(msg){ setPinMode(PINMODE); $('pinErr').textContent=msg||''; $('pinInput').value=''; if(!pinDlg.open) pinDlg.showModal(); setTimeout(()=>$('pinInput').focus(),60); }
+pinDlg.addEventListener('cancel',e=>{ if(PINMODE!=='cctv') e.preventDefault(); });
+function setPinMode(m){ PINMODE=m; const c=m==='cctv';
+  document.querySelector('#pinDlg .lg-title').textContent=c?'🔒 ชั้นกล้องวงจรปิด':'🔒 แผนที่รวม';
+  document.querySelector('#pinDlg .lg-sub').innerHTML=c?'ใส่รหัสของระบบกล้องวงจรปิด<br>(รหัสเดียวกับหน้า 📹 กล้องวงจรปิด)':'ใส่รหัสเจ้าหน้าที่ (รหัสเดียวกับหน้าวิเคราะห์อาชญากรรม)<br>ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์';
+  $('pinOk').textContent=c?'เปิดชั้นกล้อง':'เข้าแผนที่'; $('pinClose').textContent=c?'ยกเลิก':'กลับหน้าแรก'; }
+$('pinClose').onclick=()=>{ if(PINMODE==='cctv'){ pinDlg.close(); PINMODE='map'; return; } location.href='index.html'; };
 async function checkPin(pin){
   const j=await fetch(CRIME_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'full',pin})}).then(r=>r.json());
   if(!j.ok){ const e=new Error(j.error||'รหัสไม่ถูกต้อง'); e.auth=!!j.auth||/รหัส/.test(j.error||''); throw e; }
@@ -677,6 +689,9 @@ $('pinForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const pin=$('pinInput').value.trim(); if(!pin) return;
   const b=$('pinOk'); b.disabled=true; $('pinErr').textContent='กำลังตรวจสอบ…';
+  if(PINMODE==='cctv'){ try{ await loadCctv(pin); try{ sessionStorage.setItem('cctv-pin',pin); }catch(_){} pinDlg.close(); PINMODE='map'; cctvOn(); }
+    catch(err){ $('pinErr').textContent=err.auth?(err.message||'รหัสไม่ถูกต้อง'):'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; const f=$('pinForm'); f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); }
+    finally{ b.disabled=false; } return; }
   try{ await checkPin(pin); PIN=pin; try{ sessionStorage.setItem('map-pin',pin); }catch(_){} pinDlg.close(); unlock(); }
   catch(err){ $('pinErr').textContent=err.auth?(err.message||'รหัสไม่ถูกต้อง'):'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; const f=$('pinForm'); f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); }
   finally{ b.disabled=false; }
@@ -758,7 +773,9 @@ function buildSubs(){
 }
 $('subCrime').addEventListener('click',e=>{ const b=e.target.closest('.sub'); if(!b) return; const g=+b.dataset.g; S.gOff.has(g)?S.gOff.delete(g):S.gOff.add(g); b.classList.toggle('off',S.gOff.has(g)); bump(b,'press'); render(); });
 $('subLocal').addEventListener('click',e=>{ const b=e.target.closest('.sub'); if(!b) return; const t=b.dataset.t; S.tOff.has(t)?S.tOff.delete(t):S.tOff.add(t); b.classList.toggle('off',S.tOff.has(t)); bump(b,'press'); render(); });
-document.querySelectorAll('.ly').forEach(b=>b.addEventListener('click',()=>{ bump(b,'press'); const k=b.dataset.ly; S.on[k]=!S.on[k]; b.classList.toggle('on',S.on[k]);
+document.querySelectorAll('.ly').forEach(b=>b.addEventListener('click',()=>{ bump(b,'press'); const k=b.dataset.ly;
+  if(k==='cctv'&&!S.on.cctv&&!CAM){ askCctv(); return; }
+  S.on[k]=!S.on[k]; b.classList.toggle('on',S.on[k]);
   if(k==='crime'){ $('subCrime').hidden=!S.on.crime; if(S.on.crime) stagger('#subCrime .sub'); } if(k==='local'){ $('subLocal').hidden=!S.on.local; if(S.on.local) stagger('#subLocal .sub'); } render(); }));
 $('segRange').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S.days=+b.dataset.d; [...b.parentNode.children].forEach(x=>x.classList.toggle('on',x===b)); render(); });
 $('segMode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S.mode=b.dataset.m; [...b.parentNode.children].forEach(x=>x.classList.toggle('on',x===b)); render(); });
@@ -784,6 +801,34 @@ function locIcon(r,d){ const c=locCol(r.type);
 const colorOf=r=>r.k==='theft'?'#0d9488':r.k==='local'?'#0284c7':(GBY[r.g]||{}).c||'#dc2626';
 
 /* ---------- วาด ---------- */
+/* ---------- ชั้นกล้องวงจรปิด (ข้อมูลจากชีตกล้อง · ต้องใช้รหัสของระบบกล้อง) ---------- */
+const CCTV_API='https://script.google.com/macros/s/AKfycbwwwZxqqkvX-Pg3RVZ0WiIZFNY_1onyEx_ZGbe1HzKJUuiVk2tuLEui3zPa5zysByAMTg/exec';
+let CAM=null;
+async function loadCctv(pin){
+  const j=await fetch(CCTV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'list',pin})}).then(r=>r.json());
+  if(!j.ok){ const e=new Error(j.error||'รหัสไม่ถูกต้อง'); e.auth=!!j.auth; throw e; }
+  const by={};
+  (j.rows||[]).filter(r=>r.lat!=null).forEach(r=>{ const k=[r.place,r.agency,r.lat.toFixed(4),r.lng.toFixed(4)].join('|');
+    const g=by[k]||(by[k]={place:r.place||'—',agency:r.agency||'',owner:r.owner||'',lat:r.lat,lng:r.lng,n:0,days:null,contacts:[]});
+    g.n++; if(r.days&&(!g.days||r.days<g.days)) g.days=r.days; if((r.name||r.tel)&&!g.contacts.some(c=>c.tel===r.tel&&c.name===r.name)) g.contacts.push({name:r.name,tel:r.tel}); });
+  CAM=Object.values(by); CAM.total=(j.rows||[]).length; return CAM;
+}
+async function askCctv(){
+  const btn=document.querySelector('.ly[data-ly="cctv"]'); $('nCctv').textContent='⏳';
+  const tries=[]; try{ const c=sessionStorage.getItem('cctv-pin'); if(c) tries.push(c); }catch(_){} if(PIN&&!tries.includes(PIN)) tries.push(PIN);
+  for(const p of tries){ try{ await loadCctv(p); try{ sessionStorage.setItem('cctv-pin',p); }catch(_){} cctvOn(); return; }catch(err){ if(!err.auth){ $('nCctv').textContent='⚠️'; toast('โหลดข้อมูลกล้องไม่สำเร็จ ลองใหม่อีกครั้ง'); return; } } }
+  $('nCctv').textContent='–'; PINMODE='cctv'; openPin();
+}
+function cctvOn(){ S.on.cctv=true; document.querySelector('.ly[data-ly="cctv"]').classList.add('on'); render(); toast(`📹 เปิดชั้นกล้องวงจรปิด ${fmt(CAM.total)} ตัว · แตะจุดเกิดเหตุเพื่อดูกล้องใกล้ๆ`); }
+const camPol=g=>/ตร\./.test(g.owner)||/สภ\.|ตำรวจ/.test(g.agency);
+const telFmt=t=>t&&t.length===10?t.replace(/(\d{3})(\d{3})(\d{4})/,'$1-$2-$3'):t;
+function camIcon(g,d){ const c=camPol(g)?'#1d4ed8':'#0891b2';
+  return L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:`<div class="cam-sq" style="--c:${c};--d:${d||0}ms"><i>📹</i>${g.n>1?`<b>${g.n}</b>`:''}</div>`}); }
+function popupCam(g){
+  return `<div class="pp-t">📹 ${esc(g.place)}</div><div class="pp-a">${esc(g.agency)} · ${fmt(g.n)} ตัว${g.days?` · เก็บภาพ ${g.days} วัน${g.days<=7?' ⚠️':''}`:''}</div>
+  ${g.contacts.length?`<div class="pp-near"><b>ผู้ประสานขอภาพ</b>${g.contacts.slice(0,3).map(c=>`<div>${esc(c.name||'–')}${c.tel?` · <a href="tel:${esc(c.tel)}" style="color:#1d4ed8;font-weight:700;text-decoration:none">📞 ${esc(telFmt(c.tel))}</a>`:''}</div>`).join('')}</div>`:''}
+  <div class="pp-l">${gmap(g.lat,g.lng)}<a href="cctv.html">เปิดหน้ากล้องวงจรปิด →</a></div>`;
+}
 function render(){
   if(!map) return;
   const ev=evRows(), evAll=evRows(true), loc=locRows(), s=since();
@@ -804,6 +849,9 @@ function render(){
   const lg=loc.filter(r=>r.lat!=null), stepL=Math.min(8,500/Math.max(1,lg.length));
   lg.forEach((r,i)=>{ const m=L.marker([r.lat,r.lng],{icon:locIcon(r,Math.round(i*stepL)),riseOnHover:true,zIndexOffset:-500});
     m.bindPopup(()=>popupLocal(r),{maxWidth:300,offset:[0,-6]}); r.m=m; m.addTo(ptLayer); });
+  if(S.on.cctv&&CAM){ const stepC=Math.min(8,500/Math.max(1,CAM.length));
+    CAM.forEach((g,i)=>{ const m=L.marker([g.lat,g.lng],{icon:camIcon(g,Math.round(i*stepC)),riseOnHover:true,zIndexOffset:-200}); m.bindPopup(()=>popupCam(g),{maxWidth:300,offset:[0,-6]}); m.addTo(ptLayer); }); }
+  if(CAM) $('nCctv').textContent=fmt(CAM.total);
   const s2=since(), cc={}; INC.forEach(r=>{ if(!s2||r.t>=s2) cc[r.g]=(cc[r.g]||0)+1; });
   document.querySelectorAll('#subCrime .sub').forEach(x=>{ countTo(x.querySelector('b'),cc[x.dataset.g]||0); });
   renderHours(evAll); renderHot(geo);
@@ -819,6 +867,12 @@ function nearHtml(lat,lng,self){
   if(locs.length){ h+=`<div><i style="background:#0284c7"></i>สถานที่สำคัญ ${fmt(locs.length)} แห่ง</div>`;
     h+=locs.slice(0,3).map(o=>`<div style="padding-left:14px">${locIc(o.x.type)} ${esc(o.x.name)} <span style="color:#94a3b8">· ${Math.round(o.d)} ม.</span></div>`).join(''); }
   else h+='<div><i style="background:#cbd5e1"></i>ไม่มีสถานที่สำคัญที่บันทึกไว้</div>';
+  if(CAM){ const cams=CAM.map(g=>({g,d:distM(lat,lng,g.lat,g.lng)})).filter(o=>o.d<=R&&o.g!==self).sort((a,b)=>a.d-b.d);
+    if(cams.length){ const n=cams.reduce((s,o)=>s+o.g.n,0), c0=cams[0].g.contacts[0];
+      h+=`<div><i style="background:#0891b2"></i>กล้องวงจรปิด ${fmt(n)} ตัว (${cams.length} จุด)</div><div style="padding-left:14px">📹 ${esc(cams[0].g.place)} <span style="color:#94a3b8">· ${Math.round(cams[0].d)} ม.${cams[0].g.days?` · เก็บ ${cams[0].g.days} วัน`:''}</span></div>`;
+      if(c0&&c0.tel) h+=`<div style="padding-left:14px">☎️ ${esc(c0.name||'')} <a href="tel:${esc(c0.tel)}" style="color:#1d4ed8;font-weight:700;text-decoration:none">${esc(telFmt(c0.tel))}</a></div>`; }
+    else h+='<div><i style="background:#cbd5e1"></i>ไม่มีกล้องวงจรปิดในรัศมี</div>'; }
+  else h+='<div style="color:#94a3b8">📹 เปิดชั้นกล้องวงจรปิด เพื่อดูกล้องใกล้จุดนี้</div>';
   return h+'</div>';
 }
 const gmap=(lat,lng)=>`<a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" rel="noopener">นำทาง ↗</a>`;
