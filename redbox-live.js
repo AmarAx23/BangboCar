@@ -2,7 +2,7 @@
    ใช้คู่กับ redbox-data.js (ข้อมูลเก่าก่อน ต.ค. 69): เดือนที่มีในชีตใช้ตัวเลขจากชีต · เดือนอื่นใช้ไฟล์เดิม
    โหลดหลัง redbox-data.js · เมื่อได้ข้อมูลใหม่จะส่ง event 'redbox-update' ให้หน้าเว็บวาดใหม่ */
 (function(){
-  var API = '';   // ← URL เว็บแอป Apps Script ของชีตผลการตรวจตู้แดง (ลงท้าย /exec)
+  var API = 'https://script.google.com/macros/s/AKfycbyIbAFF_qtxX0-uI2wKXDxMwe0JqvojZnqrPHPgy6TQOOZ2sZ0ql-Hz4JrLkKH-zCT0/exec';   // ← URL เว็บแอป Apps Script ของชีตผลการตรวจตู้แดง (ลงท้าย /exec)
   if(!API || !window.fetch) return;
   var BASE = window.REDBOX || null, KEY = 'rb-live';
   function sum(o){ var s = 0; for(var k in o) s += o[k]; return s; }
