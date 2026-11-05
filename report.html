@@ -417,6 +417,7 @@ a,button,label,summary,[role=button]{-webkit-tap-highlight-color:transparent}
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 <script src="redbox-data.js"></script>
+<script src="redbox-live.js"></script>
 <script>
 const API={
   crime:'https://script.google.com/macros/s/AKfycbwlYw-y_bEU9wdDz8BM911CjHxfCEmnWpFwy_tpeWeJag5I0zwZw_Re9z9w0T3iwCdTZA/exec',
@@ -780,6 +781,7 @@ function fitPaper(){ const w=document.querySelector('.stage').clientWidth-32, pw
 addEventListener('resize',()=>{ if(D) fitPaper(); });
 
 function unlock(){ document.body.classList.remove('locked'); loadAll(); }
+document.addEventListener('redbox-update',()=>{ if(D) build(); });   // ตัวเลขตู้แดงจากชีตมาถึง → วาดรายงานใหม่
 boot();
 </script>
 </body>

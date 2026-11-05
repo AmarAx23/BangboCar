@@ -817,6 +817,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   <p class="rb-note" id="rbFoot" style="text-align:center;margin-top:16px"></p>
 </main>
 <script src="redbox-data.js"></script>
+<script src="redbox-live.js"></script>
 <script>
 // ===== ผลการตรวจตู้แดง: counts per officer (data file holds counts only — no times, no places) =====
 const THAI_MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -840,7 +841,7 @@ function countTo(el, to, unit){
   const step = now=>{ const p = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-p,3); el.textContent = fmt(Math.round(to*e)) + (unit||''); if(p<1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
-const D = window.REDBOX;
+let D = window.REDBOX;
 let month = '';   // '' = every month
 const COLORS = ['#ef4444','#f97316','#f59e0b','#3b82f6','#3b82f6','#3b82f6','#8b5cf6','#8b5cf6','#10b981','#10b981','#64748b','#64748b'];
 const pctTxt = (n, t)=>{ const p = n/t*100; return p>0 && p<1 ? '<1%' : Math.round(p)+'%'; };
@@ -958,17 +959,24 @@ function buildMonthSeg(){
     if(month){ calMonth = month; renderCalendar(); }
   }));
 }
-if(!D){ document.querySelector('main').innerHTML = '<p class="rb-note">โหลดข้อมูลตู้แดงไม่สำเร็จ</p>'; }
-else{
+let STARTED = false;
+function startPage(){
+  if(!D){ if(!STARTED) document.getElementById('rbChart').innerHTML = '<p class="rb-note">โหลดข้อมูลตู้แดงไม่สำเร็จ</p>'; return; }
+  const first = !STARTED; STARTED = true;
+  if(month && !D.months.includes(month)) month = '';
+  if(calMonth && !D.months.includes(calMonth)) calMonth = null;
   document.getElementById('rbSub').textContent = `สถานีตำรวจภูธรบางบ่อ · ${dayLabel(D.firstDay)} – ${dayLabel(D.lastDay)}`;
-  document.getElementById('rbFoot').textContent = `ข้อมูลจากไฟล์ผลการตรวจตู้แดง ${dayLabel(D.firstDay)} – ${dayLabel(D.lastDay)} · แสดงเฉพาะจำนวนครั้ง ไม่แสดงเวลาและสถานที่ที่ตรวจ`;
+  document.getElementById('rbFoot').textContent = `ข้อมูลจาก${D.live?'ชีต':'ไฟล์'}ผลการตรวจตู้แดง ${dayLabel(D.firstDay)} – ${dayLabel(D.lastDay)} · แสดงเฉพาะจำนวนครั้ง ไม่แสดงเวลาและสถานที่ที่ตรวจ`;
   buildMonthSeg(); render();
   const cw = document.getElementById('calWho');
-  cw.innerHTML += D.officers.slice().sort((a,b)=>countOf(b,'')-countOf(a,'')).map(o=>`<option value="${esc(o.name)}">${esc(o.name)}</option>`).join('');
-  cw.addEventListener('change', renderCalendar);
+  const keep = cw.value; cw.innerHTML = cw.options[0].outerHTML + D.officers.slice().sort((a,b)=>countOf(b,'')-countOf(a,'')).map(o=>`<option value="${esc(o.name)}">${esc(o.name)}</option>`).join(''); cw.value = keep;
+  if(first) cw.addEventListener('change', renderCalendar);
   renderCalendar();
-  if(!reduceMotion) [...document.querySelectorAll('.kpi, .card')].forEach((c,i)=>{ c.style.setProperty('--d', i*60+'ms'); c.classList.add('reveal'); });
+  if(first && !reduceMotion) [...document.querySelectorAll('.kpi, .card')].forEach((c,i)=>{ c.style.setProperty('--d', i*60+'ms'); c.classList.add('reveal'); });
 }
+startPage();
+/* ข้อมูลใหม่จากชีตตู้แดง (redbox-live.js) → วาดใหม่ */
+document.addEventListener('redbox-update', ()=>{ D = window.REDBOX; startPage(); });
 </script>
 </body>
 </html>
