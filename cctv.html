@@ -1004,6 +1004,9 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 .near-box .t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--text-strong)}
 .near-box .sec-tabs{margin:8px 0 4px}
 .near-box .sec-tabs button{font-size:12.5px;padding:4px 11px}
+.np-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px}
+.np-bar[hidden]{display:none}
+:root[data-theme="dark"] .np-bar{background:#2a1215;border-color:#7f1d1d;color:#fecaca}
 .flt-h{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.3px;margin-bottom:-4px}
 .srch{position:relative}
 .srch input{width:100%;border:1px solid var(--input-border);border-radius:12px;padding:9px 12px 9px 34px;font:500 14px 'Prompt',sans-serif;background:var(--surface);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
@@ -1108,7 +1111,7 @@ main{transition:filter .6s}
     <button type="button" class="kpi type-card" data-f="pol"><span class="ti">👮</span><span class="kpi-lbl">กล้องของ ตร.</span><span class="kpi-val" id="kPol">–</span><span class="kpi-sub" id="kPolS"></span></button>
     <button type="button" class="kpi type-card" data-f="oth"><span class="ti">🏢</span><span class="kpi-lbl">หน่วยงานอื่น</span><span class="kpi-val" id="kOth">–</span><span class="kpi-sub" id="kOthS"></span></button>
     <button type="button" class="kpi type-card warn" data-f="short"><span class="ti">⏱️</span><span class="kpi-lbl">เก็บภาพไม่เกิน 7 วัน</span><span class="kpi-val" id="kShort">–</span><span class="kpi-sub">ต้องรีบขอภาพ</span></button>
-    <button type="button" class="kpi type-card" data-f="loc" style="cursor:default"><span class="ti">📍</span><span class="kpi-lbl">จุดติดตั้ง</span><span class="kpi-val" id="kLoc">–</span><span class="kpi-sub" id="kLocS"></span></button>
+    <button type="button" class="kpi type-card" data-f="loc" title="แตะเพื่อดูจุดที่พิกัดไม่ถูกต้อง"><span class="ti">📍</span><span class="kpi-lbl">จุดติดตั้ง</span><span class="kpi-val" id="kLoc">–</span><span class="kpi-sub" id="kLocS"></span></button>
   </div>
 
   <div id="panelMap">
@@ -1138,6 +1141,7 @@ main{transition:filter .6s}
 
   <div id="panelList" hidden>
     <div class="card">
+      <div class="np-bar" id="npBar" hidden>⚠️ กล้องที่<b>พิกัดไม่ถูกต้อง</b> จึงไม่ขึ้นบนแผนที่ · แก้ช่องละติจูด/ลองจิจูดในชีตตาม<b>แถว</b>ที่แสดง แล้วโหลดหน้านี้ใหม่ <button type="button" class="btn btn-reset" id="npX" style="padding:3px 12px;font-size:12.5px">✕ ดูทั้งหมด</button></div>
       <div class="sec-tabs" id="daysTabs"><button type="button" data-d="" class="on">⏱️ ทุกระยะเวลา</button><button type="button" data-d="7">≤ 7 วัน</button><button type="button" data-d="20">8–20 วัน</button><button type="button" data-d="99">&gt; 20 วัน</button></div>
       <div class="li-tools">
         <div class="form-control">
@@ -1219,7 +1223,7 @@ async function boot(){
 
 /* ---------- ข้อมูล: กล้องที่จุดเดียวกัน = 1 จุดติดตั้ง ---------- */
 let G=[], map=null, layer=null, dropMark=null, dropCircle=null, meMark=null, NEAR=null, RADIUS=300, SEL=null, SHOW=40, VIEW='map';
-const F={q:'',f:'all',days:''};
+const F={q:'',f:'all',days:'',np:false};
 function group(rows){
   const by={};
   rows.forEach(r=>{ const k=[r.place,r.agency,r.lat!=null?r.lat.toFixed(4):'-',r.lng!=null?r.lng.toFixed(4):'-'].join('|');
@@ -1238,7 +1242,7 @@ function start(j){
   $('liSub').textContent=`สถานีตำรวจภูธรบางบ่อ · ${fmt(cams)} กล้อง · ${fmt(G.length)} จุด`;
   $('liCount').textContent=`ข้อมูลจากชีต "กล้องวงจรปิด" · ณ ${j.updated||''}`;
   initMap(); render(true);
-  if(noPos) toast(`⚠️ มี ${noPos} กล้องที่พิกัดไม่ถูกต้อง (ไม่แสดงบนแผนที่)`);
+  if(noPos) toast(`⚠️ มี ${noPos} กล้องที่พิกัดไม่ถูกต้อง · แตะการ์ด 📍 จุดติดตั้ง เพื่อดูว่าตัวไหน`);
   stagger('.li-head, .type-card, #panelMap .card',60);
 }
 
@@ -1269,6 +1273,7 @@ function pinIcon(g,d){ const s=g.n>=20?34:g.n>=8?28:g.n>=3?24:20; return L.divIc
 
 /* ---------- กรอง + วาด ---------- */
 function pass(g){
+  if(F.np&&g.lat!=null) return false;
   if(F.f==='pol'&&!isPol(g)) return false; if(F.f==='oth'&&isPol(g)) return false;
   if(F.days){ const d=g.days; if(d==null) return false; if(F.days==='7'&&d>7) return false; if(F.days==='20'&&(d<=7||d>20)) return false; if(F.days==='99'&&d<=20) return false; }
   if(F.q){ const q=F.q.toLowerCase().replace(/\s+/g,''); const hay=(g.place+g.agency+g.contacts.map(c=>c.name+c.tel).join('')).toLowerCase().replace(/\s+/g,''); if(!hay.includes(q)) return false; }
@@ -1301,7 +1306,7 @@ function renderSide(vis,anim){
 }
 function renderTable(vis,anim){
   $('liTable').innerHTML=`<thead><tr><th>#</th><th>สถานที่ติดตั้ง</th><th>หน่วยงาน</th><th>จำนวน</th><th>เก็บภาพ</th><th>ผู้ประสานขอภาพ</th><th>แผนที่</th></tr></thead><tbody>`+
-    (vis.length?vis.map((g,k)=>`<tr><td class="n">${k+1}</td><td class="nm">${esc(g.place)}<div class="li-note">${esc(g.zone)} · ${esc(g.stores.join(', '))}</div></td><td>${esc(g.agency)}<div class="li-note">${esc(g.owner)}</div></td><td class="c">${fmt(g.n)} ตัว</td><td class="c">${g.days!=null?`<span class="tpill${g.days<=7?' warn':''}">${g.days} วัน</span>`:'–'}</td><td>${g.contacts.map(c=>`<div>${esc(c.name||'–')}${c.tel?` · <a class="tel" href="tel:${esc(c.tel)}">📞 ${esc(telFmt(c.tel))}</a>`:''}</div>`).join('')||'–'}</td><td><button type="button" class="btn-map" data-i="${g.i}"${g.lat==null?' disabled':''}>🗺️ ดู</button></td></tr>`).join('')
+    (vis.length?vis.map((g,k)=>`<tr><td class="n">${k+1}</td><td class="nm">${esc(g.place)}<div class="li-note">${esc(g.zone)} · ${esc(g.stores.join(', '))}</div>${g.lat==null?`<div class="li-note" style="color:#dc2626;font-weight:600">⚠️ พิกัดไม่ถูกต้อง · แถวในชีต: ${g.cams.map(c=>c.row).join(', ')}</div>`:''}</td><td>${esc(g.agency)}<div class="li-note">${esc(g.owner)}</div></td><td class="c">${fmt(g.n)} ตัว</td><td class="c">${g.days!=null?`<span class="tpill${g.days<=7?' warn':''}">${g.days} วัน</span>`:'–'}</td><td>${g.contacts.map(c=>`<div>${esc(c.name||'–')}${c.tel?` · <a class="tel" href="tel:${esc(c.tel)}">📞 ${esc(telFmt(c.tel))}</a>`:''}</div>`).join('')||'–'}</td><td><button type="button" class="btn-map" data-i="${g.i}"${g.lat==null?' disabled':''}>🗺️ ดู</button></td></tr>`).join('')
       :'<tr><td colspan="7" class="li-empty">ไม่พบกล้องตามตัวกรอง</td></tr>')+'</tbody>';
   if(anim&&VIEW==='list') stagger('#liTable tbody tr',18);
 }
@@ -1338,12 +1343,15 @@ $('nearR').addEventListener('click',e=>{ const b=e.target.closest('button'); if(
 $('nearX').onclick=()=>{ NEAR=null; if(dropMark){ dropMark.remove(); dropMark=null; } if(dropCircle){ dropCircle.remove(); dropCircle=null; } render(true); };
 
 /* ---------- ตัวกรอง / แท็บ ---------- */
-$('typeRow').addEventListener('click',e=>{ const b=e.target.closest('.type-card'); if(!b||b.dataset.f==='loc') return;
+$('typeRow').addEventListener('click',e=>{ const b=e.target.closest('.type-card'); if(!b) return;
+  if(b.dataset.f==='loc'){ if(!G.some(g=>g.lat==null)) return toast('ทุกจุดมีพิกัดถูกต้อง'); F.np=!F.np; if(F.np){ F.f='all'; F.days=''; F.q=''; showView('list',true); } render(true); return; }
+  F.np=false;
   if(b.dataset.f==='short') F.days=F.days==='7'?'':'7'; else if(b.dataset.f==='all'){ F.f='all'; F.days=''; } else F.f=F.f===b.dataset.f?'all':b.dataset.f;
   SHOW=40; render(true); });
 /* ตัวกรองทุกจุด (การ์ด · ปุ่มข้างแผนที่ · แท็บรายการ · ช่องค้นหา) ใช้ค่าเดียวกัน */
 function syncUI(){
-  document.querySelectorAll('#typeRow .type-card').forEach(b=>{ const f=b.dataset.f; b.classList.toggle('on', f==='short'?F.days==='7':f==='all'?(F.f==='all'&&!F.days):f===F.f); });
+  document.querySelectorAll('#typeRow .type-card').forEach(b=>{ const f=b.dataset.f; b.classList.toggle('on', f==='loc'?F.np:F.np?false:f==='short'?F.days==='7':f==='all'?(F.f==='all'&&!F.days):f===F.f); });
+  $('npBar').hidden=!F.np;
   document.querySelectorAll('#segOwner button').forEach(x=>x.classList.toggle('on',x.dataset.v===F.f));
   document.querySelectorAll('#segDays button').forEach(x=>x.classList.toggle('on',x.dataset.v===F.days));
   document.querySelectorAll('#daysTabs button').forEach(x=>x.classList.toggle('on',x.dataset.d===F.days));
@@ -1353,6 +1361,7 @@ function syncUI(){
 $('segOwner').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.f=b.dataset.v; SHOW=40; render(true); });
 $('segDays').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.days=b.dataset.v; SHOW=40; render(true); });
 let mqT; $('mq').addEventListener('input',()=>{ clearTimeout(mqT); mqT=setTimeout(()=>{ F.q=$('mq').value.trim(); SHOW=40; render(); },180); });
+$('npX').onclick=()=>{ F.np=false; render(true); };
 $('daysTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.days=b.dataset.d; render(true); });
 let qT; $('liSearch').addEventListener('input',()=>{ clearTimeout(qT); qT=setTimeout(()=>{ F.q=$('liSearch').value.trim(); SHOW=40; render(); },180); });
 function showView(v,push){
