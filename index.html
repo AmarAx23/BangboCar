@@ -1595,7 +1595,7 @@ function setChooserStat(){
   const sc = document.createElement('script'); sc.src = 'redbox-data.js';
   const rbStat = ()=>{ const D = window.REDBOX; if(D) document.getElementById('hcRedboxStat').textContent = `${D.total.toLocaleString('th-TH')} ครั้ง · ${D.officers.length} นาย`; };
   document.addEventListener('redbox-update', rbStat);   // ตัวเลขจากชีตตู้แดง (redbox-live.js)
-  sc.onload = ()=>{ rbStat(); const lv = document.createElement('script'); lv.src = 'redbox-live.js'; document.head.appendChild(lv); };
+  sc.onload = ()=>{ rbStat(); const lv = document.createElement('script'); lv.src = 'redbox-live.js?v=2'; document.head.appendChild(lv); };
   document.head.appendChild(sc);
   // leave system: how many requests are waiting for approval (same Apps Script the leave site reads)
   const LEAVE_API = 'https://script.google.com/macros/s/AKfycbyvA77uO7cWUb0Z_Q2sEXd2McXqDoR2Zd0675n2kVjHGIIAq5OHEC2h9nfyMNeNeVry/exec';
