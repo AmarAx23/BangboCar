@@ -992,6 +992,7 @@ if(!/[?&](from|to)=/.test(location.search) && !location.hash) document.getElemen
         </div>
       </div>
     </label>
+    <button class="btn btn-reset" id="shareLinkBtn" type="button" title="คัดลอกลิงก์หน้ารถหายแบบดูอย่างเดียว (ไม่มีแบบฟอร์ม · ไม่มีข้อมูลผู้เสียหาย) ไว้แชร์">🔗 คัดลอกลิงก์</button>
     <a class="btn btn-reset" href="redbox.html" style="text-decoration:none">🚨 ตู้แดง</a>
     <button class="btn btn-reset" onclick="loadData(false)">🔄 รีเฟรช</button>
     <button class="btn btn-print" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
@@ -2543,6 +2544,11 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const c=document
 const THEFT_API = 'https://script.google.com/macros/s/AKfycbwl0Y7siW8vwmKn8ofBrJf7ImflPfKVS9kLhpzb6JXF8D4tZuaXTIg574yw1-As5XA/exec';   // ← URL เว็บแอป Apps Script ของชีตรถหาย (ลงท้าย /exec)
 const $f = id=>document.getElementById(id);
 let toastT; function toast(m){ const t=$f('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3400); }
+/* คัดลอกลิงก์หน้าดูอย่างเดียว (theft.html) ไว้แชร์ทาง LINE */
+document.getElementById('shareLinkBtn').addEventListener('click', async ()=>{
+  const u = location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, '') + 'theft.html';
+  try{ await navigator.clipboard.writeText(u); toast('📋 คัดลอกลิงก์แล้ว (หน้าดูอย่างเดียว) ส่งทาง LINE ได้เลย'); }catch(_){ window.prompt('คัดลอกลิงก์นี้', u); }
+});
 const p2 = n=>String(n).padStart(2,'0');
 function setNowTheft(){ const d=new Date(); $f('tDate').value=d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); $f('tTime').value=p2(d.getHours())+':'+p2(d.getMinutes()); }
 function fillTheftLists(){
