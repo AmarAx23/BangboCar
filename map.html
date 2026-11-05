@@ -445,6 +445,23 @@ body.unlocking .mp-wrap{transition:filter .7s ease}
   .rise,.press,.tick,.drop,.pulse,.zone-path,.zone-label,.leaflet-popup,.me-dot span,#hotBtn::after,.bars button.sel,.srch li{animation:none!important}
   .bars button,.ly,.seg button,.chip{transition:none}
 }
+
+/* ===== หมุดแบบใหม่ ===== */
+.ev-pin{position:relative;width:var(--s);height:calc(var(--s) + 8px);animation:evDrop .55s cubic-bezier(.3,1.5,.5,1) both;animation-delay:var(--d,0ms);transform-origin:50% 100%}
+.ev-b{position:absolute;left:0;top:0;width:var(--s);height:var(--s);border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:radial-gradient(circle at 30% 30%,color-mix(in srgb,var(--c) 70%,#fff),var(--c) 70%);border:2.5px solid #fff;box-shadow:0 4px 10px color-mix(in srgb,var(--c) 45%,transparent),0 1px 3px rgba(0,0,0,.35);display:grid;place-items:center;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.ev-b i{transform:rotate(45deg);font-style:normal;font-size:calc(var(--s) * .45);line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.ev-sh{position:absolute;left:50%;bottom:0;width:calc(var(--s) * .5);height:5px;margin-left:calc(var(--s) * -.25);border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.35),transparent);z-index:-1}
+.ev-pin:hover .ev-b{transform:rotate(-45deg) scale(1.15)}
+.ev-pin.major .ev-b{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 30%,transparent),0 4px 12px color-mix(in srgb,var(--c) 60%,transparent)}
+.ev-ring{position:absolute;left:50%;bottom:2px;width:calc(var(--s) * 1.4);height:calc(var(--s) * .55);margin-left:calc(var(--s) * -.7);border-radius:50%;border:2.5px solid var(--c);opacity:0;animation:evRing 1.8s ease-out infinite;animation-delay:calc(var(--d,0ms) + .5s);z-index:-1}
+@keyframes evDrop{0%{opacity:0;transform:translateY(-28px) scale(.6)}60%{opacity:1;transform:translateY(2px) scale(1.05,.95)}100%{transform:none}}
+@keyframes evRing{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1.4);opacity:0}}
+.lc-pin{width:24px;height:24px;border-radius:50%;background:#fff;border:2.5px solid var(--c);box-shadow:0 2px 6px rgba(15,23,42,.25);display:grid;place-items:center;animation:lcPop .4s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--d,0ms);transition:transform .2s}
+.lc-pin i{font-style:normal;font-size:12px;line-height:1}
+.lc-pin:hover{transform:scale(1.25)}
+:root[data-theme="dark"] .lc-pin{background:#0f172a}
+@keyframes lcPop{from{opacity:0;transform:scale(0)}}
+@media (prefers-reduced-motion:reduce){ .ev-pin,.lc-pin,.ev-ring{animation:none!important} .ev-ring{display:none} }
 </style>
 <script src="fx.js"></script>
 <!-- ให้เว็บรู้สึกเหมือนแอปบนมือถือ: หน้าต่างเลื่อนขึ้นจากล่าง · ปุ่มยุบตอนแตะ · สีแถบด้านบน · หน้าโลโก้ตอนเปิดแอป -->
@@ -494,7 +511,7 @@ a,button,label,summary,[role=button]{-webkit-tap-highlight-color:transparent}
     <h3>ชั้นข้อมูล</h3>
     <button type="button" class="ly on" data-ly="crime" style="--c:#dc2626"><i></i>จุดเกิดเหตุ<span class="n" id="nCrime">–</span><span class="sw"></span></button>
     <div class="subs" id="subCrime"></div>
-    <button type="button" class="ly on" data-ly="theft" style="--c:#f59e0b"><i></i>รถจักรยานยนต์หาย<span class="n" id="nTheft">–</span><span class="sw"></span></button>
+    <button type="button" class="ly on" data-ly="theft" style="--c:#0d9488"><i></i>รถจักรยานยนต์หาย<span class="n" id="nTheft">–</span><span class="sw"></span></button>
     <button type="button" class="ly" data-ly="local" style="--c:#0284c7"><i></i>สถานที่สำคัญ / กล้อง<span class="n" id="nLocal">–</span><span class="sw"></span></button>
     <div class="subs" id="subLocal" hidden></div>
     <button type="button" class="ly on" data-ly="zone" style="--c:#475569"><i></i>เขตตรวจ<span class="n" id="nZone">3</span><span class="sw"></span></button>
@@ -755,7 +772,16 @@ function evRows(ignoreHour){
   return ignoreHour||S.hour==null?out:out.filter(r=>!r.nt&&r.t.getHours()===S.hour);
 }
 const locRows=()=>S.on.local?LOC.filter(r=>!S.tOff.has(r.type)):[];
-const colorOf=r=>r.k==='theft'?'#f59e0b':r.k==='local'?'#0284c7':(GBY[r.g]||{}).c||'#dc2626';
+/* หมุดแบบใหม่: เหตุ = หมุดหยดน้ำสีตามประเภท + ไอคอน · เหตุใหม่ (3 วัน) มีวงกระเพื่อม · สถานที่ = วงกลมขาวขอบสีตามประเภท */
+const LOC_COL=[[/ทอง/,'#d97706'],[/ธนาคาร|ATM/i,'#2563eb'],[/สะดวกซื้อ|เซเว่น|7-?11/i,'#16a34a'],[/ปั[้๊]?ม|น้ำมัน|แก๊ส/,'#e11d48'],[/โรงเรียน|วิทยาลัย/,'#7c3aed'],[/วัด|มัสยิด|โบสถ์/,'#ca8a04'],[/โรงแรม|รีสอร์ท|ที่พัก/,'#db2777'],[/กล้อง|CCTV/i,'#0891b2']];
+const locCol=t=>(LOC_COL.find(([re])=>re.test(t||''))||[,'#0284c7'])[1];
+function evIcon(r,d){ const c=colorOf(r), ic=r.k==='theft'?'🛵':((GBY[r.g]||{}).ic||'📌'), fresh=Date.now()-r.t<3*864e5, big=r.major;
+  const s=big?36:30;
+  return L.divIcon({className:'',iconSize:[s,s+8],iconAnchor:[s/2,s+6],
+    html:`<div class="ev-pin${fresh?' fresh':''}${big?' major':''}" style="--c:${c};--s:${s}px;--d:${d||0}ms"><span class="ev-b"><i>${ic}</i></span>${fresh?'<span class="ev-ring"></span>':''}<span class="ev-sh"></span></div>`}); }
+function locIcon(r,d){ const c=locCol(r.type);
+  return L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:`<div class="lc-pin" style="--c:${c};--d:${d||0}ms"><i>${locIc(r.type)}</i></div>`}); }
+const colorOf=r=>r.k==='theft'?'#0d9488':r.k==='local'?'#0284c7':(GBY[r.g]||{}).c||'#dc2626';
 
 /* ---------- วาด ---------- */
 function render(){
@@ -771,12 +797,13 @@ function render(){
   if(S.mode==='heat' && L.heatLayer){
     heatLayer=L.heatLayer(geo.map(r=>[r.lat,r.lng,r.major?1:.6]),{radius:26,blur:20,maxZoom:17,minOpacity:.35,gradient:{.25:'#fde047',.55:'#f97316',.85:'#dc2626',1:'#7f1d1d'}}).addTo(map); fadeIn(heatLayer._canvas);
   } else {
-    geo.forEach(r=>{ const m=L.circleMarker([r.lat,r.lng],{renderer:rend,radius:r.major?8:6.5,color:'#fff',weight:2,fillColor:colorOf(r),fillOpacity:.95});
-      m.bindPopup(()=>popupHtml(r),{maxWidth:300}); r.m=m; m.addTo(ptLayer); POP.push(m); });
+    const stepE=Math.min(14,600/Math.max(1,geo.length));
+    geo.slice().sort((a,b)=>a.t-b.t).forEach((r,i)=>{ const m=L.marker([r.lat,r.lng],{icon:evIcon(r,Math.round(i*stepE)),riseOnHover:true,zIndexOffset:500+i});
+      m.bindPopup(()=>popupHtml(r),{maxWidth:300,offset:[0,-26]}); r.m=m; m.addTo(ptLayer); });
   }
-  loc.filter(r=>r.lat!=null).forEach(r=>{ const m=L.circleMarker([r.lat,r.lng],{renderer:rend,radius:5.5,color:'#fff',weight:1.5,fillColor:'#0284c7',fillOpacity:.9});
-    m.bindPopup(()=>popupLocal(r),{maxWidth:300}); r.m=m; m.addTo(ptLayer); POP.push(m); });
-  popIn();
+  const lg=loc.filter(r=>r.lat!=null), stepL=Math.min(8,500/Math.max(1,lg.length));
+  lg.forEach((r,i)=>{ const m=L.marker([r.lat,r.lng],{icon:locIcon(r,Math.round(i*stepL)),riseOnHover:true,zIndexOffset:-500});
+    m.bindPopup(()=>popupLocal(r),{maxWidth:300,offset:[0,-6]}); r.m=m; m.addTo(ptLayer); });
   const s2=since(), cc={}; INC.forEach(r=>{ if(!s2||r.t>=s2) cc[r.g]=(cc[r.g]||0)+1; });
   document.querySelectorAll('#subCrime .sub').forEach(x=>{ countTo(x.querySelector('b'),cc[x.dataset.g]||0); });
   renderHours(evAll); renderHot(geo);
