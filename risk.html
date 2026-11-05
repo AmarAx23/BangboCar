@@ -1243,6 +1243,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
         </div>
       </div>
     </label>
+    <button class="btn btn-reset" id="shareLinkBtn" type="button" title="คัดลอกลิงก์หน้าดูอย่างเดียว ไว้แชร์">🔗 คัดลอกลิงก์</button>
     <button class="btn btn-print" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
   </div>
 </nav>
@@ -1939,5 +1940,11 @@ async function load(quiet, pre){
 })();
 </script>
 <script>/* สลับแท็บ: เนื้อหาจางเข้า */document.addEventListener('click',e=>{ if(e.target.closest('[data-view]')) document.documentElement.classList.add('tabbed'); },true);</script>
+<script>/* คัดลอกลิงก์หน้าดูอย่างเดียว (risk-list.html) ไว้แชร์ทาง LINE */
+document.getElementById('shareLinkBtn').addEventListener('click', async ()=>{
+  const u = location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, '') + 'risk-list.html';
+  const say = m=>{ try{ toast(m); }catch(_){} };
+  try{ await navigator.clipboard.writeText(u); say('📋 คัดลอกลิงก์แล้ว (หน้าดูอย่างเดียว) ส่งทาง LINE ได้เลย'); }catch(_){ window.prompt('คัดลอกลิงก์นี้', u); }
+});</script>
 </body>
 </html>
