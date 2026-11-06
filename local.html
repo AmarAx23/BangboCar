@@ -1242,7 +1242,7 @@ $('typeRow').addEventListener('click', e=>{ const b = e.target.closest('.type-ca
 ['pubTabs','mapTabs'].forEach(id => $(id).addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; S.type = b.dataset.t; renderTypes(); renderTable(); }));
 
 /* ---------- ภาพรวม (อินโฟกราฟิกจำนวนสถานที่) ---------- */
-const TH_NUM = n=>String(n).replace(/\d/g,d=>'๐๑๒๓๔๕๖๗๘๙'[d]);
+const TH_NUM = n=>String(n);
 function ovZone(r){
   if(r.lat==null || r.lng==null) return '';
   const z = AREA.find(z=>{ let ins=false; const c=z.c; for(let i=0,j=c.length-1;i<c.length;j=i++){ const [xi,yi]=c[i],[xj,yj]=c[j]; if(((yi>r.lat)!==(yj>r.lat)) && (r.lng<(xj-xi)*(r.lat-yi)/(yj-yi)+xi)) ins=!ins; } return ins; });
