@@ -1059,6 +1059,38 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
 body.locked main{filter:blur(6px) grayscale(.4);pointer-events:none;user-select:none}
 main{transition:filter .6s}
 .ld{padding:60px 0;text-align:center;color:var(--muted)}
+/* ฟอร์มบันทึกกล้อง */
+.fm-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+.fm-card{display:flex;flex-direction:column;gap:12px}
+.fm-card .card-title{margin-bottom:-2px}
+.fm-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld>span{font-size:13px;font-weight:600;color:var(--text-2)}
+.fld i,.req{color:#dc2626;font-style:normal}
+.fld input{width:100%;border:1px solid var(--input-border);border-radius:10px;padding:9px 12px;font:500 14.5px 'Prompt',sans-serif;background:var(--surface);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.fld input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+.fld input.bad,#fLat.bad,#fLng.bad{border-color:#dc2626;background:color-mix(in srgb,#dc2626 6%,var(--surface));animation:shakeX .35s}
+@keyframes shakeX{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.fld-h{font-size:12px;color:var(--muted);font-style:normal}
+.fld-h a{color:#2563eb;font-weight:600}
+.fm-days{display:flex;gap:8px;align-items:center}
+.fm-days input{width:96px;flex:none}
+.fm-days .seg{flex:1}
+#fMap{position:relative;height:340px;border-radius:12px;overflow:hidden;border:1px solid var(--border);z-index:1}
+#fMap .map-btns{z-index:800}
+.fm-near{border:1px dashed #3b82f6;border-radius:12px;padding:9px 11px;font-size:12.5px;color:var(--text-2);display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb,#3b82f6 6%,var(--surface))}
+.fm-near[hidden]{display:none}
+.fm-pick{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:6px 10px;font:500 13px 'Prompt',sans-serif;color:var(--text);text-align:left;cursor:pointer;transition:border-color .2s,transform .15s}
+.fm-pick:hover{border-color:#3b82f6;transform:translateY(-1px)}
+.fm-pick b{color:#2563eb;font-weight:600;white-space:nowrap}
+.fm-err{color:#dc2626;font-size:13px;font-weight:600;min-height:1em}
+.fm-err:empty{display:none}
+.fm-act{display:flex;gap:10px;justify-content:flex-end}
+.fm-act .btn{padding:10px 18px;font-size:15px}
+.fm-act .btn:disabled{opacity:.6;cursor:wait}
+#typeRow[hidden]{display:none}
+@media (max-width:980px){ .fm-grid{grid-template-columns:1fr} #fMap{height:300px} }
+@media (max-width:520px){ .fm-row2{grid-template-columns:1fr} .fm-act .btn{flex:1;justify-content:center} }
 @media (max-width:980px){ .mp-grid{grid-template-columns:1fr} .side-card{max-height:none;min-height:0} .side-list{overflow:visible} #panelMap #liMap{height:60vh;min-height:360px} }
 @media (max-width:700px){ #typeRow{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px} #typeRow .type-card{padding:10px;gap:2px} #typeRow .ti{font-size:18px} #typeRow .kpi-val{font-size:20px} #typeRow .kpi-lbl{font-size:11.5px;min-height:2.5em;margin-bottom:2px} #typeRow .kpi-sub{display:none} }
 @media (prefers-reduced-motion:reduce){ .cam-pin,.drop-pin,.near-circle,.leaflet-popup,.rise,.tick{animation:none!important} .drop-pin::after,.me-dot::after{display:none} }
@@ -1079,6 +1111,7 @@ main{transition:filter .6s}
   <div class="tabbar" role="tablist" aria-label="มุมมอง">
     <button class="tab on" role="tab" data-view="map" aria-selected="true">🗺️ แผนที่</button>
     <button class="tab" role="tab" data-view="list" aria-selected="false">📋 รายการ</button>
+    <button class="tab" role="tab" data-view="add" aria-selected="false">📝 บันทึกกล้อง</button>
   </div>
   <div class="nav-right">
     <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
@@ -1151,6 +1184,56 @@ main{transition:filter .6s}
       </div>
       <div class="li-wrap"><table class="li-table" id="liTable"></table></div>
     </div>
+  </div>
+
+  <div id="panelAdd" hidden>
+    <form class="fm" id="addForm" novalidate autocomplete="off">
+      <div class="fm-grid">
+        <div class="card fm-card">
+          <div class="card-title">👤 ผู้ลงข้อมูล / ผู้ประสานขอภาพ</div>
+          <div class="fm-row2">
+            <label class="fld"><span>ชื่อ-สกุลผู้ลงข้อมูล <i>*</i></span><input id="fName" maxlength="80" required placeholder="เช่น ส.ต.ต.สมชาย ใจดี"></label>
+            <label class="fld"><span>หมายเลขโทรศัพท์ <i>*</i></span><input id="fTel" type="tel" inputmode="tel" maxlength="12" required placeholder="0xx-xxx-xxxx"></label>
+          </div>
+          <div class="card-title" style="margin-top:6px">🏢 หน่วยงาน / สถานที่</div>
+          <label class="fld"><span>สถานที่ติดตั้งกล้อง <i>*</i></span><input id="fPlace" list="dlPlace" maxlength="150" required placeholder="เช่น หน้าร้านสะดวกซื้อ ปากซอย…"><em class="fld-h" id="fPlaceH"></em></label>
+          <div class="fm-row2">
+            <label class="fld"><span>ประเภทหน่วยงาน <i>*</i></span><input id="fOwner" list="dlOwner" maxlength="60" required placeholder="เลือกหรือพิมพ์"></label>
+            <label class="fld"><span>ชื่อหน่วยงาน <i>*</i></span><input id="fAgency" list="dlAgency" maxlength="120" required placeholder="เช่น อบต.… / บริษัท…"></label>
+          </div>
+          <div class="card-title" style="margin-top:6px">📹 ข้อมูลกล้อง</div>
+          <div class="fm-row2">
+            <label class="fld"><span>จำนวนกล้องที่จุดนี้ <i>*</i></span><input id="fCount" type="number" inputmode="numeric" min="1" max="50" value="1" required><em class="fld-h">ลง 1 แถวต่อ 1 กล้อง</em></label>
+            <label class="fld"><span>ประเภทการใช้งานกล้อง</span><input id="fUse" list="dlUse" maxlength="80" placeholder="เลือกหรือพิมพ์"></label>
+          </div>
+          <label class="fld"><span>รายละเอียด</span><input id="fDetail" list="dlDetail" maxlength="200" placeholder="เช่น ยี่ห้อ รุ่น ความละเอียด"></label>
+          <div class="fm-row2">
+            <label class="fld"><span>วิธีการจัดเก็บข้อมูล</span><input id="fStore" list="dlStore" maxlength="80" placeholder="เลือกหรือพิมพ์"></label>
+            <label class="fld"><span>การรับส่งข้อมูล</span><input id="fTrans" list="dlTrans" maxlength="80" placeholder="เลือกหรือพิมพ์"></label>
+          </div>
+          <label class="fld"><span>ระยะเวลาสูงสุดในการเก็บภาพ (วัน) <i>*</i></span>
+            <div class="fm-days"><input id="fDays" type="number" inputmode="numeric" min="1" max="3650" required placeholder="วัน"><div class="seg" id="fDaysQ"><button type="button" data-v="7">7</button><button type="button" data-v="15">15</button><button type="button" data-v="30">30</button><button type="button" data-v="60">60</button></div></div></label>
+        </div>
+        <div class="card fm-card">
+          <div class="card-title">📍 พิกัดจุดติดตั้ง <i class="req">*</i></div>
+          <div class="side-hint">แตะบนแผนที่เพื่อปักหมุด ลากหมุดเพื่อขยับ หรือกด <b>ตำแหน่งฉัน</b> เมื่อยืนอยู่ที่กล้อง</div>
+          <div id="fMap"><div class="map-btns"><button type="button" class="btn btn-reset" id="fMe">📍 ตำแหน่งฉัน</button></div></div>
+          <div class="fm-row2">
+            <label class="fld"><span>ละติจูด</span><input id="fLat" inputmode="decimal" placeholder="13.xxxxxx" maxlength="14"></label>
+            <label class="fld"><span>ลองจิจูด</span><input id="fLng" inputmode="decimal" placeholder="100.xxxxxx" maxlength="14"></label>
+          </div>
+          <div class="side-hint" id="fPosH"></div>
+          <div class="fm-near" id="fNear" hidden></div>
+          <div class="fm-err" id="fErr" role="alert"></div>
+          <div class="fm-act">
+            <button type="button" class="btn btn-reset" id="fClear">↺ ล้างฟอร์ม</button>
+            <button type="submit" class="btn btn-print" id="fSave">💾 บันทึกลงชีต</button>
+          </div>
+        </div>
+      </div>
+    </form>
+    <datalist id="dlPlace"></datalist><datalist id="dlOwner"></datalist><datalist id="dlAgency"></datalist><datalist id="dlUse"></datalist>
+    <datalist id="dlDetail"></datalist><datalist id="dlStore"></datalist><datalist id="dlTrans"></datalist>
   </div>
 </main>
 
@@ -1235,13 +1318,16 @@ function group(rows){
       specs:Object.entries(g.cams.reduce((o,c)=>{ const k=(c.detail||'').replace(/^[-.\s]+/,'')||'ไม่ระบุ'; o[k]=(o[k]||0)+1; return o; },{})).sort((a,b)=>b[1]-a[1]),
       contacts:Object.values(g.contacts)}); }).sort((a,b)=>b.n-a.n||a.place.localeCompare(b.place,'th'));
 }
-function start(j){
+function start(j,refresh){
   document.body.classList.remove('locked');
-  G=group(j.rows||[]); G.forEach((g,i)=>g.i=i);
+  ROWS=j.rows||[]; G=group(ROWS); G.forEach((g,i)=>g.i=i); SEL=null;
   const cams=G.reduce((s,g)=>s+g.n,0), noPos=G.filter(g=>g.lat==null).reduce((s,g)=>s+g.n,0);
   $('liSub').textContent=`สถานีตำรวจภูธรบางบ่อ · ${fmt(cams)} กล้อง · ${fmt(G.length)} จุด`;
   $('liCount').textContent=`ข้อมูลจากชีต "กล้องวงจรปิด" · ณ ${j.updated||''}`;
-  initMap(); render(true);
+  initMap(); render(!refresh);
+  if(fMap){ fillLists(); fDotsDraw(); }
+  if(VIEW==='add') openAdd();
+  if(refresh) return;
   if(noPos) toast(`⚠️ มี ${noPos} กล้องที่พิกัดไม่ถูกต้อง · แตะการ์ด 📍 จุดติดตั้ง เพื่อดูว่าตัวไหน`);
   stagger('.li-head, .type-card, #panelMap .card',60);
 }
@@ -1365,11 +1451,13 @@ $('npX').onclick=()=>{ F.np=false; render(true); };
 $('daysTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.days=b.dataset.d; render(true); });
 let qT; $('liSearch').addEventListener('input',()=>{ clearTimeout(qT); qT=setTimeout(()=>{ F.q=$('liSearch').value.trim(); SHOW=40; render(); },180); });
 function showView(v,push){
-  VIEW=v==='list'?'list':'map';
-  $('panelMap').hidden=VIEW!=='map'; $('panelList').hidden=VIEW!=='list';
+  VIEW=v==='list'||v==='add'?v:'map';
+  $('panelMap').hidden=VIEW!=='map'; $('panelList').hidden=VIEW!=='list'; $('panelAdd').hidden=VIEW!=='add';
+  $('typeRow').hidden=VIEW==='add';
   document.querySelectorAll('nav .tab').forEach(t=>{ const on=t.dataset.view===VIEW; t.classList.toggle('on',on); t.setAttribute('aria-selected',on); });
-  if(push) history.replaceState(null,'',VIEW==='list'?'#list':location.pathname+location.search);
+  if(push) history.replaceState(null,'',VIEW!=='map'?'#'+VIEW:location.pathname+location.search);
   if(VIEW==='map'&&map) setTimeout(()=>map.invalidateSize(),30);
+  if(VIEW==='add') openAdd();
   if(VIEW==='list'&&G.length) stagger('#liTable tbody tr',18);
 }
 document.querySelectorAll('nav .tab').forEach(t=>t.addEventListener('click',()=>showView(t.dataset.view,true)));
@@ -1382,6 +1470,111 @@ $('meBtn').onclick=()=>{
     $('meBtn').textContent='📍 ตำแหน่งฉัน'; setNear(ll[0],ll[1]); },
   ()=>{ $('meBtn').textContent='📍 ตำแหน่งฉัน'; toast('หาตำแหน่งไม่ได้ (ต้องอนุญาตตำแหน่งในเบราว์เซอร์)'); },{enableHighAccuracy:true,timeout:12000});
 };
+
+/* ---------- ฟอร์มบันทึกกล้อง (ส่งเข้า Apps Script · ลงชีต 1 แถวต่อ 1 กล้อง) ---------- */
+let ROWS=[], fMap=null, fMark=null, fDots=null, fBusy=false;
+function fDotsDraw(){ if(!fDots) return; fDots.clearLayers(); G.filter(g=>g.lat!=null).forEach(g=>L.circleMarker([g.lat,g.lng],{radius:4,color:'#fff',weight:1,fillColor:colorOf(g),fillOpacity:.75,interactive:false}).addTo(fDots)); }
+const FD={name:'fName',tel:'fTel',detail:'fDetail',store:'fStore',trans:'fTrans',days:'fDays',use:'fUse',owner:'fOwner',agency:'fAgency',place:'fPlace'};
+function fillLists(){
+  const top=(k,n)=>Object.entries(ROWS.reduce((o,r)=>{ const v=String(r[k]||'').trim(); if(v) o[v]=(o[v]||0)+1; return o; },{})).sort((a,b)=>b[1]-a[1]).slice(0,n||60).map(x=>x[0]);
+  const put=(id,arr)=>{ $(id).innerHTML=arr.map(v=>`<option value="${esc(v)}"></option>`).join(''); };
+  put('dlOwner',[...new Set(['หน่วยงานของ ตร.','หน่วยงานอื่น',...top('owner')])]);
+  put('dlAgency',top('agency',150)); put('dlUse',top('use')); put('dlDetail',top('detail',40)); put('dlStore',top('store')); put('dlTrans',top('trans'));
+  put('dlPlace',G.map(g=>g.place).filter(p=>p&&p!=='—').slice(0,300));
+}
+function openAdd(){
+  if(document.body.classList.contains('locked')) return;
+  if(!fMap){
+    fMap=L.map('fMap',{zoomControl:true}); L.DomEvent.disableClickPropagation(document.querySelector('#fMap .map-btns'));
+    fMap.fitBounds(L.latLngBounds(AREA.flatMap(z=>z.c.map(([x,y])=>[y,x]))),{padding:[16,16]});
+    BASEMAPS[baseMode].make().addTo(fMap);
+    AREA.forEach(z=>L.polygon(z.c.map(([x,y])=>[y,x]),{color:ZCOL[z.name]||'#475569',weight:2,fillOpacity:.05,interactive:false}).addTo(fMap));
+    fDots=L.layerGroup().addTo(fMap); fDotsDraw();
+    fMap.on('click',e=>setPos(e.latlng.lat,e.latlng.lng,false));
+    fillLists();
+    try{ const me=JSON.parse(sessionStorage.getItem('cctv-me')||'{}'); if(me.name&&!$('fName').value) $('fName').value=me.name; if(me.tel&&!$('fTel').value) $('fTel').value=me.tel; }catch(_){}
+  }
+  setTimeout(()=>fMap.invalidateSize(),40);
+  stagger('#panelAdd .fm-card',80);
+}
+function setPos(lat,lng,fly){
+  lat=+(+lat).toFixed(6); lng=+(+lng).toFixed(6);
+  $('fLat').value=lat; $('fLng').value=lng; unbad('fLat');
+  if(fMark) fMark.setLatLng([lat,lng]);
+  else { fMark=L.marker([lat,lng],{draggable:true,icon:L.divIcon({className:'',html:'<div class="drop-pin"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(fMap);
+    fMark.on('dragend',()=>{ const p=fMark.getLatLng(); setPos(p.lat,p.lng,false); }); }
+  if(fly) fMap.flyTo([lat,lng],Math.max(fMap.getZoom(),17),{duration:RM?0:.6});
+  posInfo();
+}
+function posInfo(){
+  const lat=parseFloat($('fLat').value), lng=parseFloat($('fLng').value), ok=okPos(lat,lng);
+  $('fPosH').innerHTML=!$('fLat').value&&!$('fLng').value?'':ok?`✅ อยู่ใน <b>${esc(zoneOf(lat,lng))}</b>`:'⚠️ พิกัดไม่อยู่ในประเทศไทย ตรวจละติจูด/ลองจิจูดอีกครั้ง';
+  const nb=$('fNear');
+  if(!ok){ nb.hidden=true; return; }
+  const near=G.filter(g=>g.lat!=null).map(g=>Object.assign({},g,{dd:distM(lat,lng,g.lat,g.lng)})).filter(g=>g.dd<=40).sort((a,b)=>a.dd-b.dd).slice(0,3);
+  nb.hidden=!near.length;
+  nb.innerHTML=near.length?'ℹ️ มีจุดกล้องเดิมอยู่ใกล้ ถ้าเป็นจุดเดียวกันให้แตะเพื่อใช้ชื่อและพิกัดเดิม (จะรวมเป็นจุดเดียว)'+near.map(g=>`<button type="button" class="fm-pick" data-i="${g.i}">📹 ${esc(g.place)} · ${esc(g.agency)} <b>${fmt(g.n)} ตัว · ${dTxt(g.dd)}</b></button>`).join(''):'';
+}
+const okPos=(a,b)=>a>5&&a<21&&b>97&&b<106;
+$('fNear').addEventListener('click',e=>{ const b=e.target.closest('.fm-pick'); if(!b) return; const g=G[+b.dataset.i];
+  $('fPlace').value=g.place; $('fAgency').value=g.agency; $('fOwner').value=g.owner;
+  const c=g.cams[0]||{}; ['use','store','trans'].forEach(k=>{ if(!$(FD[k]).value&&c[k]) $(FD[k]).value=c[k]; }); if(!$('fDays').value&&g.days) $('fDays').value=g.days;
+  setPos(g.lat,g.lng,true); placeHint(); toast('ใช้ข้อมูลจุดเดิมแล้ว · ตรวจรายละเอียดกล้องก่อนบันทึก'); });
+function placeHint(){ const g=G.find(x=>x.place===$('fPlace').value.trim()); $('fPlaceH').innerHTML=g?`มีจุดนี้แล้ว ${fmt(g.n)} กล้อง · <a href="#" id="fUseOld">ใช้หน่วยงานและพิกัดเดิม</a>`:''; }
+$('fPlace').addEventListener('input',placeHint);
+$('fPlaceH').addEventListener('click',e=>{ if(e.target.id!=='fUseOld') return; e.preventDefault(); const g=G.find(x=>x.place===$('fPlace').value.trim()); if(!g) return;
+  $('fAgency').value=g.agency; $('fOwner').value=g.owner; if(!$('fDays').value&&g.days) $('fDays').value=g.days; if(g.lat!=null) setPos(g.lat,g.lng,true); });
+['fLat','fLng'].forEach(id=>$(id).addEventListener('change',()=>{ let a=parseFloat($('fLat').value), b=parseFloat($('fLng').value);
+  if(a>90&&b<30){ [a,b]=[b,a]; }
+  if(okPos(a,b)) setPos(a,b,true); else posInfo(); }));
+$('fDaysQ').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; $('fDays').value=b.dataset.v; unbad('fDays'); syncDays(); });
+function unbad(id){ $(id).classList.remove('bad'); if(!document.querySelector('#addForm .bad')) $('fErr').textContent=''; }
+function syncDays(){ document.querySelectorAll('#fDaysQ button').forEach(x=>x.classList.toggle('on',x.dataset.v===$('fDays').value)); }
+$('fDays').addEventListener('input',syncDays);
+$('fTel').addEventListener('blur',()=>{ const d=$('fTel').value.replace(/\D/g,''); if(d.length===10) $('fTel').value=telFmt(d); });
+$('fMe').onclick=()=>{
+  if(!navigator.geolocation) return toast('อุปกรณ์นี้หาตำแหน่งไม่ได้');
+  $('fMe').textContent='⏳ กำลังหา…';
+  navigator.geolocation.getCurrentPosition(p=>{ $('fMe').textContent='📍 ตำแหน่งฉัน'; setPos(p.coords.latitude,p.coords.longitude,true);
+    if(p.coords.accuracy>50) toast(`ความแม่นยำประมาณ ${Math.round(p.coords.accuracy)} ม. · ลากหมุดให้ตรงจุดได้`); },
+  ()=>{ $('fMe').textContent='📍 ตำแหน่งฉัน'; toast('หาตำแหน่งไม่ได้ (ต้องอนุญาตตำแหน่งในเบราว์เซอร์)'); },{enableHighAccuracy:true,timeout:15000});
+};
+function clearForm(keepMe){
+  Object.values(FD).forEach(id=>{ if(keepMe&&(id==='fName'||id==='fTel')) return; $(id).value=''; $(id).classList.remove('bad'); });
+  $('fCount').value=1; $('fLat').value=''; $('fLng').value=''; if(fMark){ fMark.remove(); fMark=null; }
+  $('fErr').textContent=''; $('fPlaceH').innerHTML=''; posInfo(); syncDays();
+}
+$('fClear').onclick=()=>clearForm(true);
+$('addForm').addEventListener('input',e=>{ if(e.target.id&&e.target.classList.contains('bad')) unbad(e.target.id); });
+$('addForm').addEventListener('submit',async e=>{
+  e.preventDefault(); if(fBusy) return;
+  const v={}; Object.entries(FD).forEach(([k,id])=>v[k]=$(id).value.trim());
+  const tel=v.tel.replace(/\D/g,''), n=parseInt($('fCount').value,10), days=parseInt(v.days,10);
+  const lat=parseFloat($('fLat').value), lng=parseFloat($('fLng').value);
+  const bad=[];
+  if(!v.name) bad.push(['fName','ชื่อ-สกุลผู้ลงข้อมูล']);
+  if(!/^0\d{8,9}$/.test(tel)) bad.push(['fTel','เบอร์โทร (9–10 หลัก ขึ้นต้น 0)']);
+  if(!v.place) bad.push(['fPlace','สถานที่ติดตั้ง']);
+  if(!v.owner) bad.push(['fOwner','ประเภทหน่วยงาน']);
+  if(!v.agency) bad.push(['fAgency','ชื่อหน่วยงาน']);
+  if(!(n>=1&&n<=50)) bad.push(['fCount','จำนวนกล้อง (1–50)']);
+  if(!(days>=1&&days<=3650)) bad.push(['fDays','ระยะเวลาเก็บภาพ (วัน)']);
+  if(!okPos(lat,lng)) bad.push(['fLat','พิกัด (แตะแผนที่เพื่อปักหมุด)']);
+  document.querySelectorAll('#addForm .bad').forEach(x=>x.classList.remove('bad'));
+  if(bad.length){ bad.forEach(([id])=>$(id).classList.add('bad')); $('fErr').textContent='กรอกให้ครบ: '+bad.map(b=>b[1]).join(' · ');
+    const f=$(bad[0][0]); f.focus({preventScroll:true}); f.scrollIntoView({behavior:RM?'auto':'smooth',block:'center'}); return; }
+  const rec=Object.assign(v,{tel,days,lat,lng,count:n});
+  fBusy=true; const sb=$('fSave'); sb.disabled=true; sb.textContent='⏳ กำลังบันทึก…'; $('fErr').textContent='';
+  try{
+    const j=await fetch(CCTV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'add',pin:PIN,rec})}).then(r=>r.json());
+    if(!j.ok){ if(j.auth){ PIN=''; try{ sessionStorage.removeItem('cctv-pin'); }catch(_){} openPin(j.error); } throw new Error(j.error||'บันทึกไม่สำเร็จ'); }
+    try{ sessionStorage.setItem('cctv-me',JSON.stringify({name:v.name,tel})); }catch(_){}
+    toast(`✅ บันทึกแล้ว ${fmt(n)} กล้อง · แถว ${j.from}${j.to>j.from?'–'+j.to:''} ในชีต`);
+    clearForm(true);
+    const d=await fetchRows(PIN); start(d,true);
+  }catch(err){ $('fErr').textContent='❌ '+(err.message==='Failed to fetch'?'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง':err.message); }
+  finally{ fBusy=false; sb.disabled=false; sb.textContent='💾 บันทึกลงชีต'; }
+});
 boot();
 </script>
 <script>/* สลับแท็บ: เนื้อหาจางเข้า */document.addEventListener('click',e=>{ if(e.target.closest('[data-view]')) document.documentElement.classList.add('tabbed'); },true);</script>
