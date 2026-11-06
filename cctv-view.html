@@ -1240,7 +1240,7 @@ main{transition:filter .6s}
   <div class="pl-card"><div class="pl-card2">
   <form class="pl-form login-box" id="pinForm" method="dialog" autocomplete="off">
     <div class="lg-title">🔒 ข้อมูลกล้องวงจรปิด</div>
-    <div class="lg-sub">ใส่รหัสเจ้าหน้าที่ของระบบกล้องวงจรปิด<br>ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์</div>
+    <div class="lg-sub">ใส่รหัสสำหรับดูข้อมูลกล้องวงจรปิด<br>ใส่ครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์</div>
     <div class="pl-field"><svg class="pl-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><input type="password" class="pl-input" id="pinInput" required inputmode="numeric" autocomplete="off" placeholder="รหัสผ่าน" aria-label="รหัสผ่าน"></div>
     <div class="lg-err" id="pinErr"></div>
     <div class="pl-btns">
@@ -1278,12 +1278,12 @@ $('liSearchLbl').innerHTML=('ค้นหาสถานที่ หน่ว�
 $('liSearchLbl').setAttribute('aria-hidden','true'); $('liSearch').setAttribute('aria-label','ค้นหาสถานที่ หน่วยงาน หรือผู้ประสาน');
 
 /* ---------- รหัส (ตรวจที่ Apps Script ของชีตกล้อง) ---------- */
-let PIN=''; try{ PIN=sessionStorage.getItem('cctv-pin')||''; }catch(_){}
+let PIN=''; try{ PIN=sessionStorage.getItem('cctv-view-pin')||''; }catch(_){}
 const pinDlg=$('pinDlg');
 function openPin(msg){ $('pinErr').textContent=msg||''; $('pinInput').value=''; if(!pinDlg.open) pinDlg.showModal(); setTimeout(()=>$('pinInput').focus(),60); }
 pinDlg.addEventListener('cancel',e=>e.preventDefault());
 $('pinClose').hidden=true;
-$('lockBtn').onclick=()=>{ try{ sessionStorage.removeItem('cctv-pin'); }catch(_){} location.replace(location.pathname); };
+$('lockBtn').onclick=()=>{ try{ sessionStorage.removeItem('cctv-view-pin'); }catch(_){} location.replace(location.pathname); };
 async function fetchRows(pin){
   const j=await fetch(CCTV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'list',pin})}).then(r=>r.json());
   if(!j.ok){ const e=new Error(j.error||'รหัสไม่ถูกต้อง'); e.auth=!!j.auth; throw e; }
@@ -1292,7 +1292,7 @@ async function fetchRows(pin){
 $('pinForm').addEventListener('submit',async e=>{
   e.preventDefault(); const pin=$('pinInput').value.trim(); if(!pin) return;
   const b=$('pinOk'); b.disabled=true; $('pinErr').textContent='กำลังตรวจสอบ…';
-  try{ const j=await fetchRows(pin); PIN=pin; try{ sessionStorage.setItem('cctv-pin',pin); }catch(_){} pinDlg.close(); start(j); }
+  try{ const j=await fetchRows(pin); PIN=pin; try{ sessionStorage.setItem('cctv-view-pin',pin); }catch(_){} pinDlg.close(); start(j); }
   catch(err){ $('pinErr').textContent=err.auth?err.message:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; const f=$('pinForm'); f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); }
   finally{ b.disabled=false; }
 });
@@ -1300,7 +1300,7 @@ async function boot(){
   if(!CCTV_API){ openPin('ยังไม่ได้เชื่อม Apps Script ของชีตกล้อง'); $('pinOk').disabled=true; return; }
   if(!PIN) return openPin();
   try{ start(await fetchRows(PIN)); }
-  catch(err){ if(err.auth){ PIN=''; try{ sessionStorage.removeItem('cctv-pin'); }catch(_){} openPin(err.message); } else openPin('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+  catch(err){ if(err.auth){ PIN=''; try{ sessionStorage.removeItem('cctv-view-pin'); }catch(_){} openPin(err.message); } else openPin('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
 }
 
 /* ---------- ข้อมูล: กล้องที่จุดเดียวกัน = 1 จุดติดตั้ง ---------- */
@@ -1566,7 +1566,7 @@ $('addForm').addEventListener('submit',async e=>{
   fBusy=true; const sb=$('fSave'); sb.disabled=true; sb.textContent='⏳ กำลังบันทึก…'; $('fErr').textContent='';
   try{
     const j=await fetch(CCTV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'add',pin:PIN,rec})}).then(r=>r.json());
-    if(!j.ok){ if(j.auth){ PIN=''; try{ sessionStorage.removeItem('cctv-pin'); }catch(_){} openPin(j.error); } throw new Error(j.error||'บันทึกไม่สำเร็จ'); }
+    if(!j.ok){ if(j.auth){ PIN=''; try{ sessionStorage.removeItem('cctv-view-pin'); }catch(_){} openPin(j.error); } throw new Error(j.error||'บันทึกไม่สำเร็จ'); }
     try{ sessionStorage.setItem('cctv-me',JSON.stringify({name:v.name,tel})); }catch(_){}
     toast(`✅ บันทึกแล้ว ${fmt(n)} กล้อง · แถว ${j.from}${j.to>j.from?'–'+j.to:''} ในชีต`);
     clearForm(true);
