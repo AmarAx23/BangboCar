@@ -933,6 +933,12 @@ if(/[?&](from|to)=/.test(location.search)){ document.getElementById('bootLoader'
         <span class="hc-desc">จุดติดตั้งกล้อง ผู้ประสานขอภาพ และหากล้องใกล้ที่เกิดเหตุ</span>
         <span class="hc-stat" id="hcCctvStat">🔒 สำหรับเจ้าหน้าที่</span>
       </a>
+      <a class="hc-card" href="psych.html">
+        <span class="hc-ico">🧠</span>
+        <span class="hc-name">บุคคลจิตเวช / คลุ้มคลั่ง</span>
+        <span class="hc-desc">ที่อยู่ ลักษณะอาการ ข้อควรระวัง และหาคนใกล้จุดแจ้งเหตุ</span>
+        <span class="hc-stat" id="hcPsyStat">🔒 สำหรับเจ้าหน้าที่</span>
+      </a>
       <a class="hc-card" href="report.html">
         <span class="hc-ico">📄</span>
         <span class="hc-name">รายงานประจำเดือน</span>
@@ -1638,6 +1644,11 @@ function setChooserStat(){
   // กล้องวงจรปิด: จำนวนกล้องอย่างเดียว (รายละเอียดต้องใส่รหัสในหน้ากล้อง)
   fetch('https://script.google.com/macros/s/AKfycbwwwZxqqkvX-Pg3RVZ0WiIZFNY_1onyEx_ZGbe1HzKJUuiVk2tuLEui3zPa5zysByAMTg/exec?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
     if(j && j.ok && j.count) document.getElementById('hcCctvStat').textContent = `${Number(j.count).toLocaleString('th-TH')} กล้อง · 🔒 สำหรับเจ้าหน้าที่`;
+  }).catch(()=>{});
+  // บุคคลจิตเวช: จำนวนคนอย่างเดียว (รายละเอียดต้องใส่รหัสในหน้าจิตเวช)
+  const PSY_API = '';
+  if(PSY_API) fetch(PSY_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
+    if(j && j.ok && j.count) document.getElementById('hcPsyStat').textContent = `${Number(j.count).toLocaleString('th-TH')} คน · 🔒 สำหรับเจ้าหน้าที่`;
   }).catch(()=>{});
   const PERS_API = 'https://script.google.com/macros/s/AKfycbzug7pnFa_Zwsra4mf9ZERpKPxh58tKyIiocdhsQTblc9R9QbsGQgksT4yprGgsm7yLmg/exec';
   fetch(PERS_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
