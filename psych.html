@@ -1156,6 +1156,23 @@ body.sv main{max-width:1200px;margin:0 auto}
 .sv-done .ok-ic{font-size:54px;animation:pinIn .6s cubic-bezier(.3,1.6,.5,1) both}
 .sv-done h2{margin:6px 0 8px;color:var(--text-strong)}
 .sv-done p{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:18px}
+/* รอตรวจสอบ */
+.tb-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:4px;border-radius:99px;background:#dc2626;color:#fff;font-size:11.5px;font-weight:700;animation:pinIn .4s both}
+.tb-n.z{background:#94a3b8}
+#tabPend[hidden]{display:none}
+.pd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}
+.pd{display:flex;flex-direction:column;gap:2px;border-left:4px solid #f59e0b;transition:opacity .35s,transform .35s}
+.pd-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.pd-h b{font-size:15.5px;color:var(--text-strong)}
+.pd-h .li-note{flex-basis:100%}
+.pd .pp-g{color:var(--text-2)}.pd .pp-g b{color:var(--muted)}
+.pd .pp-c{border-color:var(--border)}
+.pd-loc{font-size:13px;color:var(--text-2);margin-top:8px}.pd-loc a{color:#2563eb;font-weight:600}
+.pd-act{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+.pd-act .btn{padding:7px 14px;font-size:13.5px}
+.pd-no:hover{background:#fee2e2;color:#b91c1c}
+.pd.gone-ok{opacity:0;transform:translateX(40px)}.pd.gone-no{opacity:0;transform:scale(.92)}
+@media (max-width:520px){ .pd-grid{grid-template-columns:1fr} }
 /* รูปถ่าย */
 .ph-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .ph,.ph-add{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--surface2);animation:pinIn .35s cubic-bezier(.3,1.5,.5,1) both}
@@ -1196,6 +1213,7 @@ body.sv main{max-width:1200px;margin:0 auto}
     <button class="tab on" role="tab" data-view="map" aria-selected="true">🗺️ แผนที่</button>
     <button class="tab" role="tab" data-view="list" aria-selected="false">📋 รายการ</button>
     <button class="tab" role="tab" data-view="add" aria-selected="false" id="tabAdd">📝 บันทึก</button>
+    <button class="tab" role="tab" data-view="pend" aria-selected="false" id="tabPend" hidden>🕓 รอตรวจสอบ <b class="tb-n" id="pendN">0</b></button>
   </div>
   <div class="nav-right">
     <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
@@ -1267,6 +1285,11 @@ body.sv main{max-width:1200px;margin:0 auto}
       </div>
       <div class="li-wrap"><table class="li-table" id="liTable"></table></div>
     </div>
+  </div>
+
+  <div id="panelPend" hidden>
+    <div class="form-link"><span>🕓 <b>ข้อมูลจากฟอร์มสายตรวจ</b> · ตรวจความถูกต้องก่อนยืนยัน · <b>✅ ยืนยัน</b> = รับเข้าระบบ · <b>✏️ แก้ไข</b> = แก้แล้วบันทึก (ยืนยันให้อัตโนมัติ) · <b>🗑️ ไม่รับ</b> = ลบออกจากชีต</span></div>
+    <div class="pd-grid" id="pendList"></div>
   </div>
 
   <div id="panelAdd" hidden>
@@ -1440,7 +1463,7 @@ const colorOf=p=>RCOL[p.risk]||'#64748b';
 const label=p=>(p.name||'')+(p.nick?` (${p.nick})`:'')||'ไม่ทราบชื่อ';
 function start(j,refresh){
   document.body.classList.remove('locked');
-  CAN_EDIT=!!j.canEdit; $('tabAdd').hidden=!CAN_EDIT;
+  CAN_EDIT=!!j.canEdit; $('tabAdd').hidden=!CAN_EDIT; $('tabPend').hidden=!CAN_EDIT;
   P=(j.rows||[]).map((p,i)=>Object.assign(p,{i,zone:p.lat!=null?zoneOf(p.lat,p.lng):'ไม่มีพิกัด'}))
     .sort((a,b)=>(rOrder[a.risk]??3)-(rOrder[b.risk]??3)||String(b.lastDate).localeCompare(String(a.lastDate))||a.id.localeCompare(b.id));
   P.forEach((p,i)=>p.i=i); SEL=null;
@@ -1448,12 +1471,12 @@ function start(j,refresh){
   const pend=P.filter(p=>p.verify).length;
   $('liSub').textContent=`สถานีตำรวจภูธรบางบ่อ · อยู่ในพื้นที่ ${fmt(act.length)} คน${pend?` · รอตรวจสอบ ${fmt(pend)}`:''}`;
   $('liCount').textContent=`ข้อมูลจากชีต · ณ ${j.updated||''}`;
-  initMap(); render(!refresh);
+  initMap(); render(!refresh); renderPend(!refresh&&VIEW==='pend');
   if(fMap) fDotsDraw(); fillLists();
   if(VIEW==='add') openAdd();
-  if(!CAN_EDIT&&VIEW==='add') showView('map',true);
+  if(!CAN_EDIT&&(VIEW==='add'||VIEW==='pend')) showView('map',true);
   if(refresh) return;
-  if(pend&&CAN_EDIT) toast(`🕓 มี ${pend} รายการจากสายตรวจรอตรวจสอบ · กด ✏️ แก้ไข ตรวจแล้วบันทึก ป้ายจะหายไป`);
+  if(pend&&CAN_EDIT&&VIEW!=='pend') toast(`🕓 มี ${pend} รายการจากสายตรวจรอตรวจสอบ · ดูที่แท็บ 🕓 รอตรวจสอบ`);
   stagger('.li-head, .type-card, #panelMap .card',60);
 }
 
@@ -1593,9 +1616,10 @@ function syncUI(){
 $('segSt').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; F.st=b.dataset.v; SHOW=40; render(true); });
 let qT; ['mq','liSearch'].forEach(id=>$(id).addEventListener('input',()=>{ clearTimeout(qT); qT=setTimeout(()=>{ F.q=$(id).value.trim(); SHOW=40; render(); },180); }));
 function showView(v,push){
-  VIEW=v==='list'||(v==='add'&&(CAN_EDIT||document.body.classList.contains('locked')))?v:'map';
-  $('panelMap').hidden=VIEW!=='map'; $('panelList').hidden=VIEW!=='list'; $('panelAdd').hidden=VIEW!=='add';
-  $('typeRow').hidden=VIEW==='add';
+  VIEW=v==='list'||((v==='add'||v==='pend')&&(CAN_EDIT||document.body.classList.contains('locked')))?v:'map';
+  $('panelMap').hidden=VIEW!=='map'; $('panelList').hidden=VIEW!=='list'; $('panelAdd').hidden=VIEW!=='add'; $('panelPend').hidden=VIEW!=='pend';
+  $('typeRow').hidden=VIEW==='add'||VIEW==='pend';
+  if(VIEW==='pend'&&P.length) renderPend(true);
   document.querySelectorAll('nav .tab').forEach(t=>{ const on=t.dataset.view===VIEW; t.classList.toggle('on',on); t.setAttribute('aria-selected',on); });
   if(push) history.replaceState(null,'',VIEW!=='map'?'#'+VIEW:location.pathname+location.search);
   if(VIEW==='map'&&map) setTimeout(()=>map.invalidateSize(),30);
@@ -1612,6 +1636,29 @@ $('meBtn').onclick=()=>{
   ()=>{ $('meBtn').textContent='📍 ตำแหน่งฉัน'; toast('หาตำแหน่งไม่ได้ (ต้องอนุญาตตำแหน่งในเบราว์เซอร์)'); },{enableHighAccuracy:true,timeout:12000});
 };
 
+/* ---------- รอตรวจสอบ (จากฟอร์มสายตรวจ) ---------- */
+function renderPend(anim){
+  const L_=P.filter(p=>p.verify).sort((a,b)=>String(b.created).localeCompare(String(a.created)));
+  $('pendN').textContent=L_.length; $('pendN').classList.toggle('z',!L_.length);
+  $('pendList').innerHTML=L_.length?L_.map(p=>`<div class="card pd" data-i="${p.i}">
+    <div class="pd-h"><span class="rk" style="--c:${colorOf(p)}">${esc(p.risk||'–')}</span><b>${esc(label(p))}</b><span class="li-note">${esc(p.id)} · ส่งเมื่อ ${esc(p.created||'')} · โดย ${esc(p.by||'–')}</span></div>
+    ${detail(p).replace(/<div class="pp-t">[\s\S]*?<\/div>/,'').replace(/<div class="pp-l">[\s\S]*?<\/div>\s*<div class="pp-id">[\s\S]*?<\/div>/,'')}
+    <div class="pd-loc">${p.lat!=null?`📍 ${esc(p.zone)} · <a href="#" data-goto="${p.i}">ดูบนแผนที่</a>`:'📍 <span style="color:#dc2626">ไม่มีพิกัดบ้าน</span>'}</div>
+    <div class="pd-act"><button type="button" class="btn btn-reset pd-no" data-i="${p.i}">🗑️ ไม่รับ</button><button type="button" class="btn btn-reset" data-edit="${p.i}">✏️ แก้ไข</button><button type="button" class="btn btn-print pd-ok" data-i="${p.i}">✅ ยืนยัน</button></div></div>`).join('')
+    :'<div class="card li-empty" style="padding:40px">✅ ไม่มีรายการรอตรวจสอบ</div>';
+  fillPh($('pendList'));
+  if(anim) stagger('#pendList .pd',60);
+}
+$('pendList').addEventListener('click',async e=>{
+  const g=e.target.closest('[data-goto]'); if(g){ e.preventDefault(); showView('map',true); setTimeout(()=>{ map.invalidateSize(); select(P[+g.dataset.goto],true); },80); return; }
+  const b=e.target.closest('.pd-ok,.pd-no'); if(!b) return; const p=P[+b.dataset.i], ok=b.classList.contains('pd-ok');
+  if(!ok&&!confirm(`ไม่รับข้อมูล ${p.id} · ${label(p)} ?\nแถวนี้และรูปจะถูกลบออกจากชีต`)) return;
+  const card=b.closest('.pd'); card.querySelectorAll('button').forEach(x=>x.disabled=true); b.textContent='⏳';
+  try{ const j=await post({action:'verify',pin:PIN,id:p.id,ok}); if(!j.ok) throw new Error(j.error||'ไม่สำเร็จ');
+    card.classList.add(ok?'gone-ok':'gone-no'); toast(ok?`✅ ยืนยัน ${p.id} แล้ว`:`🗑️ ลบ ${p.id} แล้ว`);
+    setTimeout(async()=>{ start(await fetchRows(PIN),true); },RM?0:380);
+  }catch(err){ toast('❌ '+err.message); card.querySelectorAll('button').forEach(x=>x.disabled=false); b.textContent=ok?'✅ ยืนยัน':'🗑️ ไม่รับ'; }
+});
 $('copyForm').onclick=async()=>{ const u=new URL('psych-form.html',location.href).href;
   try{ await navigator.clipboard.writeText(u); toast('📋 คัดลอกลิงก์ฟอร์มสายตรวจแล้ว'); }catch(_){ prompt('คัดลอกลิงก์นี้',u); } };
 /* ---------- ฟอร์มบันทึก / แก้ไข ---------- */
