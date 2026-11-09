@@ -1265,7 +1265,7 @@ main{transition:filter .6s}
             <em class="fld-h">สูง = เคยทำร้ายผู้อื่น/ตนเองรุนแรง ใช้อาวุธ หรือมีอาการหลงผิดสั่งให้ทำร้าย (เกณฑ์ SMI-V) · ปานกลาง = ก้าวร้าว อาละวาด ขาดยาบ่อย · ต่ำ = อาการคงที่ กินยาต่อเนื่อง</em></div>
           <div class="fld"><span>สารเสพติด / สุรา</span>
             <div class="seg" id="fDrug"><button type="button" data-v="ไม่มี">ไม่มี</button><button type="button" data-v="สุรา">สุรา</button><button type="button" data-v="ยาเสพติด">ยาเสพติด</button><button type="button" data-v="สุราและยาเสพติด">ทั้งคู่</button><button type="button" data-v="ไม่ทราบ">ไม่ทราบ</button></div></div>
-          <div class="fld" id="fDrugRxW" hidden><span>ยาเสพติด: การบำบัด</span>
+          <div class="fld" id="fDrugRxW"><span>ยาเสพติด: การบำบัด <em class="fld-h">(เลือกแล้วจะติ๊ก "ยาเสพติด" ให้เอง)</em></span>
             <div class="seg" id="fDrugRx"><button type="button" data-v="ได้รับการบำบัด">✅ ได้รับการบำบัด</button><button type="button" data-v="ไม่ได้รับการบำบัด">❌ ไม่ได้รับการบำบัด</button></div></div>
           <label class="fld"><span>⚠️ อาวุธ / ข้อควรระวังเมื่อเข้าระงับเหตุ</span><textarea id="fCaution" rows="2" maxlength="1000" placeholder="เช่น มีมีดพร้าในบ้าน · กลัวเครื่องแบบ ให้ญาติเข้าคุยก่อน · มีสุนัขดุ"></textarea></label>
 
@@ -1574,10 +1574,11 @@ let fMap=null, fMark=null, fDots=null, fBusy=false, EDIT=null;
 $('fSym').innerHTML=SYMS.map(s=>`<label class="chk"><input type="checkbox" value="${esc(s)}"><span>${esc(s)}</span></label>`).join('')+`<label class="chk other"><span>อื่น ๆ</span><input id="fSymOther" maxlength="80" placeholder="ระบุ"></label>`;
 const TXT={name:'fName',nick:'fNick',age:'fAge',addr:'fAddr',tambon:'fTambon',symNote:'fSymNote',caution:'fCaution',hosp:'fHosp',care:'fCare',careTel:'fCareTel',lastDate:'fLastDate',last:'fLast',by:'fBy',note:'fNote'};
 const SEG={sex:'fSex',risk:'fRisk',drug:'fDrug',drugRx:'fDrugRx',treat:'fTreat',status:'fStatus'};
-function syncRx(){ const on=/ยาเสพติด/.test(segVal('fDrug')); $('fDrugRxW').hidden=!on; if(!on) setSeg('fDrugRx',''); }
+function syncRx(){ if(!/ยาเสพติด/.test(segVal('fDrug'))) setSeg('fDrugRx',''); }
+function rxPicked(){ if(!segVal('fDrugRx')) return; const d=segVal('fDrug'); if(!/ยาเสพติด/.test(d)) setSeg('fDrug',d==='สุรา'?'สุราและยาเสพติด':'ยาเสพติด'); }
 const segVal=id=>{ const b=document.querySelector('#'+id+' button.on'); return b?b.dataset.v:''; };
 const setSeg=(id,v)=>{ let hit=false; document.querySelectorAll('#'+id+' button').forEach(b=>{ const on=!!v&&b.dataset.v===v; b.classList.toggle('on',on); hit=hit||on; }); return hit; };
-Object.values(SEG).forEach(id=>$(id).addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const was=b.classList.contains('on'); setSeg(id,was&&id!=='fStatus'?'':b.dataset.v); unbad(id); if(id==='fDrug') syncRx(); }));
+Object.values(SEG).forEach(id=>$(id).addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const was=b.classList.contains('on'); setSeg(id,was&&id!=='fStatus'?'':b.dataset.v); unbad(id); if(id==='fDrug') syncRx(); if(id==='fDrugRx') rxPicked(); }));
 function fillLists(){
   const top=k=>[...new Set(P.map(p=>String(p[k]||'').trim()).filter(Boolean))];
   $('dlTambon').innerHTML=[...new Set([...TAMBONS,...top('tambon')])].map(v=>`<option value="${esc(v)}"></option>`).join('');
