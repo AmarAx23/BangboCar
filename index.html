@@ -1646,7 +1646,7 @@ function setChooserStat(){
     if(j && j.ok && j.count) document.getElementById('hcCctvStat').textContent = `${Number(j.count).toLocaleString('th-TH')} กล้อง · 🔒 สำหรับเจ้าหน้าที่`;
   }).catch(()=>{});
   // บุคคลจิตเวช: จำนวนคนอย่างเดียว (รายละเอียดต้องใส่รหัสในหน้าจิตเวช)
-  const PSY_API = '';
+  const PSY_API = 'https://script.google.com/macros/s/AKfycbz-YOBSPARA1o4CN3dUSoV_p2-rqgsbGDjOWcqPpHDLiobaJRhe7R_hhmdC43dPdoSD8A/exec';
   if(PSY_API) fetch(PSY_API + '?t=' + Date.now(), ctl ? {signal:ctl.signal} : {}).then(r=>r.json()).then(j=>{
     if(j && j.ok && j.count) document.getElementById('hcPsyStat').textContent = `${Number(j.count).toLocaleString('th-TH')} คน · 🔒 สำหรับเจ้าหน้าที่`;
   }).catch(()=>{});
