@@ -891,12 +891,12 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .lvdd-q{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:9px;margin-bottom:9px;border-bottom:1px solid var(--border)}
 .lvdd-q button{border:1px solid var(--border);background:var(--surface2,var(--surface));color:var(--text-2,var(--text));border-radius:99px;padding:4px 11px;font:500 12.5px 'Prompt',sans-serif;cursor:pointer}
 .lvdd-q button:hover{border-color:#3b82f6;color:#2563eb}
-.lvdd-o{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.lvdd-o{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .lvdd-o label{display:flex!important;flex-direction:row!important;align-items:center;justify-content:center;gap:6px;border:2px solid var(--border);border-radius:10px;padding:8px 6px;cursor:pointer;font-weight:600;font-size:14px;transition:border-color .2s,background .2s,color .2s}
 .lvdd-o label:has(input:checked){border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
 :root[data-theme="dark"] .lvdd-o label:has(input:checked){background:rgba(37,99,235,.18);color:#93c5fd}
 .lvdd-o input{accent-color:#2563eb;width:16px;height:16px;margin:0}
-@media (max-width:420px){ .lvdd-o{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:600px){ .lvdd-o{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .pf-msg{grid-column:1/-1;font-size:13px;color:var(--muted);background:var(--surface2);border:1px dashed var(--input-border);border-radius:10px;padding:12px 14px;text-align:center}
 .pf-msg.err{color:#b45309;background:#fef3c7;border-color:#fcd34d}
 :root[data-theme="dark"] .pf-msg.err{background:#3a2f12;color:#f0c55a}
@@ -1674,27 +1674,31 @@ function pfFill(box, fields){
     const m = box.querySelector(`input[data-mark="${k}"]`); if(m && (v==='/' || v==='✓')){ m.checked = true; m.dataset.was = '1'; } });
   pfCalc(box); lvSync(box);
 }
-/* ระดับชั้นเรียน: ดรอปดาวน์ติ๊กได้หลายข้อ · เก็บลงชีตเป็นข้อความ เช่น "ม.1–ม.6, ปวช." */
-const LV_OPTS = ['ม.1','ม.2','ม.3','ม.4','ม.5','ม.6','ปวช.','ปวส.'];
+/* ระดับชั้นเรียน: ติ๊กเดี่ยวหรือหลายระดับ · เก็บลงชีตแบบเดิม เช่น "อนุบาล - ประถมศึกษา", "มัธยมศึกษา" */
+const LV_OPTS = ['อนุบาล','ประถมศึกษา','มัธยมศึกษา','อาชีวศึกษา','อุดมศึกษา'];
+const LV_RX = [/อนุบาล/, /ประถม/, /มัธยม|ม\.\s*\d/, /อาชีว|ปวช|ปวส/, /อุดม|ปริญญา|มหาวิทยาลัย/];
 function lvHTML(c){
-  return `<div class="fl full lvf"><span>${esc(c.name)} <em class="lv-h">(เลือกได้หลายข้อ)</em></span><div class="lvdd">
+  return `<div class="fl full lvf"><span>${esc(c.name)} <em class="lv-h">(เลือกระดับเดียว หรือหลายระดับก็ได้)</em></span><div class="lvdd">
     <button type="button" class="lvdd-btn" aria-expanded="false"><span class="lvdd-v">— เลือกระดับชั้น —</span><i>▾</i></button>
     <div class="lvdd-pop" hidden>
-      <div class="lvdd-q"><button type="button" data-q="1-3">ม.ต้น (ม.1–3)</button><button type="button" data-q="4-6">ม.ปลาย (ม.4–6)</button><button type="button" data-q="1-6">ม.1–ม.6</button><button type="button" data-q="">ล้าง</button></div>
+      <div class="lvdd-q"><button type="button" data-q="0-1">อนุบาล - ประถมศึกษา</button><button type="button" data-q="1-2">ประถมศึกษา - มัธยมศึกษา</button><button type="button" data-q="0-2">อนุบาล - มัธยมศึกษา</button><button type="button" data-q="">ล้าง</button></div>
       <div class="lvdd-o">${LV_OPTS.map(o=>`<label><input type="checkbox" value="${o}"><span>${o}</span></label>`).join('')}</div>
     </div>
     <input type="hidden" data-i="${c.i}" data-n="${esc(c.name)}" value=""></div></div>`;
 }
-function lvJoin(sel){   // ม.1,ม.2,ม.3 → "ม.1–ม.3"
-  const ms = LV_OPTS.slice(0,6).map((o,i)=>sel.includes(o)?i+1:0).filter(Boolean), out = [];
-  for(let i=0;i<ms.length;){ let j=i; while(j+1<ms.length && ms[j+1]===ms[j]+1) j++; out.push(j-i>=2 ? `ม.${ms[i]}–ม.${ms[j]}` : ms.slice(i,j+1).map(n=>'ม.'+n).join(', ')); i=j+1; }
-  return out.concat(LV_OPTS.slice(6).filter(o=>sel.includes(o))).join(', ');
+function lvJoin(sel){   // ติดกัน 2 ระดับขึ้นไป → "อนุบาล - ประถมศึกษา" ; ไม่ติดกัน → คั่นด้วย ,
+  const ix = LV_OPTS.map((o,i)=>sel.includes(o)?i:-1).filter(i=>i>=0), out = [];
+  for(let i=0;i<ix.length;){ let j=i; while(j+1<ix.length && ix[j+1]===ix[j]+1) j++; out.push(j>i ? `${LV_OPTS[ix[i]]} - ${LV_OPTS[ix[j]]}` : LV_OPTS[ix[i]]); i=j+1; }
+  return out.join(', ');
 }
-function lvSplit(v){   // ข้อความเดิมในชีต → รายการที่ติ๊ก
-  const sel = new Set(); String(v||'').replace(/ม\.?\s*(\d)\s*[–\-ถึง]+\s*(?:ม\.?\s*)?(\d)/g,(m,a,b)=>{ for(let n=+a;n<=+b;n++) sel.add('ม.'+n); return ''; })
-    .replace(/ม\.?\s*(\d)/g,(m,a)=>{ sel.add('ม.'+a); return ''; });
-  if(/ปวช/.test(v)) sel.add('ปวช.'); if(/ปวส/.test(v)) sel.add('ปวส.');
-  return [...sel];
+function lvSplit(v){   // ข้อความเดิมในชีต → ระดับที่ติ๊ก (รองรับ "อนุบาล - มัธยมศึกษา" = อนุบาล+ประถม+มัธยม)
+  const sel = new Set();
+  String(v||'').split(/[,،\/]|และ/).forEach(part=>{
+    const hit = LV_RX.map((re,i)=>re.test(part)?i:-1).filter(i=>i>=0);
+    if(hit.length >= 2 && /[-–]|ถึง/.test(part)){ for(let i=Math.min(...hit);i<=Math.max(...hit);i++) sel.add(LV_OPTS[i]); }
+    else hit.forEach(i=>sel.add(LV_OPTS[i]));
+  });
+  return LV_OPTS.filter(o=>sel.has(o));
 }
 function lvUpdate(dd){
   const sel = [...dd.querySelectorAll('.lvdd-o input:checked')].map(x=>x.value), v = lvJoin(sel), h = dd.querySelector('input[type=hidden]');
@@ -1708,7 +1712,7 @@ document.addEventListener('click', e=>{
   const dd = e.target.closest('.lvdd'); lvClose(dd); if(!dd) return;
   if(e.target.closest('.lvdd-btn')){ const open = !dd.classList.contains('open'); dd.classList.toggle('open', open); dd.querySelector('.lvdd-pop').hidden = !open; dd.querySelector('.lvdd-btn').setAttribute('aria-expanded', open); return; }
   const q = e.target.closest('[data-q]'); if(q){ const [a,b] = q.dataset.q.split('-').map(Number);
-    dd.querySelectorAll('.lvdd-o input').forEach(x=>{ const n = /^ม\.(\d)$/.exec(x.value); x.checked = q.dataset.q ? (n ? (+n[1]>=a && +n[1]<=b) : x.checked) : false; }); lvUpdate(dd); }
+    dd.querySelectorAll('.lvdd-o input').forEach(x=>{ const n = LV_OPTS.indexOf(x.value); x.checked = !!q.dataset.q && n>=a && n<=b; }); lvUpdate(dd); }
 });
 document.addEventListener('change', e=>{ const dd = e.target.closest('.lvdd'); if(dd) lvUpdate(dd); });
 const pfInZone = (lat,lng) => { const z = AREA.find(z=>{ let ins=false; const c=z.c; for(let i=0,j=c.length-1;i<c.length;j=i++){ const [xi,yi]=c[i],[xj,yj]=c[j]; if(((yi>lat)!==(yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) ins=!ins; } return ins; }); return z ? z.name : 'นอกเขต'; };
