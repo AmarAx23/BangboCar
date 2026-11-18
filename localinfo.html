@@ -1387,6 +1387,7 @@ function cell(v, col){
 }
 const LV = {'เขียว':'g','เหลือง':'y','แดง':'r'};   // คอลัมน์ระดับความปลอดภัย → ใส่สีตามชื่อ
 const lvOf = c=>LV[String((c && c.name) || '').trim()] || '';
+const isNo = v=>/^ไม่?มี/.test(String(v ?? '').normalize('NFC').replace(/[\s\u00a0\u200b-\u200d\ufeff.,:;'"()\-]/g,''));   // "ไม่มี" แม้มีช่องว่าง/อักขระซ่อนติดมา
 const lvMark = v=>/^(\/|✓|มี|1)$/.test(String(v ?? '').trim());
 function renderSecure(){
   const F = S.full; if(!F) return;
@@ -1405,7 +1406,7 @@ function renderSecure(){
   }
   const leftCols = new Set(cols.map((c,i)=>/ชื่อ|ที่ตั้ง/.test(c.name)?i:-1).filter(i=>i>=0));
   $('secTable').innerHTML = `<thead><tr>${top}</tr>${hasGroup?`<tr>${sub}</tr>`:''}</thead><tbody>` +
-    sh.rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${leftCols.has(i)?'l':''}${lvOf(cols[i]) && lvMark(v) ? ' lv-'+lvOf(cols[i]) : ''}${String(v ?? '').trim()==='ไม่มี' ? ' no' : ''}">${cell(v, cols[i]||{name:''})}</td>`).join('')}</tr>`).join('') + '</tbody>';
+    sh.rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${leftCols.has(i)?'l':''}${lvOf(cols[i]) && lvMark(v) ? ' lv-'+lvOf(cols[i]) : ''}${isNo(v) ? ' no' : ''}">${cell(v, cols[i]||{name:''})}</td>`).join('')}</tr>`).join('') + '</tbody>';
 }
 $('secTabs').addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; S.sheet = b.dataset.s; renderSecure(); });
 /* ---------- แชร์เป็นภาพ: แบบสรุปผู้บริหาร / แบบเอกสารราชการ (ของแท็บที่เลือก) ---------- */
@@ -1481,7 +1482,7 @@ function shSumHtml(sh, pg){
     <div class="k" style="grid-template-columns:repeat(${k.length},178px)">${k.map(x=>`<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>
     <div class="bd"><div class="gr" style="grid-template-rows:repeat(${Math.ceil(pg.rows.length/2)},auto)">${pg.rows.map((r,i)=>{ i += pg.start;
       const nm = shTxt(r[C.name]) || '–', who = [C.own>=0 ? shTxt(r[C.own]) : '', C.tel>=0 && shTxt(r[C.tel]) ? '📞 ' + shTxt(r[C.tel]) : ''].filter(Boolean).join(' · ');
-      const ex = extra.map(j=>{ const v = shTxt(r[j]); return v && v!=='-' && !isLink(v) ? `<span class="x${v==='ไม่มี' ? ' no' : ''}">${esc(sh.cols[j].name)}: ${esc(v)}</span>` : ''; }).join('');
+      const ex = extra.map(j=>{ const v = shTxt(r[j]); return v && v!=='-' && !isLink(v) ? `<span class="x${isNo(v) ? ' no' : ''}">${esc(sh.cols[j].name)}: ${esc(v)}</span>` : ''; }).join('');
       const lvi = sh.cols.findIndex((c,j)=>lvOf(c) && lvMark(r[j])), lvp = lvi>=0 ? `<span class="lvp lv-${lvOf(sh.cols[lvi])}">● ${esc(sh.cols[lvi].name)}</span>` : '';
       const g = shGuard(r,C), gd = grd ? (g==='y' ? '👮 มี รปภ.' : g==='n' ? '⚠️ ไม่มี รปภ.' : '') : '';
       if(!cam) return `<div class="r nb"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${lvp}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div class="gd${g==='n'?' no':''}">${gd}</div></div>`;
@@ -1501,7 +1502,7 @@ function shDocHtml(sh, pg){
   const left = new Set(keep.filter(i=>/ชื่อ|ที่ตั้ง|เจ้าของ|ผู้จัดการ|ผู้ดูแล/.test(sh.cols[i].name)));
   return `<div class="s5"><div class="cf">ลับ · ห้ามเผยแพร่</div><div class="lg"><img src="logo.webp" alt=""></div>
     <h1>บัญชีสถานที่สำคัญในพื้นที่รับผิดชอบ</h1><h2>ประเภท ${esc(sh.name)} · ${fmt(sh.rows.length)} แห่ง</h2><div class="sub">สถานีตำรวจภูธรบางบ่อ จังหวัดสมุทรปราการ · ข้อมูล ณ วันที่ ${shDate()}${pg.n>1?` · หน้า ${pg.p}/${pg.n}`:''}</div>
-    <table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${pg.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'l':'c'}${/โทร/.test(sh.cols[i].name)?' n':''}${lvOf(sh.cols[i]) && lvMark(r[i]) ? ' lv-'+lvOf(sh.cols[i]) : ''}${v==='ไม่มี' ? ' no' : ''}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>${pg.n>1?`<div class="pg">หน้า ${pg.p}/${pg.n}${pg.p<pg.n?' (มีต่อ)':''}</div>`:''}
+    <table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${pg.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'l':'c'}${/โทร/.test(sh.cols[i].name)?' n':''}${lvOf(sh.cols[i]) && lvMark(r[i]) ? ' lv-'+lvOf(sh.cols[i]) : ''}${isNo(v) ? ' no' : ''}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>${pg.n>1?`<div class="pg">หน้า ${pg.p}/${pg.n}${pg.p<pg.n?' (มีต่อ)':''}</div>`:''}
     ${pg.p<pg.n?'':'<div class="sign">(ลงชื่อ).......................................................<br>(.......................................................)<br>ตำแหน่ง.......................................................</div>'}</div>`;
 }
 async function shareSecure(kind, btn){
