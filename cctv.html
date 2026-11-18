@@ -1151,6 +1151,7 @@ main{transition:filter .6s}
         </div>
       </div>
     </label>
+    <button class="btn btn-reset" id="shareLinkBtn" type="button" title="คัดลอกลิงก์หน้าดูอย่างเดียว (cctv-view.html) ไว้แชร์">🔗 คัดลอกลิงก์</button>
     <a class="btn btn-reset" href="index.html" style="text-decoration:none">🏠 หน้าแรก</a>
     <button class="btn btn-print" id="lockBtn" type="button">🔒 ออก</button>
   </div>
@@ -1640,4 +1641,10 @@ $('addForm').addEventListener('submit',async e=>{
 boot();
 </script>
 <script>/* สลับแท็บ: เนื้อหาจางเข้า */document.addEventListener('click',e=>{ if(e.target.closest('[data-view]')) document.documentElement.classList.add('tabbed'); },true);</script>
+<script>/* คัดลอกลิงก์หน้าดูอย่างเดียว (cctv-view.html) ไว้แชร์ทาง LINE */
+document.getElementById('shareLinkBtn').addEventListener('click', async ()=>{
+  const u = location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, '') + 'cctv-view.html';
+  const say = m=>{ try{ toast(m); }catch(_){} };
+  try{ await navigator.clipboard.writeText(u); say('📋 คัดลอกลิงก์แล้ว (หน้าดูอย่างเดียว) ส่งทาง LINE ได้เลย'); }catch(_){ window.prompt('คัดลอกลิงก์นี้', u); }
+});</script>
 </body>
