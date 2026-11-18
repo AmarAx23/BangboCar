@@ -977,6 +977,46 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:tabFade .28s ease both}
 @keyframes tabFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){animation:none}}
+
+/* ---------- ภาพแชร์ (ข้อมูลเฉพาะเจ้าหน้าที่) ---------- */
+.sh-btn{white-space:nowrap}
+@media (max-width:700px){ .sec-head{flex-wrap:wrap} .sec-head .sh-btn{flex:1} }
+#imgDlg{margin:auto;border:0;border-radius:16px;padding:0;max-width:min(96vw,980px);width:96vw;background:var(--surface);color:var(--text);box-shadow:0 24px 60px rgba(15,23,42,.45)}
+#imgDlg::backdrop{background:rgba(15,23,42,.6)}
+#imgDlg .id-hd{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);font-weight:600}
+#imgDlg .id-hd b{flex:1}
+#imgDlg .id-x{border:0;background:none;font-size:20px;cursor:pointer;color:var(--muted)}
+#imgDlg .id-body{padding:12px;max-height:68vh;overflow:auto;background:var(--bg)}
+#imgDlg img{display:block;width:100%;height:auto;border-radius:8px;-webkit-touch-callout:default;user-select:auto}
+#imgDlg .id-tip{font-size:12.5px;color:var(--muted);padding:10px 14px 0;line-height:1.6}
+#imgDlg .id-acts{display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;flex-wrap:wrap}
+#imgDlg .id-acts a,#imgDlg .id-acts button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text-strong);font:600 13.5px 'Prompt',sans-serif;cursor:pointer;text-decoration:none}
+#imgDlg .id-acts .line{background:#06c755;border-color:#06c755;color:#fff}
+#shareCard{position:fixed;left:-12000px;top:0;width:1080px;background:#fff;color:#0f172a;font-family:'Prompt',sans-serif;line-height:1.45;text-align:left}
+#shareCard *{box-sizing:border-box}
+.s3 .top{background:linear-gradient(135deg,#0b1b3a,#1e3a8a);color:#fff;padding:46px 52px 40px}
+.s3 .t1{display:flex;align-items:center;gap:18px}.s3 .t1 img{width:68px;height:78px;object-fit:contain}.s3 h1{font-size:38px;font-weight:700;margin:0;line-height:1.25;color:#fff}.s3 .t1 p{font-size:20px;opacity:.85;margin:4px 0 0}
+.s3 .k{display:grid;gap:14px;margin-top:30px}
+.s3 .k div{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:18px;padding:16px 18px}
+.s3 .k b{display:block;font-size:46px;font-weight:700;color:#facc15;line-height:1.1}.s3 .k span{font-size:18px;opacity:.85}
+.s3 .bd{padding:26px 52px 36px}
+.s3 .r{display:grid;grid-template-columns:44px 1fr 330px 84px;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #eef2f7}
+.s3 .r.nb{grid-template-columns:44px 1fr 200px}
+.s3 .i{font-size:20px;color:#94a3b8;text-align:center}.s3 .nm{font-size:21px;font-weight:600;color:#0f172a}.s3 .nm small{display:block;font-size:16px;color:#64748b;font-weight:400}
+.s3 .nm .x{display:inline-block;font-size:15px;font-weight:500;color:#334155;background:#f1f5f9;border-radius:99px;padding:1px 10px;margin:4px 6px 0 0}
+.s3 .bar{height:14px;background:#e2e8f0;border-radius:99px;overflow:hidden;display:flex}.s3 .bar i{background:#2563eb}.s3 .bar u{background:#f87171}
+.s3 .v{font-size:21px;font-weight:700;color:#1d4ed8;text-align:right;white-space:nowrap}
+.s3 .gd{font-size:16px;color:#64748b;margin-top:4px}.s3 .gd.no{color:#dc2626;font-weight:600}.s3 .r.nb .gd{text-align:right;margin:0;font-size:17px}
+.s3 .ft{display:flex;justify-content:space-between;margin-top:20px;font-size:16px;color:#94a3b8}
+.s5{padding:64px 60px 56px;color:#111;position:relative}
+.s5 .lg{text-align:center}.s5 .lg img{width:86px;height:100px;object-fit:contain}
+.s5 h1{text-align:center;font-size:32px;font-weight:700;margin:10px 0 0;color:#111}.s5 h2{text-align:center;font-size:23px;font-weight:400;margin:4px 0 6px;color:#111}
+.s5 .sub{text-align:center;font-size:19px;color:#444}
+.s5 .cf{position:absolute;right:60px;top:60px;border:3px solid #b91c1c;color:#b91c1c;font-weight:700;font-size:22px;padding:6px 16px;transform:rotate(6deg)}
+.s5 table{width:100%;border-collapse:collapse;margin-top:26px}
+.s5 th,.s5 td{border:1.5px solid #222;padding:9px 8px;vertical-align:middle;color:#111;background:#fff}.s5 th{background:#f1f1f1;font-weight:600;font-size:.92em;text-align:center}
+.s5 td.c{text-align:center}
+.s5 .sign{margin:46px 0 0 auto;width:430px;text-align:center;font-size:20px;line-height:2}
 </style>
 <script src="fx.js"></script>
 <!-- ให้เว็บรู้สึกเหมือนแอปบนมือถือ: หน้าต่างเลื่อนขึ้นจากล่าง · ปุ่มยุบตอนแตะ · สีแถบด้านบน · หน้าโลโก้ตอนเปิดแอป -->
@@ -1118,6 +1158,8 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
       <h2>🔒 ข้อมูลเฉพาะเจ้าหน้าที่</h2>
       <span class="sec-badge">ห้ามเผยแพร่</span>
       <div style="flex:1"></div>
+      <button class="btn btn-reset sh-btn" id="shareSum" type="button" title="ภาพสรุปของแท็บที่เลือก สำหรับส่งผู้บังคับบัญชา">📊 แชร์ภาพสรุป</button>
+      <button class="btn btn-reset sh-btn" id="shareDoc" type="button" title="ภาพตารางแบบเอกสารราชการ พิมพ์แนบเสนอได้">📄 แชร์แบบเอกสาร</button>
       <button class="btn btn-reset" id="logoutBtn" type="button">ออกจากโหมดเจ้าหน้าที่</button>
     </div>
     <div class="sec-tabs" id="secTabs"></div>
@@ -1352,6 +1394,124 @@ function renderSecure(){
     sh.rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${leftCols.has(i)?'l':''}">${cell(v, cols[i]||{name:''})}</td>`).join('')}</tr>`).join('') + '</tbody>';
 }
 $('secTabs').addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; S.sheet = b.dataset.s; renderSecure(); });
+/* ---------- แชร์เป็นภาพ: แบบสรุปผู้บริหาร / แบบเอกสารราชการ (ของแท็บที่เลือก) ---------- */
+let h2iP = null;
+function loadH2I(){
+  if(window.htmlToImage) return Promise.resolve();
+  return h2iP || (h2iP = new Promise((res, rej)=>{ const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'; sc.onload = res; sc.onerror = ()=>{ h2iP = null; rej(new Error('load')); }; document.head.appendChild(sc); }));
+}
+let fontCSSP = null;
+function snapFontCSS(){
+  const toData = u=>fetch(u).then(r=>r.blob()).then(b=>new Promise(res=>{ const fr = new FileReader(); fr.onload = ()=>res(fr.result); fr.readAsDataURL(b); }));
+  return fontCSSP || (fontCSSP = fetch('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap').then(r=>r.text()).then(async css=>{
+    const out = [];
+    for(const b of css.split(/(?=\/\* )/).filter(b=>/\/\* (thai|latin) \*\//.test(b))){ const m = b.match(/url\((https:[^)]+)\)/); out.push(m ? b.replace(m[1], await toData(m[1])) : b); }
+    return out.join('\n');
+  }).catch(()=>{ fontCSSP = null; return undefined; }));
+}
+const SH_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const shFile = (blob, name)=>{ try{ return new File([blob], name, {type:'image/png'}); }catch(_){ return null; } };
+const shCan = f=>!!(f && navigator.canShare && navigator.share && (()=>{ try{ return navigator.canShare({files:[f]}); }catch(_){ return false; } })());
+let SH_URL = null;
+function shDialog(blob, name){
+  let d = $('imgDlg');
+  if(!d){
+    d = document.createElement('dialog'); d.id = 'imgDlg';
+    d.innerHTML = '<div class="id-hd"><b>ภาพสำหรับแชร์</b><button class="id-x" type="button" aria-label="ปิด">✕</button></div><div class="id-body"><img alt="ภาพสำหรับแชร์"></div><div class="id-tip"></div><div class="id-acts"><button class="line" type="button" data-act="share">📤 แชร์ (LINE ฯลฯ)</button><a data-act="dl">⬇️ ดาวน์โหลดไฟล์</a></div>';
+    document.body.appendChild(d);
+    d.querySelector('.id-x').onclick = ()=>d.close();
+    d.addEventListener('click', e=>{ if(e.target === d) d.close(); });
+    d.addEventListener('close', ()=>{ if(SH_URL){ URL.revokeObjectURL(SH_URL); SH_URL = null; } });
+  }
+  if(SH_URL) URL.revokeObjectURL(SH_URL);
+  SH_URL = URL.createObjectURL(blob);
+  const f = shFile(blob, name), can = shCan(f);
+  d.querySelector('img').src = SH_URL;
+  const dl = d.querySelector('[data-act="dl"]'); dl.href = SH_URL; dl.download = name;
+  const sb = d.querySelector('[data-act="share"]'); sb.hidden = !can;
+  sb.onclick = async ()=>{ try{ await navigator.share({files:[f], title:name.replace(/\.png$/,'')}); d.close(); }catch(err){ if(!err || err.name !== 'AbortError') toast('⚠️ แชร์ไม่ได้ในเบราว์เซอร์นี้ · กดค้างที่รูปเพื่อบันทึกแทน'); } };
+  d.querySelector('.id-tip').textContent = (can ? 'กด "แชร์" แล้วเลือก LINE และกลุ่มที่ต้องการ · ' : '') + 'หรือกดค้างที่รูปเพื่อบันทึก/คัดลอก แล้วส่งใน LINE';
+  d.showModal();
+}
+/* หาคอลัมน์จากชื่อหัวตาราง (แต่ละแท็บมีคอลัมน์ไม่เหมือนกัน) */
+function shCols(sh){
+  const cs = sh.cols, f = (re, g)=>cs.findIndex(c=>re.test(c.name||'') && (!g || g.test(c.group||'')));
+  const C = { no:f(/^ลำดับ|^ที่$/), name:f(/ชื่อสถานที่/), addr:f(/ที่ตั้ง/), all:f(/ทั้งหมด/, /กล้อง/), ok:f(/ใช้การได้/, /กล้อง/), bad:f(/ไม่ได้/, /กล้อง/),
+    gy:f(/^มี$/, /รปภ/), gn:f(/^ไม่มี$/, /รปภ/), own:f(/เจ้าของ|ผู้จัดการ|ผู้ดูแล|ผู้ประสาน/), tel:f(/โทร/) };
+  if(C.name < 0) C.name = f(/^ชื่อ/);
+  if(C.name < 0) C.name = cs.findIndex((c,i)=>i!==C.no);
+  return C;
+}
+const shTxt = v=>{ const t = String(v ?? '').trim(); return t==='/' ? '✓' : t; };
+const shNum = v=>parseInt(String(v ?? '').replace(/[^\d]/g,''),10) || 0;
+const shMark = v=>/^(\/|✓|มี|1)$/.test(String(v ?? '').trim());
+const shDate = ()=>new Date().toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+const isLink = v=>/^https?:\/\//.test(String(v ?? '').trim());
+function shGuard(r, C){ if(C.gy>=0 && shMark(r[C.gy])) return 'y'; if(C.gn>=0 && shMark(r[C.gn])) return 'n'; return ''; }
+function shSumHtml(sh){
+  const C = shCols(sh), rows = sh.rows, N = rows.length, cam = C.all>=0, grd = C.gy>=0 || C.gn>=0;
+  const tot = cam ? rows.reduce((a,r)=>a+shNum(r[C.all]),0) : 0;
+  const okN = cam ? rows.reduce((a,r)=>a+(C.ok>=0 ? shNum(r[C.ok]) : shNum(r[C.all]) - (C.bad>=0 ? shNum(r[C.bad]) : 0)),0) : 0;
+  const gY = rows.filter(r=>shGuard(r,C)==='y').length;
+  const mx = Math.max(1, ...rows.map(r=>shNum(r[C.all])));
+  const used = new Set(Object.values(C).filter(i=>i>=0));
+  const extra = sh.cols.map((c,i)=>i).filter(i=>!used.has(i) && !/^(เขียว|เหลือง|แดง)$/.test(sh.cols[i].name));
+  const k = [[fmt(N),'แห่ง']];
+  if(cam){ k.push([fmt(tot),'กล้องวงจรปิด']); k.push([tot ? Math.round(okN/tot*100)+'%' : '–','ใช้การได้']); }
+  if(grd) k.push([gY+'/'+N,'มี รปภ.']);
+  const t = SHEET_TYPE[sh.name] || sh.name;
+  return `<div class="s3"><div class="top"><div class="t1"><img src="logo.webp" alt=""><div><h1>สรุปข้อมูล ${esc(sh.name)} ในพื้นที่</h1><p>สถานีตำรวจภูธรบางบ่อ · ณ ${shDate()} · 🔒 ห้ามเผยแพร่</p></div></div>
+    <div class="k" style="grid-template-columns:repeat(${k.length},1fr)">${k.map(x=>`<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>
+    <div class="bd">${rows.map((r,i)=>{
+      const nm = shTxt(r[C.name]) || '–', who = [C.own>=0 ? shTxt(r[C.own]) : '', C.tel>=0 && shTxt(r[C.tel]) ? '📞 ' + shTxt(r[C.tel]) : ''].filter(Boolean).join(' · ');
+      const ex = extra.map(j=>{ const v = shTxt(r[j]); return v && v!=='-' && !isLink(v) ? `<span class="x">${esc(sh.cols[j].name)}: ${esc(v)}</span>` : ''; }).join('');
+      const g = shGuard(r,C), gd = grd ? (g==='y' ? '👮 มี รปภ.' : g==='n' ? '⚠️ ไม่มี รปภ.' : '') : '';
+      if(!cam) return `<div class="r nb"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div class="gd${g==='n'?' no':''}">${gd}</div></div>`;
+      const a = shNum(r[C.all]), o = C.ok>=0 ? shNum(r[C.ok]) : a - (C.bad>=0 ? shNum(r[C.bad]) : 0), b = Math.max(0, a - o);
+      return `<div class="r"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div><div class="bar"><i style="width:${o/mx*100}%"></i><u style="width:${b/mx*100}%"></u></div><div class="gd${g==='n'?' no':''}">${[gd, b ? `เสีย ${b} ตัว` : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div></div><div class="v">${o}/${a}</div></div>`;
+    }).join('')}
+    <div class="ft"><span>${cam ? '🟦 กล้องใช้การได้ · 🟥 ใช้การไม่ได้' : ''}</span><span>ข้อมูลจากชีต "ข้อมูลท้องถิ่น" · ${typeIcon(t)} ${esc(sh.name)}</span></div></div></div>`;
+}
+function shDocHtml(sh){
+  const C = shCols(sh), keep = sh.cols.map((c,i)=>i).filter(i=>!sh.rows.every(r=>isLink(r[i]) || !String(r[i]??'').trim()) || sh.cols[i].group);
+  const cols = keep.map(i=>sh.cols[i]), hasG = cols.some(c=>c.group);
+  let top = '', sub = '';
+  for(let i=0;i<cols.length;){ const c = cols[i];
+    if(c.group){ let j=i; while(j<cols.length && cols[j].group===c.group) j++; top += `<th colspan="${j-i}">${esc(c.group)}</th>`; for(let k=i;k<j;k++) sub += `<th>${esc(cols[k].name)}</th>`; i=j; }
+    else { top += `<th${hasG?' rowspan="2"':''}>${esc(c.name)}</th>`; i++; } }
+  const fs = Math.max(14, Math.min(19, 19 - Math.max(0, cols.length - 7)));
+  const left = new Set(keep.filter(i=>/ชื่อ|ที่ตั้ง|เจ้าของ|ผู้จัดการ|ผู้ดูแล/.test(sh.cols[i].name)));
+  return `<div class="s5"><div class="cf">ลับ · ห้ามเผยแพร่</div><div class="lg"><img src="logo.webp" alt=""></div>
+    <h1>บัญชีสถานที่สำคัญในพื้นที่รับผิดชอบ</h1><h2>ประเภท ${esc(sh.name)} · ${fmt(sh.rows.length)} แห่ง</h2><div class="sub">สถานีตำรวจภูธรบางบ่อ จังหวัดสมุทรปราการ · ข้อมูล ณ วันที่ ${shDate()}</div>
+    <table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${sh.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'':'c'}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>
+    <div class="sign">(ลงชื่อ).......................................................<br>(.......................................................)<br>ตำแหน่ง.......................................................</div></div>`;
+}
+async function shareSecure(kind, btn){
+  const F = S.full; if(!F) return;
+  const sh = F.sheets.find(s=>s.name===S.sheet && s.rows.length); if(!sh) return toast('เลือกแท็บที่มีข้อมูลก่อน');
+  const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างภาพ…';
+  try{
+    const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
+    try{ await document.fonts.ready; }catch(_){}
+    let el = $('shareCard'); if(!el){ el = document.createElement('div'); el.id = 'shareCard'; document.body.appendChild(el); }
+    el.innerHTML = kind === 'doc' ? shDocHtml(sh) : shSumHtml(sh);
+    await Promise.all([...el.querySelectorAll('img')].map(im=>im.complete ? 0 : new Promise(r=>{ im.onload = im.onerror = r; })));
+    const opt = { pixelRatio: 2, backgroundColor: '#ffffff', fontEmbedCSS: fontCSS, width: 1080, height: el.offsetHeight, style: { left: '0', top: '0', position: 'static' } };
+    let blob;
+    try{ await htmlToImage.toBlob(el, opt); blob = await htmlToImage.toBlob(el, opt); } finally { el.innerHTML = ''; }
+    if(!blob) throw new Error('blob');
+    const name = ((kind === 'doc' ? 'บัญชี_' : 'สรุป_') + sh.name + '_' + shDate()).replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,'_') + '.png';
+    const f = shFile(blob, name);
+    if(f && shCan(f) && (SH_IOS || matchMedia('(pointer:coarse)').matches)){
+      try{ await navigator.share({files:[f], title:name.replace(/\.png$/,'')}); return; }catch(err){ if(err && err.name === 'AbortError') return; }
+    }
+    shDialog(blob, name);
+  }catch(err){ toast('⚠️ สร้างภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+  finally{ btn.disabled = false; btn.innerHTML = old; }
+}
+$('shareSum').addEventListener('click', e=>shareSecure('sum', e.currentTarget));
+$('shareDoc').addEventListener('click', e=>shareSecure('doc', e.currentTarget));
+
 function showSecure(on){
   $('secure').hidden = !on;
   $('lockBtn').textContent = on ? '🔓 โหมดเจ้าหน้าที่' : '🔒 ข้อมูลเจ้าหน้าที่';
