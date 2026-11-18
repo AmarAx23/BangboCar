@@ -1021,7 +1021,11 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 .s5 .cf{position:absolute;right:60px;top:60px;border:3px solid #b91c1c;color:#b91c1c;font-weight:700;font-size:22px;padding:6px 16px;transform:rotate(6deg)}
 .s5 table{width:100%;border-collapse:collapse;margin-top:26px}
 .s5 th,.s5 td{border:1.5px solid #222;padding:9px 8px;vertical-align:middle;color:#111;background:#fff}.s5 th{background:#f1f1f1;font-weight:600;font-size:.92em;text-align:center}
-.s5 td.c{text-align:center}.s5 td.l{min-width:150px}.s5 td.n{white-space:nowrap}.s5 .pg{text-align:right;font-size:17px;color:#555;margin-top:12px}
+.s5 td.c{text-align:center}
+td.no{color:#dc2626!important;font-weight:700}.s3 .nm .x.no{background:#fee2e2;color:#b91c1c}
+th.lv-g{background:#16a34a!important;color:#fff!important}th.lv-y{background:#facc15!important;color:#422006!important}th.lv-r{background:#dc2626!important;color:#fff!important}
+td.lv-g{background:#dcfce7!important;color:#15803d!important;font-weight:700}td.lv-y{background:#fef9c3!important;color:#a16207!important;font-weight:700}td.lv-r{background:#fee2e2!important;color:#b91c1c!important;font-weight:700}
+.s3 .lvp{display:inline-block;vertical-align:middle;font-size:14px;font-weight:600;border-radius:99px;padding:1px 10px;margin-left:8px}.s3 .lvp.lv-g{background:#dcfce7;color:#15803d}.s3 .lvp.lv-y{background:#fef9c3;color:#a16207}.s3 .lvp.lv-r{background:#fee2e2;color:#b91c1c}.s5 td.l{min-width:150px}.s5 td.n{white-space:nowrap}.s5 .pg{text-align:right;font-size:17px;color:#555;margin-top:12px}
 .s5 .sign{margin:46px 0 0 auto;width:430px;text-align:center;font-size:20px;line-height:2}
 </style>
 <script src="fx.js"></script>
@@ -1381,6 +1385,9 @@ function cell(v, col){
   if(/^https:\/\//.test(t)) return `<a href="${esc(t)}" target="_blank" rel="noopener">🗺️</a>`;
   return esc(t);
 }
+const LV = {'เขียว':'g','เหลือง':'y','แดง':'r'};   // คอลัมน์ระดับความปลอดภัย → ใส่สีตามชื่อ
+const lvOf = c=>LV[String((c && c.name) || '').trim()] || '';
+const lvMark = v=>/^(\/|✓|มี|1)$/.test(String(v ?? '').trim());
 function renderSecure(){
   const F = S.full; if(!F) return;
   const sheets = F.sheets.filter(s=>s.rows.length);
@@ -1393,12 +1400,12 @@ function renderSecure(){
   let top = '', sub = '';
   for(let i=0;i<cols.length;){
     const c = cols[i];
-    if(c.group){ let j=i; while(j<cols.length && cols[j].group===c.group) j++; top += `<th class="grp" colspan="${j-i}">${esc(c.group)}</th>`; for(let k=i;k<j;k++) sub += `<th>${esc(cols[k].name)}</th>`; i=j; }
+    if(c.group){ let j=i; while(j<cols.length && cols[j].group===c.group) j++; top += `<th class="grp" colspan="${j-i}">${esc(c.group)}</th>`; for(let k=i;k<j;k++) sub += `<th class="${lvOf(cols[k]) ? 'lv-'+lvOf(cols[k]) : ''}">${esc(cols[k].name)}</th>`; i=j; }
     else { top += `<th${hasGroup?' rowspan="2"':''}>${esc(c.name)}</th>`; i++; }
   }
   const leftCols = new Set(cols.map((c,i)=>/ชื่อ|ที่ตั้ง/.test(c.name)?i:-1).filter(i=>i>=0));
   $('secTable').innerHTML = `<thead><tr>${top}</tr>${hasGroup?`<tr>${sub}</tr>`:''}</thead><tbody>` +
-    sh.rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${leftCols.has(i)?'l':''}">${cell(v, cols[i]||{name:''})}</td>`).join('')}</tr>`).join('') + '</tbody>';
+    sh.rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${leftCols.has(i)?'l':''}${lvOf(cols[i]) && lvMark(v) ? ' lv-'+lvOf(cols[i]) : ''}${String(v ?? '').trim()==='ไม่มี' ? ' no' : ''}">${cell(v, cols[i]||{name:''})}</td>`).join('')}</tr>`).join('') + '</tbody>';
 }
 $('secTabs').addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; S.sheet = b.dataset.s; renderSecure(); });
 /* ---------- แชร์เป็นภาพ: แบบสรุปผู้บริหาร / แบบเอกสารราชการ (ของแท็บที่เลือก) ---------- */
@@ -1474,11 +1481,12 @@ function shSumHtml(sh, pg){
     <div class="k" style="grid-template-columns:repeat(${k.length},178px)">${k.map(x=>`<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>
     <div class="bd"><div class="gr" style="grid-template-rows:repeat(${Math.ceil(pg.rows.length/2)},auto)">${pg.rows.map((r,i)=>{ i += pg.start;
       const nm = shTxt(r[C.name]) || '–', who = [C.own>=0 ? shTxt(r[C.own]) : '', C.tel>=0 && shTxt(r[C.tel]) ? '📞 ' + shTxt(r[C.tel]) : ''].filter(Boolean).join(' · ');
-      const ex = extra.map(j=>{ const v = shTxt(r[j]); return v && v!=='-' && !isLink(v) ? `<span class="x">${esc(sh.cols[j].name)}: ${esc(v)}</span>` : ''; }).join('');
+      const ex = extra.map(j=>{ const v = shTxt(r[j]); return v && v!=='-' && !isLink(v) ? `<span class="x${v==='ไม่มี' ? ' no' : ''}">${esc(sh.cols[j].name)}: ${esc(v)}</span>` : ''; }).join('');
+      const lvi = sh.cols.findIndex((c,j)=>lvOf(c) && lvMark(r[j])), lvp = lvi>=0 ? `<span class="lvp lv-${lvOf(sh.cols[lvi])}">● ${esc(sh.cols[lvi].name)}</span>` : '';
       const g = shGuard(r,C), gd = grd ? (g==='y' ? '👮 มี รปภ.' : g==='n' ? '⚠️ ไม่มี รปภ.' : '') : '';
-      if(!cam) return `<div class="r nb"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div class="gd${g==='n'?' no':''}">${gd}</div></div>`;
+      if(!cam) return `<div class="r nb"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${lvp}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div class="gd${g==='n'?' no':''}">${gd}</div></div>`;
       const a = shNum(r[C.all]), o = C.ok>=0 ? shNum(r[C.ok]) : a - (C.bad>=0 ? shNum(r[C.bad]) : 0), b = Math.max(0, a - o);
-      return `<div class="r"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div><div class="bar"><i style="width:${o/mx*100}%"></i><u style="width:${b/mx*100}%"></u></div><div class="gd${g==='n'?' no':''}">${[gd, b ? `เสีย ${b} ตัว` : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div></div><div class="v">${o}/${a}</div></div>`;
+      return `<div class="r"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${lvp}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div><div class="bar"><i style="width:${o/mx*100}%"></i><u style="width:${b/mx*100}%"></u></div><div class="gd${g==='n'?' no':''}">${[gd, b ? `เสีย ${b} ตัว` : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div></div><div class="v">${o}/${a}</div></div>`;
     }).join('')}</div>
     <div class="ft"><span>${cam ? '🟦 กล้องใช้การได้ · 🟥 ใช้การไม่ได้' : ''}</span><span>${pg.n>1?`หน้า ${pg.p}/${pg.n} · `:''}ข้อมูลจากชีต "ข้อมูลท้องถิ่น" · ${typeIcon(t)} ${esc(sh.name)}</span></div></div></div>`;
 }
@@ -1487,13 +1495,13 @@ function shDocHtml(sh, pg){
   const cols = keep.map(i=>sh.cols[i]), hasG = cols.some(c=>c.group);
   let top = '', sub = '';
   for(let i=0;i<cols.length;){ const c = cols[i];
-    if(c.group){ let j=i; while(j<cols.length && cols[j].group===c.group) j++; top += `<th colspan="${j-i}">${esc(c.group)}</th>`; for(let k=i;k<j;k++) sub += `<th>${esc(cols[k].name)}</th>`; i=j; }
+    if(c.group){ let j=i; while(j<cols.length && cols[j].group===c.group) j++; top += `<th colspan="${j-i}">${esc(c.group)}</th>`; for(let k=i;k<j;k++) sub += `<th class="${lvOf(cols[k]) ? 'lv-'+lvOf(cols[k]) : ''}">${esc(cols[k].name)}</th>`; i=j; }
     else { top += `<th${hasG?' rowspan="2"':''}>${esc(c.name)}</th>`; i++; } }
   const fs = Math.max(14, Math.min(19, 19 - Math.max(0, cols.length - 7)));
   const left = new Set(keep.filter(i=>/ชื่อ|ที่ตั้ง|เจ้าของ|ผู้จัดการ|ผู้ดูแล/.test(sh.cols[i].name)));
   return `<div class="s5"><div class="cf">ลับ · ห้ามเผยแพร่</div><div class="lg"><img src="logo.webp" alt=""></div>
     <h1>บัญชีสถานที่สำคัญในพื้นที่รับผิดชอบ</h1><h2>ประเภท ${esc(sh.name)} · ${fmt(sh.rows.length)} แห่ง</h2><div class="sub">สถานีตำรวจภูธรบางบ่อ จังหวัดสมุทรปราการ · ข้อมูล ณ วันที่ ${shDate()}${pg.n>1?` · หน้า ${pg.p}/${pg.n}`:''}</div>
-    <table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${pg.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'l':'c'}${/โทร/.test(sh.cols[i].name)?' n':''}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>${pg.n>1?`<div class="pg">หน้า ${pg.p}/${pg.n}${pg.p<pg.n?' (มีต่อ)':''}</div>`:''}
+    <table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${pg.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'l':'c'}${/โทร/.test(sh.cols[i].name)?' n':''}${lvOf(sh.cols[i]) && lvMark(r[i]) ? ' lv-'+lvOf(sh.cols[i]) : ''}${v==='ไม่มี' ? ' no' : ''}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>${pg.n>1?`<div class="pg">หน้า ${pg.p}/${pg.n}${pg.p<pg.n?' (มีต่อ)':''}</div>`:''}
     ${pg.p<pg.n?'':'<div class="sign">(ลงชื่อ).......................................................<br>(.......................................................)<br>ตำแหน่ง.......................................................</div>'}</div>`;
 }
 async function shareSecure(kind, btn){
