@@ -1528,14 +1528,20 @@ async function shareSecure(kind, btn){
         list.push({ blob, name: base + (n > 1 ? `_หน้า${p}-${n}` : '') + '.png' });
       }
     } finally { el.innerHTML = ''; }
+    if(SH_PC){   // คอม: บันทึกไฟล์ลงเครื่องเลย
+      for(const x of list){ const u = URL.createObjectURL(x.blob), a = document.createElement('a'); a.href = u; a.download = x.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000); await new Promise(r=>setTimeout(r,350)); }
+      toast(`💾 บันทึกภาพแล้ว ${list.length} ไฟล์ (ดูในโฟลเดอร์ Downloads)`); return;
+    }
     const files = list.map(x=>shFile(x.blob, x.name));
-    if(shCan(files) && (SH_IOS || matchMedia('(pointer:coarse)').matches)){
+    if(shCan(files)){
       try{ await navigator.share({files}); return; }catch(err){ if(err && err.name === 'AbortError') return; }
     }
     shDialog(list);
   }catch(err){ toast('⚠️ สร้างภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
   finally{ btn.disabled = false; btn.innerHTML = old; }
 }
+const SH_PC = !SH_IOS && !matchMedia('(pointer:coarse)').matches;   // คอม = เมาส์ ไม่ใช่จอสัมผัส
+if(SH_PC){ $('shareSum').innerHTML = '💾 บันทึกภาพ แบบที่ 1'; $('shareSum').title = 'บันทึกภาพสรุป (หัวน้ำเงิน + ตาราง) ลงเครื่อง'; $('shareDoc').innerHTML = '💾 บันทึกภาพ แบบที่ 2'; $('shareDoc').title = 'บันทึกภาพแบบเอกสารราชการ ลงเครื่อง'; }
 $('shareSum').addEventListener('click', e=>shareSecure('sum', e.currentTarget));
 $('shareDoc').addEventListener('click', e=>shareSecure('doc', e.currentTarget));
 
