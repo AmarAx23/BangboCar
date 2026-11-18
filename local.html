@@ -1014,6 +1014,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 .s3 .bd{padding:18px 48px 30px}.s3 .gr{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;column-gap:52px}
 .s3 .r{grid-template-columns:36px 1fr 130px 64px;gap:12px;padding:12px 0}.s3 .bar{height:6px;opacity:.75}.s3 .r .gd{margin-top:6px}.s3 .r.nb{grid-template-columns:36px 1fr 150px}
 .s3 .nm{font-size:20px}.s3 .nm small{font-size:15px}.s3 .nm .x{font-size:13.5px;padding:0 8px;margin:3px 4px 0 0}.s3 .gd{font-size:15px}.s3 .v{font-size:20px}
+.s5.tb{padding:0}.s5.tb table{margin-top:4px}
 .s5{padding:64px 60px 56px;color:#111;position:relative}
 .s5 .lg{text-align:center}.s5 .lg img{width:86px;height:100px;object-fit:contain}
 .s5 h1{text-align:center;font-size:32px;font-weight:700;margin:10px 0 0;color:#111}.s5 h2{text-align:center;font-size:23px;font-weight:400;margin:4px 0 6px;color:#111}
@@ -1479,18 +1480,10 @@ function shSumHtml(sh, pg){
   const t = SHEET_TYPE[sh.name] || sh.name;
   return `<div class="s3"><div class="top"><div class="t1"><img src="logo.webp" alt=""><div><h1>สรุปข้อมูล ${esc(sh.name)} ในพื้นที่</h1><p>สถานีตำรวจภูธรบางบ่อ · ณ ${shDate()} · 🔒 ห้ามเผยแพร่${pg.n>1?` · หน้า ${pg.p}/${pg.n}`:''}</p></div></div>
     <div class="k" style="grid-template-columns:repeat(${k.length},178px)">${k.map(x=>`<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>
-    <div class="bd"><div class="gr" style="grid-template-rows:repeat(${Math.ceil(pg.rows.length/2)},auto)">${pg.rows.map((r,i)=>{ i += pg.start;
-      const nm = shTxt(r[C.name]) || '–', who = [C.own>=0 ? shTxt(r[C.own]) : '', C.tel>=0 && shTxt(r[C.tel]) ? '📞 ' + shTxt(r[C.tel]) : ''].filter(Boolean).join(' · ');
-      const ex = extra.map(j=>{ const v = shTxt(r[j]); return v && v!=='-' && !isLink(v) ? `<span class="x${isNo(v) ? ' no' : ''}">${esc(sh.cols[j].name)}: ${esc(v)}</span>` : ''; }).join('');
-      const lvi = sh.cols.findIndex((c,j)=>lvOf(c) && lvMark(r[j])), lvp = lvi>=0 ? `<span class="lvp lv-${lvOf(sh.cols[lvi])}">● ${esc(sh.cols[lvi].name)}</span>` : '';
-      const g = shGuard(r,C), gd = grd ? (g==='y' ? '👮 มี รปภ.' : g==='n' ? '⚠️ ไม่มี รปภ.' : '') : '';
-      if(!cam) return `<div class="r nb"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${lvp}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div class="gd${g==='n'?' no':''}">${gd}</div></div>`;
-      const a = shNum(r[C.all]), o = C.ok>=0 ? shNum(r[C.ok]) : a - (C.bad>=0 ? shNum(r[C.bad]) : 0), b = Math.max(0, a - o);
-      return `<div class="r"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${lvp}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div><div class="bar"><i style="width:${o/mx*100}%"></i><u style="width:${b/mx*100}%"></u></div><div class="gd${g==='n'?' no':''}">${[gd, b ? `เสีย ${b} ตัว` : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div></div><div class="v">${o}/${a}</div></div>`;
-    }).join('')}</div>
-    <div class="ft"><span>${cam ? '🟦 กล้องใช้การได้ · 🟥 ใช้การไม่ได้' : ''}</span><span>${pg.n>1?`หน้า ${pg.p}/${pg.n} · `:''}ข้อมูลจากชีต "ข้อมูลท้องถิ่น" · ${typeIcon(t)} ${esc(sh.name)}</span></div></div></div>`;
+    <div class="bd"><div class="s5 tb">${shTableHtml(sh, pg)}</div>
+    <div class="ft"><span>${pg.n>1?`หน้า ${pg.p}/${pg.n}${pg.p<pg.n?' (มีต่อ)':''}`:''}</span><span>ข้อมูลจากชีต "ข้อมูลท้องถิ่น" · ${typeIcon(t)} ${esc(sh.name)}</span></div></div></div>`;
 }
-function shDocHtml(sh, pg){
+function shTableHtml(sh, pg){
   const C = shCols(sh), keep = sh.cols.map((c,i)=>i).filter(i=>!sh.rows.every(r=>isLink(r[i]) || !String(r[i]??'').trim()) || sh.cols[i].group);
   const cols = keep.map(i=>sh.cols[i]), hasG = cols.some(c=>c.group);
   let top = '', sub = '';
@@ -1499,9 +1492,12 @@ function shDocHtml(sh, pg){
     else { top += `<th${hasG?' rowspan="2"':''}>${esc(c.name)}</th>`; i++; } }
   const fs = Math.max(14, Math.min(19, 19 - Math.max(0, cols.length - 7)));
   const left = new Set(keep.filter(i=>/ชื่อ|ที่ตั้ง|เจ้าของ|ผู้จัดการ|ผู้ดูแล/.test(sh.cols[i].name)));
+  return `<table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${pg.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'l':'c'}${/โทร/.test(sh.cols[i].name)?' n':''}${lvOf(sh.cols[i]) && lvMark(r[i]) ? ' lv-'+lvOf(sh.cols[i]) : ''}${isNo(v) ? ' no' : ''}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function shDocHtml(sh, pg){
   return `<div class="s5"><div class="cf">ลับ · ห้ามเผยแพร่</div><div class="lg"><img src="logo.webp" alt=""></div>
     <h1>บัญชีสถานที่สำคัญในพื้นที่รับผิดชอบ</h1><h2>ประเภท ${esc(sh.name)} · ${fmt(sh.rows.length)} แห่ง</h2><div class="sub">สถานีตำรวจภูธรบางบ่อ จังหวัดสมุทรปราการ · ข้อมูล ณ วันที่ ${shDate()}${pg.n>1?` · หน้า ${pg.p}/${pg.n}`:''}</div>
-    <table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${pg.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'l':'c'}${/โทร/.test(sh.cols[i].name)?' n':''}${lvOf(sh.cols[i]) && lvMark(r[i]) ? ' lv-'+lvOf(sh.cols[i]) : ''}${isNo(v) ? ' no' : ''}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>${pg.n>1?`<div class="pg">หน้า ${pg.p}/${pg.n}${pg.p<pg.n?' (มีต่อ)':''}</div>`:''}
+    ${shTableHtml(sh, pg)}${pg.n>1?`<div class="pg">หน้า ${pg.p}/${pg.n}${pg.p<pg.n?' (มีต่อ)':''}</div>`:''}
     ${pg.p<pg.n?'':'<div class="sign">(ลงชื่อ).......................................................<br>(.......................................................)<br>ตำแหน่ง.......................................................</div>'}</div>`;
 }
 async function shareSecure(kind, btn){
