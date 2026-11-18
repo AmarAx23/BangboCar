@@ -987,6 +987,8 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 #imgDlg .id-hd b{flex:1}
 #imgDlg .id-x{border:0;background:none;font-size:20px;cursor:pointer;color:var(--muted)}
 #imgDlg .id-body{padding:12px;max-height:68vh;overflow:auto;background:var(--bg)}
+#imgDlg .id-body img+img{margin-top:12px}
+#imgDlg .id-pg{font-size:12.5px;color:var(--muted);margin:10px 0 4px}
 #imgDlg img{display:block;width:100%;height:auto;border-radius:8px;-webkit-touch-callout:default;user-select:auto}
 #imgDlg .id-tip{font-size:12.5px;color:var(--muted);padding:10px 14px 0;line-height:1.6}
 #imgDlg .id-acts{display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;flex-wrap:wrap}
@@ -1015,7 +1017,7 @@ html.tabbed [id^="panel"]:not([hidden]),html.tabbed [id^="view"]:not([hidden]){a
 .s5 .cf{position:absolute;right:60px;top:60px;border:3px solid #b91c1c;color:#b91c1c;font-weight:700;font-size:22px;padding:6px 16px;transform:rotate(6deg)}
 .s5 table{width:100%;border-collapse:collapse;margin-top:26px}
 .s5 th,.s5 td{border:1.5px solid #222;padding:9px 8px;vertical-align:middle;color:#111;background:#fff}.s5 th{background:#f1f1f1;font-weight:600;font-size:.92em;text-align:center}
-.s5 td.c{text-align:center}
+.s5 td.c{text-align:center}.s5 td.l{min-width:150px}.s5 td.n{white-space:nowrap}.s5 .pg{text-align:right;font-size:17px;color:#555;margin-top:12px}
 .s5 .sign{margin:46px 0 0 auto;width:430px;text-align:center;font-size:20px;line-height:2}
 </style>
 <script src="fx.js"></script>
@@ -1412,26 +1414,29 @@ function snapFontCSS(){
 }
 const SH_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const shFile = (blob, name)=>{ try{ return new File([blob], name, {type:'image/png'}); }catch(_){ return null; } };
-const shCan = f=>!!(f && navigator.canShare && navigator.share && (()=>{ try{ return navigator.canShare({files:[f]}); }catch(_){ return false; } })());
-let SH_URL = null;
-function shDialog(blob, name){
+const shCan = fs=>{ fs = [].concat(fs); return !!(fs.length && fs.every(Boolean) && navigator.canShare && navigator.share && (()=>{ try{ return navigator.canShare({files:fs}); }catch(_){ return false; } })()); };
+let SH_URLS = [];
+function shDialog(list){
   let d = $('imgDlg');
   if(!d){
     d = document.createElement('dialog'); d.id = 'imgDlg';
-    d.innerHTML = '<div class="id-hd"><b>ภาพสำหรับแชร์</b><button class="id-x" type="button" aria-label="ปิด">✕</button></div><div class="id-body"><img alt="ภาพสำหรับแชร์"></div><div class="id-tip"></div><div class="id-acts"><button class="line" type="button" data-act="share">📤 แชร์ (LINE ฯลฯ)</button><a data-act="dl">⬇️ ดาวน์โหลดไฟล์</a></div>';
+    d.innerHTML = '<div class="id-hd"><b>ภาพสำหรับแชร์</b><button class="id-x" type="button" aria-label="ปิด">✕</button></div><div class="id-body"></div><div class="id-tip"></div><div class="id-acts"><button class="line" type="button" data-act="share">📤 แชร์ (LINE ฯลฯ)</button><button type="button" data-act="dl">⬇️ ดาวน์โหลด</button></div>';
     document.body.appendChild(d);
     d.querySelector('.id-x').onclick = ()=>d.close();
     d.addEventListener('click', e=>{ if(e.target === d) d.close(); });
-    d.addEventListener('close', ()=>{ if(SH_URL){ URL.revokeObjectURL(SH_URL); SH_URL = null; } });
+    d.addEventListener('close', ()=>{ SH_URLS.forEach(u=>URL.revokeObjectURL(u)); SH_URLS = []; });
   }
-  if(SH_URL) URL.revokeObjectURL(SH_URL);
-  SH_URL = URL.createObjectURL(blob);
-  const f = shFile(blob, name), can = shCan(f);
-  d.querySelector('img').src = SH_URL;
-  const dl = d.querySelector('[data-act="dl"]'); dl.href = SH_URL; dl.download = name;
+  SH_URLS.forEach(u=>URL.revokeObjectURL(u));
+  SH_URLS = list.map(x=>URL.createObjectURL(x.blob));
+  const many = list.length > 1;
+  d.querySelector('.id-hd b').textContent = many ? `ภาพสำหรับแชร์ (${list.length} หน้า)` : 'ภาพสำหรับแชร์';
+  d.querySelector('.id-body').innerHTML = SH_URLS.map((u,i)=>(many ? `<div class="id-pg">หน้า ${i+1}/${list.length}</div>` : '') + `<img src="${u}" alt="ภาพสำหรับแชร์ หน้า ${i+1}">`).join('');
+  const files = list.map(x=>shFile(x.blob, x.name)), can = shCan(files);
   const sb = d.querySelector('[data-act="share"]'); sb.hidden = !can;
-  sb.onclick = async ()=>{ try{ await navigator.share({files:[f], title:name.replace(/\.png$/,'')}); d.close(); }catch(err){ if(!err || err.name !== 'AbortError') toast('⚠️ แชร์ไม่ได้ในเบราว์เซอร์นี้ · กดค้างที่รูปเพื่อบันทึกแทน'); } };
-  d.querySelector('.id-tip').textContent = (can ? 'กด "แชร์" แล้วเลือก LINE และกลุ่มที่ต้องการ · ' : '') + 'หรือกดค้างที่รูปเพื่อบันทึก/คัดลอก แล้วส่งใน LINE';
+  sb.onclick = async ()=>{ try{ await navigator.share({files}); d.close(); }catch(err){ if(!err || err.name !== 'AbortError') toast('⚠️ แชร์ไม่ได้ในเบราว์เซอร์นี้ · กดค้างที่รูปเพื่อบันทึกแทน'); } };
+  const db = d.querySelector('[data-act="dl"]'); db.textContent = many ? `⬇️ ดาวน์โหลดทั้งหมด (${list.length})` : '⬇️ ดาวน์โหลดไฟล์';
+  db.onclick = async ()=>{ for(let i=0;i<list.length;i++){ const a = document.createElement('a'); a.href = SH_URLS[i]; a.download = list[i].name; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,350)); } };
+  d.querySelector('.id-tip').textContent = (can ? `กด "แชร์" แล้วเลือก LINE${many ? ' (ส่งครบทุกหน้าในครั้งเดียว)' : ''} · ` : '') + 'หรือกดค้างที่รูปเพื่อบันทึก/คัดลอก แล้วส่งใน LINE';
   d.showModal();
 }
 /* หาคอลัมน์จากชื่อหัวตาราง (แต่ละแท็บมีคอลัมน์ไม่เหมือนกัน) */
@@ -1449,7 +1454,7 @@ const shMark = v=>/^(\/|✓|มี|1)$/.test(String(v ?? '').trim());
 const shDate = ()=>new Date().toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
 const isLink = v=>/^https?:\/\//.test(String(v ?? '').trim());
 function shGuard(r, C){ if(C.gy>=0 && shMark(r[C.gy])) return 'y'; if(C.gn>=0 && shMark(r[C.gn])) return 'n'; return ''; }
-function shSumHtml(sh){
+function shSumHtml(sh, pg){
   const C = shCols(sh), rows = sh.rows, N = rows.length, cam = C.all>=0, grd = C.gy>=0 || C.gn>=0;
   const tot = cam ? rows.reduce((a,r)=>a+shNum(r[C.all]),0) : 0;
   const okN = cam ? rows.reduce((a,r)=>a+(C.ok>=0 ? shNum(r[C.ok]) : shNum(r[C.all]) - (C.bad>=0 ? shNum(r[C.bad]) : 0)),0) : 0;
@@ -1461,9 +1466,9 @@ function shSumHtml(sh){
   if(cam){ k.push([fmt(tot),'กล้องวงจรปิด']); k.push([tot ? Math.round(okN/tot*100)+'%' : '–','ใช้การได้']); }
   if(grd) k.push([gY+'/'+N,'มี รปภ.']);
   const t = SHEET_TYPE[sh.name] || sh.name;
-  return `<div class="s3"><div class="top"><div class="t1"><img src="logo.webp" alt=""><div><h1>สรุปข้อมูล ${esc(sh.name)} ในพื้นที่</h1><p>สถานีตำรวจภูธรบางบ่อ · ณ ${shDate()} · 🔒 ห้ามเผยแพร่</p></div></div>
+  return `<div class="s3"><div class="top"><div class="t1"><img src="logo.webp" alt=""><div><h1>สรุปข้อมูล ${esc(sh.name)} ในพื้นที่</h1><p>สถานีตำรวจภูธรบางบ่อ · ณ ${shDate()} · 🔒 ห้ามเผยแพร่${pg.n>1?` · หน้า ${pg.p}/${pg.n}`:''}</p></div></div>
     <div class="k" style="grid-template-columns:repeat(${k.length},1fr)">${k.map(x=>`<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>
-    <div class="bd">${rows.map((r,i)=>{
+    <div class="bd">${pg.rows.map((r,i)=>{ i += pg.start;
       const nm = shTxt(r[C.name]) || '–', who = [C.own>=0 ? shTxt(r[C.own]) : '', C.tel>=0 && shTxt(r[C.tel]) ? '📞 ' + shTxt(r[C.tel]) : ''].filter(Boolean).join(' · ');
       const ex = extra.map(j=>{ const v = shTxt(r[j]); return v && v!=='-' && !isLink(v) ? `<span class="x">${esc(sh.cols[j].name)}: ${esc(v)}</span>` : ''; }).join('');
       const g = shGuard(r,C), gd = grd ? (g==='y' ? '👮 มี รปภ.' : g==='n' ? '⚠️ ไม่มี รปภ.' : '') : '';
@@ -1471,9 +1476,9 @@ function shSumHtml(sh){
       const a = shNum(r[C.all]), o = C.ok>=0 ? shNum(r[C.ok]) : a - (C.bad>=0 ? shNum(r[C.bad]) : 0), b = Math.max(0, a - o);
       return `<div class="r"><div class="i">${i+1}</div><div class="nm">${esc(nm)}${who?`<small>${esc(who)}</small>`:''}${ex}</div><div><div class="bar"><i style="width:${o/mx*100}%"></i><u style="width:${b/mx*100}%"></u></div><div class="gd${g==='n'?' no':''}">${[gd, b ? `เสีย ${b} ตัว` : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div></div><div class="v">${o}/${a}</div></div>`;
     }).join('')}
-    <div class="ft"><span>${cam ? '🟦 กล้องใช้การได้ · 🟥 ใช้การไม่ได้' : ''}</span><span>ข้อมูลจากชีต "ข้อมูลท้องถิ่น" · ${typeIcon(t)} ${esc(sh.name)}</span></div></div></div>`;
+    <div class="ft"><span>${cam ? '🟦 กล้องใช้การได้ · 🟥 ใช้การไม่ได้' : ''}</span><span>${pg.n>1?`หน้า ${pg.p}/${pg.n} · `:''}ข้อมูลจากชีต "ข้อมูลท้องถิ่น" · ${typeIcon(t)} ${esc(sh.name)}</span></div></div></div>`;
 }
-function shDocHtml(sh){
+function shDocHtml(sh, pg){
   const C = shCols(sh), keep = sh.cols.map((c,i)=>i).filter(i=>!sh.rows.every(r=>isLink(r[i]) || !String(r[i]??'').trim()) || sh.cols[i].group);
   const cols = keep.map(i=>sh.cols[i]), hasG = cols.some(c=>c.group);
   let top = '', sub = '';
@@ -1483,9 +1488,9 @@ function shDocHtml(sh){
   const fs = Math.max(14, Math.min(19, 19 - Math.max(0, cols.length - 7)));
   const left = new Set(keep.filter(i=>/ชื่อ|ที่ตั้ง|เจ้าของ|ผู้จัดการ|ผู้ดูแล/.test(sh.cols[i].name)));
   return `<div class="s5"><div class="cf">ลับ · ห้ามเผยแพร่</div><div class="lg"><img src="logo.webp" alt=""></div>
-    <h1>บัญชีสถานที่สำคัญในพื้นที่รับผิดชอบ</h1><h2>ประเภท ${esc(sh.name)} · ${fmt(sh.rows.length)} แห่ง</h2><div class="sub">สถานีตำรวจภูธรบางบ่อ จังหวัดสมุทรปราการ · ข้อมูล ณ วันที่ ${shDate()}</div>
-    <table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${sh.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'':'c'}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>
-    <div class="sign">(ลงชื่อ).......................................................<br>(.......................................................)<br>ตำแหน่ง.......................................................</div></div>`;
+    <h1>บัญชีสถานที่สำคัญในพื้นที่รับผิดชอบ</h1><h2>ประเภท ${esc(sh.name)} · ${fmt(sh.rows.length)} แห่ง</h2><div class="sub">สถานีตำรวจภูธรบางบ่อ จังหวัดสมุทรปราการ · ข้อมูล ณ วันที่ ${shDate()}${pg.n>1?` · หน้า ${pg.p}/${pg.n}`:''}</div>
+    <table style="font-size:${fs}px"><thead><tr>${top}</tr>${hasG?`<tr>${sub}</tr>`:''}</thead><tbody>${pg.rows.map(r=>`<tr>${keep.map(i=>{ const v = shTxt(r[i]); return `<td class="${left.has(i)?'l':'c'}${/โทร/.test(sh.cols[i].name)?' n':''}">${isLink(v)?'':esc(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>${pg.n>1?`<div class="pg">หน้า ${pg.p}/${pg.n}${pg.p<pg.n?' (มีต่อ)':''}</div>`:''}
+    ${pg.p<pg.n?'':'<div class="sign">(ลงชื่อ).......................................................<br>(.......................................................)<br>ตำแหน่ง.......................................................</div>'}</div>`;
 }
 async function shareSecure(kind, btn){
   const F = S.full; if(!F) return;
@@ -1495,18 +1500,29 @@ async function shareSecure(kind, btn){
     const [, fontCSS] = await Promise.all([loadH2I(), snapFontCSS()]);
     try{ await document.fonts.ready; }catch(_){}
     let el = $('shareCard'); if(!el){ el = document.createElement('div'); el.id = 'shareCard'; document.body.appendChild(el); }
-    el.innerHTML = kind === 'doc' ? shDocHtml(sh) : shSumHtml(sh);
-    await Promise.all([...el.querySelectorAll('img')].map(im=>im.complete ? 0 : new Promise(r=>{ im.onload = im.onerror = r; })));
-    const opt = { pixelRatio: 2, backgroundColor: '#ffffff', fontEmbedCSS: fontCSS, width: 1080, height: el.offsetHeight, style: { left: '0', top: '0', position: 'static' } };
-    let blob;
-    try{ await htmlToImage.toBlob(el, opt); blob = await htmlToImage.toBlob(el, opt); } finally { el.innerHTML = ''; }
-    if(!blob) throw new Error('blob');
-    const name = ((kind === 'doc' ? 'บัญชี_' : 'สรุป_') + sh.name + '_' + shDate()).replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,'_') + '.png';
-    const f = shFile(blob, name);
-    if(f && shCan(f) && (SH_IOS || matchMedia('(pointer:coarse)').matches)){
-      try{ await navigator.share({files:[f], title:name.replace(/\.png$/,'')}); return; }catch(err){ if(err && err.name === 'AbortError') return; }
+    const PER = 10, n = Math.ceil(sh.rows.length / PER), list = [];
+    const base = ((kind === 'doc' ? 'บัญชี_' : 'สรุป_') + sh.name + '_' + shDate()).replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,'_');
+    try{
+      for(let p=1; p<=n; p++){
+        if(n > 1) btn.innerHTML = `⏳ กำลังสร้างภาพ ${p}/${n}…`;
+        const pg = { p, n, start:(p-1)*PER, rows: sh.rows.slice((p-1)*PER, p*PER) };
+        el.style.width = '1080px';
+        el.innerHTML = kind === 'doc' ? shDocHtml(sh, pg) : shSumHtml(sh, pg);
+        const tb = el.querySelector('table');
+        if(tb && tb.offsetWidth > 960) el.style.width = (tb.offsetWidth + 120) + 'px';   // ตารางคอลัมน์เยอะ → ขยายภาพเป็นแนวนอน ไม่ให้ตกขอบ
+        await Promise.all([...el.querySelectorAll('img')].map(im=>im.complete ? 0 : new Promise(r=>{ im.onload = im.onerror = r; })));
+        const opt = { pixelRatio: 2, backgroundColor: '#ffffff', fontEmbedCSS: fontCSS, width: el.offsetWidth, height: el.offsetHeight, style: { left: '0', top: '0', position: 'static' } };
+        if(p === 1) await htmlToImage.toBlob(el, opt);
+        const blob = await htmlToImage.toBlob(el, opt);
+        if(!blob) throw new Error('blob');
+        list.push({ blob, name: base + (n > 1 ? `_หน้า${p}-${n}` : '') + '.png' });
+      }
+    } finally { el.innerHTML = ''; }
+    const files = list.map(x=>shFile(x.blob, x.name));
+    if(shCan(files) && (SH_IOS || matchMedia('(pointer:coarse)').matches)){
+      try{ await navigator.share({files}); return; }catch(err){ if(err && err.name === 'AbortError') return; }
     }
-    shDialog(blob, name);
+    shDialog(list);
   }catch(err){ toast('⚠️ สร้างภาพไม่สำเร็จ ลองใหม่อีกครั้ง'); }
   finally{ btn.disabled = false; btn.innerHTML = old; }
 }
