@@ -1387,7 +1387,7 @@ function cell(v, col){
 }
 const LV = {'เขียว':'g','เหลือง':'y','แดง':'r'};   // คอลัมน์ระดับความปลอดภัย → ใส่สีตามชื่อ
 const lvOf = c=>LV[String((c && c.name) || '').trim()] || '';
-const isNo = v=>/^ไม่?มี/.test(String(v ?? '').normalize('NFC').replace(/[\s\u00a0\u200b-\u200d\ufeff.,:;'"()\-]/g,''));   // "ไม่มี" แม้มีช่องว่าง/อักขระซ่อนติดมา
+const isNo = v=>/^[ไใ]มม/.test(String(v ?? '').normalize('NFC').replace(/[^\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46]/g,''));   // "ไม่มี" — ตัดช่องว่าง/อักขระซ่อน/วรรณยุกต์ออกก่อนเทียบ
 const lvMark = v=>/^(\/|✓|มี|1)$/.test(String(v ?? '').trim());
 function renderSecure(){
   const F = S.full; if(!F) return;
