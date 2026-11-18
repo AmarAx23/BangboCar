@@ -689,6 +689,8 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .li-table td.n{color:var(--faint);font-variant-numeric:tabular-nums;width:44px}
 .li-table td.nm{font-weight:600;color:var(--text-strong)}
 .li-table td.ad{color:var(--muted);font-size:13px;min-width:220px}
+.li-table td.lvc{white-space:nowrap}.lvtag{display:inline-block;font-size:12.5px;font-weight:600;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:99px;padding:2px 10px}
+:root[data-theme="dark"] .lvtag{color:#93c5fd;background:rgba(37,99,235,.15);border-color:rgba(147,197,253,.3)}
 .li-table tr:hover td{background:rgba(37,99,235,.04)}
 .li-wrap{overflow-x:auto}
 .tpill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:#eef2f7;color:#334155;white-space:nowrap}
@@ -1272,13 +1274,23 @@ function renderTypes(){
   $('mapTabs').innerHTML = $('pubTabs').innerHTML = cards.map(([t,lbl,n,ic])=>`<button type="button" role="tab" aria-selected="${S.type===t}" data-t="${esc(t)}" class="${S.type===t?'on':''}${n?'':' zero'}">${ic} ${esc(lbl)} · ${fmt(n)}</button>`).join('');
   $('typeRow').innerHTML = cards.map(([t,lbl,n,ic])=>`<button type="button" class="kpi type-card${S.type===t?' on':''}${n?'':' zero'}" data-t="${esc(t)}" title="${esc(lbl)}"><span class="ti">${ic}</span><span class="kpi-lbl">${esc(lbl)}</span><span class="kpi-val">${fmt(n)}</span></button>`).join('');
 }
+/* ระดับชั้นเรียน (โรงเรียน): จากข้อมูลสาธารณะ (r.level) ถ้า Apps Script ส่งมา · ไม่งั้นใช้ข้อมูลโหมดเจ้าหน้าที่ */
+function levelOf(r){
+  if(r.level) return String(r.level).trim();
+  const F = S.full; if(!F || !F.sheets) return '';
+  if(F._lv === undefined){ F._lv = {};
+    F.sheets.forEach(sh=>{ const li = sh.cols.findIndex(c=>/ระดับชั้น/.test(c.name)), ni = sh.cols.findIndex(c=>/ชื่อสถานที่/.test(c.name)); if(li<0 || ni<0) return;
+      sh.rows.forEach(x=>{ const n = String(x[ni]??'').replace(/\s+/g,''), v = String(x[li]??'').trim(); if(n && v) F._lv[n] = v; }); }); }
+  return F._lv[String(r.name||'').replace(/\s+/g,'')] || '';
+}
 function renderTable(){
   const q = S.q.trim().toLowerCase().replace(/\s+/g,'');
   const list = S.rows.filter(r=>(!S.type || r.type===S.type) && (!q || (r.name+r.addr).toLowerCase().replace(/\s+/g,'').includes(q)));
   $('liCount').textContent = `แสดง ${fmt(list.length)} จาก ${fmt(S.rows.length)} แห่ง`;
-  $('liTable').innerHTML = `<thead><tr><th>#</th><th>ประเภท</th><th>ชื่อสถานที่</th><th>ที่ตั้ง</th><th>แผนที่</th></tr></thead><tbody>` +
-    (list.length ? list.map((r,i)=>`<tr><td class="n">${i+1}</td><td><span class="tpill">${typeIcon(r.type)} ${esc(r.type)}</span></td><td class="nm">${esc(r.name)}</td><td class="ad">${esc(r.addr)}</td><td>${r.map?`<a class="maplink" href="${esc(r.map)}" target="_blank" rel="noopener">🗺️ เปิด</a>`:''}</td></tr>`).join('')
-      : `<tr><td colspan="5" class="li-empty">${S.type && !q ? 'ประเภทนี้ยังไม่มีข้อมูลในชีต' : 'ไม่พบสถานที่ที่ค้นหา'}</td></tr>`) + '</tbody>';
+  const lvl = list.map(levelOf), hasLv = lvl.some(Boolean);
+  $('liTable').innerHTML = `<thead><tr><th>#</th><th>ประเภท</th><th>ชื่อสถานที่</th>${hasLv?'<th>ระดับชั้นเรียน</th>':''}<th>ที่ตั้ง</th><th>แผนที่</th></tr></thead><tbody>` +
+    (list.length ? list.map((r,i)=>`<tr><td class="n">${i+1}</td><td><span class="tpill">${typeIcon(r.type)} ${esc(r.type)}</span></td><td class="nm">${esc(r.name)}</td>${hasLv?`<td class="lvc">${lvl[i]?`<span class="lvtag">🎓 ${esc(lvl[i])}</span>`:''}</td>`:''}<td class="ad">${esc(r.addr)}</td><td>${r.map?`<a class="maplink" href="${esc(r.map)}" target="_blank" rel="noopener">🗺️ เปิด</a>`:''}</td></tr>`).join('')
+      : `<tr><td colspan="${hasLv?6:5}" class="li-empty">${S.type && !q ? 'ประเภทนี้ยังไม่มีข้อมูลในชีต' : 'ไม่พบสถานที่ที่ค้นหา'}</td></tr>`) + '</tbody>';
   renderMap(list);
 }
 /* ---------- แผนที่สถานที่ (แผนที่ฐานเดียวกับ Heat Map · ขอบพื้นที่สีเดียว · หมุดตามประเภท) ---------- */
@@ -1585,7 +1597,7 @@ $('shareSum').addEventListener('click', e=>shareSecure('sum', e.currentTarget));
 $('shareDoc').addEventListener('click', e=>shareSecure('doc', e.currentTarget));
 
 function showSecure(on){
-  $('secure').hidden = !on;
+  $('secure').hidden = !on; try{ renderTable(); }catch(_){}
   $('lockBtn').textContent = on ? '🔓 โหมดเจ้าหน้าที่' : '🔒 ข้อมูลเจ้าหน้าที่';
   if(on){ showView('list', true); renderSecure(); $('secure').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'start'}); }
 }
