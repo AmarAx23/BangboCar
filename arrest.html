@@ -1068,7 +1068,28 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 @media (prefers-reduced-motion:reduce){ .anim-on *,.anim-bars *{animation:none!important} }
 @media print{ .anim-on *,.anim-bars *,.reveal{animation:none!important} }
 /* ---- ผลการจับกุม ---- */
-.kpi-row.k5{grid-template-columns:repeat(4,minmax(0,1fr))}
+.kpi-row.k5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.kpi.vip{cursor:pointer;transition:transform .15s,box-shadow .2s,border-color .2s}.kpi.vip:hover{transform:translateY(-2px)}.kpi.vip.on{border-color:#f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.35)}
+.kpi.vip .kpi-val{color:#d97706}
+.vip-tg{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:2px solid var(--border);background:var(--surface);color:var(--muted);border-radius:99px;padding:5px 14px;font:600 13px 'Prompt',sans-serif;cursor:pointer;transition:all .2s}
+.vip-tg:hover{border-color:#f59e0b;color:#b45309}
+.vip-tg .vstar{font-size:15px;line-height:1;display:inline-block}
+.vip-tg[aria-pressed="true"]{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-color:#f59e0b;color:#fff;box-shadow:0 4px 14px rgba(245,158,11,.35)}
+.vip-tg[aria-pressed="true"] .vstar{animation:vipPop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes vipPop{40%{transform:scale(1.5) rotate(-15deg)}}
+.ff .catf{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.ff .catf em{font-style:normal;font-weight:400}
+.catpick{display:flex;flex-wrap:wrap;gap:6px}
+.catpick label{flex-direction:row!important;align-items:center;gap:6px!important;border:2px solid var(--border);border-radius:99px;padding:6px 12px;cursor:pointer;font-size:13.5px!important;color:var(--text)!important;background:var(--surface);transition:border-color .2s,background .2s,color .2s}
+.catpick label:has(input:checked){border-color:#dc2626;background:#fef2f2;color:#b91c1c!important}
+:root[data-theme="dark"] .catpick label:has(input:checked){background:rgba(220,38,38,.18);color:#fca5a5!important}
+.catpick input{accent-color:#dc2626;width:15px;height:15px;margin:0}
+.vip-b{display:inline-block;margin-right:4px;color:#d97706}
+tr.vipr td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
+.dt-flag{margin-top:14px;padding:12px;border:1px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;gap:10px}
+.dt-flag .row1{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:700;color:var(--text-strong)}
+.dt-flag .row1 .vip-tg{margin-left:0}
+.dt-flag .acts2{display:flex;justify-content:flex-end}
 #csvBtn[hidden],#tblCard[hidden],#lockCard[hidden]{display:none!important}
 .lock-card{text-align:center;padding:34px 18px}
 .lock-card .ic{font-size:40px;line-height:1}
@@ -1087,7 +1108,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 #phDlg .bd .msg{color:var(--muted);padding:30px}
 .mcol .c{min-width:0}
 .sz-grid.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-@media (max-width:700px){ .kpi-row.k5{grid-template-columns:repeat(2,minmax(0,1fr))} .sz-grid.two{grid-template-columns:1fr} }
+@media (max-width:700px){ .kpi-row.k5{grid-template-columns:repeat(2,minmax(0,1fr))} .kpi.vip{grid-column:1/-1} .sz-grid.two{grid-template-columns:1fr} }
 .cat{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;margin:0 4px 3px 0;background:var(--surface2);color:var(--text)}
 .cat.c0{background:#fee2e2;color:#b91c1c}.cat.c1{background:#ffedd5;color:#c2410c}.cat.c2{background:#fce7f3;color:#be185d}.cat.c3{background:#dbeafe;color:#1d4ed8}.cat.c4{background:#ede9fe;color:#6d28d9}.cat.c5{background:#dcfce7;color:#15803d}.cat.c6{background:#e0f2fe;color:#0369a1}
 :root[data-theme="dark"] .cat{background:var(--surface2)!important;color:var(--text)!important}
@@ -1197,6 +1218,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
       <div class="kpi"><div class="kpi-lbl">📅 เดือนนี้</div><div class="kpi-val" id="kMon">–</div><div class="kpi-sub" id="kMonSub"></div></div>
       <div class="kpi"><div class="kpi-lbl">💊 คดียาเสพติด</div><div class="kpi-val" id="kDrug">–</div><div class="kpi-sub" id="kDrugSub"></div></div>
       <div class="kpi"><div class="kpi-lbl">🔫 คดีอาวุธปืน / อาวุธ</div><div class="kpi-val" id="kGun">–</div><div class="kpi-sub" id="kGunSub"></div></div>
+      <div class="kpi vip" id="kVipCard" role="button" tabindex="0" title="แตะเพื่อดูเฉพาะจับกุมสำคัญ"><div class="kpi-lbl">⭐ จับกุมสำคัญ</div><div class="kpi-val" id="kVip">–</div><div class="kpi-sub" id="kVipSub"></div></div>
     </div>
     <div class="sz-grid">
       <div class="card"><div class="card-title">จำนวนการจับกุม รายเดือน · กดที่แท่งเพื่อกรองเดือน</div><div class="mcol" id="cMonth"></div></div>
@@ -1229,7 +1251,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
     <div class="sz-form-wrap">
       <div class="card" style="margin:0">
         <form class="ff" id="szForm" autocomplete="off" novalidate>
-          <div class="sec">🗓️ การจับกุม</div>
+          <div class="sec">🗓️ การจับกุม <button type="button" class="vip-tg" id="iVip" aria-pressed="false"><span class="vstar">☆</span> จับกุมสำคัญ</button></div>
           <label><span>วัน/เดือน/ปี/เวลา <span class="req">*</span></span><input type="datetime-local" id="iWhen" required></label>
           <label><span>เลขคดี</span><input type="text" id="iCase" placeholder="เช่น 123/2569"></label>
           <label class="full"><span>เรื่อง</span><input type="text" id="iTitle" placeholder="สรุปเรื่องสั้น ๆ เช่น จับกุมผู้ต้องหาครอบครองยาบ้า"></label>
@@ -1243,6 +1265,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
           <div class="full priv">🔒 ชื่อ เลขบัตร ที่อยู่ ข้อหา และรูป บันทึกลงชีตเท่านั้น หน้าเว็บทั่วไปแสดงเฉพาะตัวเลขสถิติ</div>
           <div class="sec">⚖️ ข้อหาและของกลาง</div>
           <label class="full"><span>ข้อหา / พฤติกรรม <span class="req">*</span></span><textarea id="iCharge" required placeholder="ขึ้นบรรทัดใหม่ได้ 1 ข้อหาต่อบรรทัด"></textarea></label>
+          <div class="catf"><span>หมวดคดี <em>(เลือกได้หลายหมวด · ระบบติ๊กให้จากข้อหา แก้เองได้)</em></span><div class="catpick" id="iCats"></div></div>
           <label class="full"><span>ของกลาง</span><textarea id="iEvid" placeholder="เช่น ยาบ้า 20 เม็ด, อาวุธปืนพก 1 กระบอก"></textarea></label>
           <label class="full"><span>พฤติการณ์</span><textarea id="iStory" style="min-height:110px" placeholder="สรุปพฤติการณ์การจับกุม"></textarea></label>
           <div class="sec">📎 ภาพถ่าย / แนบไฟล์</div>
@@ -1256,7 +1279,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
         <div class="card"><div class="card-title">💡 คำแนะนำ</div>
           <ul class="sz-tips">
             <li>ช่องที่มี <b style="color:#dc2626">*</b> ต้องกรอก</li>
-            <li>หมวดคดีในกราฟ ระบบจัดให้เองจากคำในเรื่องและข้อหา</li>
+            <li>หมวดคดี ระบบติ๊กให้จากข้อหา เลือกเพิ่ม/เอาออกเองได้ · กด ⭐ จับกุมสำคัญ สำหรับคดีเด่น</li>
             <li>เลขบัตรประชาชนต้องครบ 13 หลัก (ใส่ขีดได้)</li>
             <li>ใส่รหัสครั้งเดียว ใช้ได้จนปิดเบราว์เซอร์</li>
             <li>แก้ไข/ลบรายการ ทำในชีตโดยตรง</li>
@@ -1352,7 +1375,7 @@ function filtered(){
   const m = $('fMonth').value, ct = $('fCat').value, of = $('fOff').value, q = $('fQ').value.trim().toLowerCase();
   return R.filter(r=>{
     if(m && (m.length===4 ? r.when.slice(0,4)!==m : ymOf(r.when)!==m)) return false;
-    if(ct && !r.cats.includes(ct)) return false;
+    if(ct==='★' ? !r.vip : (ct && !r.cats.includes(ct))) return false;
     if(of && r.officer!==of) return false;
     if(q){
       const s = STAFF && STAFF[r.row] || {};
@@ -1382,8 +1405,10 @@ function render(){
   const drug = F.filter(r=>r.cats.includes('ยาเสพติด')).length, gun = F.filter(r=>r.cats.includes('อาวุธปืน / อาวุธ')).length;
   countTo($('kDrug'), drug); $('kDrugSub').textContent = n ? Math.round(drug/n*100)+'%' : '';
   countTo($('kGun'), gun); $('kGunSub').textContent = n ? Math.round(gun/n*100)+'%' : '';
+  const vip = F.filter(r=>r.vip).length; countTo($('kVip'), vip); $('kVipSub').textContent = $('fCat').value==='★' ? 'แตะอีกครั้งเพื่อดูทั้งหมด' : (vip ? 'แตะเพื่อดูเฉพาะคดีสำคัญ' : '');
+  $('kVipCard').classList.toggle('on', $('fCat').value==='★');
   // รายเดือน (ไม่สนตัวกรองเดือน เพื่อให้เห็นทุกเดือนและกดเลือกได้)
-  const base = R.filter(r=>(!$('fCat').value || r.cats.includes($('fCat').value)) && (!$('fOff').value || r.officer===$('fOff').value));
+  const fc = $('fCat').value, base = R.filter(r=>(!fc || (fc==='★' ? r.vip : r.cats.includes(fc))) && (!$('fOff').value || r.officer===$('fOff').value));
   const months = uniq(R.map(r=>ymOf(r.when))).sort().slice(window.innerWidth < 700 ? -6 : -12), mm = {}; base.forEach(r=>{ const k = ymOf(r.when); mm[k] = (mm[k]||0)+1; });
   const mx = Math.max(1, ...months.map(k=>mm[k]||0));
   $('cMonth').innerHTML = months.length ? months.map((k,i)=>`<div class="c${k===mSel?' sel':''}" data-m="${k}" title="${ymFull(k)}" style="--d:${i*45}ms"><i style="height:${Math.max(2,(mm[k]||0)/mx*100)}%"><b>${fmt(mm[k]||0)}</b></i><span>${ymLabel(k)}</span></div>`).join('') : '<div class="sz-empty" style="flex:1">ไม่มีข้อมูล</div>';
@@ -1402,8 +1427,8 @@ function renderTable(F){
   const rows = F.slice(0, SHOW).map((r,i)=>{
     const s = STAFF[r.row] || {};
     const nf = (s.photos||[]).length + (s.files||[]).length;
-    return `<tr class="clk" data-row="${r.row}" tabindex="0" style="--d:${Math.min(i,14)*35}ms"><td class="d">${dLabel(r.when)}${tLabel(r.when)?`<small>${tLabel(r.when)}</small>`:''}</td>`
-      + `<td class="nm"><b>${esc(s.suspect||'–')}</b><small>${s.age?`อายุ ${esc(s.age)} ปี`:''}${s.idno?` · ${esc(maskId(s.idno))}`:''}</small></td>`
+    return `<tr class="clk${r.vip?' vipr':''}" data-row="${r.row}" tabindex="0" style="--d:${Math.min(i,14)*35}ms"><td class="d">${dLabel(r.when)}${tLabel(r.when)?`<small>${tLabel(r.when)}</small>`:''}</td>`
+      + `<td class="nm"><b>${r.vip?'<span class="vip-b" title="จับกุมสำคัญ">⭐</span>':''}${esc(s.suspect||'–')}</b><small>${s.age?`อายุ ${esc(s.age)} ปี`:''}${s.idno?` · ${esc(maskId(s.idno))}`:''}</small></td>`
       + `<td class="ch"><div>${r.cats.map(k=>`<span class="cat ${catCls(k)}">${esc(k)}</span>`).join('')}</div>${esc(s.charge||'–')}</td>`
       + `<td class="ch">${esc(s.evid||'–')}</td>`
       + `<td>${esc(s.place||'–')}<small>👮 ${esc(r.officer||'ไม่ระบุ')}</small></td>`
@@ -1416,6 +1441,8 @@ function renderTable(F){
   $('moreBtn').textContent = `แสดงเพิ่ม (อีก ${fmt(F.length-SHOW)} รายการ) ▾`;
 }
 ['fMonth','fCat','fOff'].forEach(id=>$(id).addEventListener('change', ()=>{ SHOW = PAGE; render(); }));
+const vipToggle = ()=>{ $('fCat').value = $('fCat').value==='★' ? '' : '★'; SHOW = PAGE; render(); };
+$('kVipCard').addEventListener('click', vipToggle); $('kVipCard').addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); vipToggle(); } });
 let qT; $('fQ').addEventListener('input', ()=>{ clearTimeout(qT); qT = setTimeout(()=>{ SHOW = PAGE; render(); }, 200); });
 $('moreBtn').addEventListener('click', ()=>{ SHOW += 60; renderTable(filtered()); });
 $('cMonth').addEventListener('click', e=>{ const c = e.target.closest('[data-m]'); if(!c) return; $('fMonth').value = $('fMonth').value===c.dataset.m ? '' : c.dataset.m; SHOW = PAGE; render(); });
@@ -1445,6 +1472,23 @@ async function enterStaff(){
 function leaveStaff(){ STAFF = null; $('staffBtn').classList.remove('on'); $('staffBtn').textContent = '🔓 ดูรายละเอียด (เจ้าหน้าที่)'; try{ sessionStorage.removeItem('arrest-staff'); }catch(_){} render(); }
 $('staffBtn').addEventListener('click', ()=>{ if(STAFF) leaveStaff(); else enterStaff(); });
 $('unlockBtn').addEventListener('click', ()=>enterStaff());
+/* แก้หมวดคดี / จับกุมสำคัญ ของรายการเดิม (ในหน้าต่างรายละเอียด) */
+$('dtBody').addEventListener('click', e=>{ const v = e.target.closest('#dVip'); if(v){ setVip(v, v.getAttribute('aria-pressed')!=='true'); $('dSave').hidden = false; } });
+$('dtBody').addEventListener('change', e=>{ if(e.target.closest('#dCats')) $('dSave').hidden = false; });
+$('dtBody').addEventListener('click', async e=>{
+  const b = e.target.closest('#dSave'); if(!b) return;
+  const box = b.closest('.dt-flag'), row = +box.dataset.row, r = R.find(x=>x.row===row); if(!r) return;
+  const cats = catPicked('dCats'), vip = $('dVip').getAttribute('aria-pressed')==='true';
+  if(!cats.length){ toast('เลือกหมวดคดีอย่างน้อย 1 หมวด'); return; }
+  if(needPin(()=>b.click())) return;
+  b.disabled = true; b.textContent = '⏳ กำลังบันทึก…';
+  try{
+    const j = await api({action:'flag', pin:PIN, row, vip, cats});
+    if(!j.ok){ if(j.auth) authFail(j, ()=>b.click()); else toast('⚠️ ' + (j.error||'บันทึกไม่สำเร็จ') + (/ไม่รู้จักคำสั่ง/.test(j.error||'')?' (ต้องอัปเดต Apps Script)':'')); return; }
+    r.vip = vip; r.cats = cats; b.hidden = true; toast(vip ? '⭐ บันทึกเป็นจับกุมสำคัญแล้ว' : '✓ บันทึกแล้ว'); render();
+  }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+  finally{ b.disabled = false; b.textContent = '💾 บันทึกการแก้ไข'; }
+});
 /* รายละเอียด + รูป (ดึงผ่านสคริปต์ เพราะรูปใน Drive เป็นแบบส่วนตัว) */
 const IMG_CACHE = {};
 const driveId = u=>{ const m = String(u||'').match(/\/d\/([\w-]{20,})|[?&]id=([\w-]{20,})/); return m ? (m[1]||m[2]) : ''; };
@@ -1456,6 +1500,8 @@ async function showDetail(rowNo){
   $('dtBody').innerHTML = `<dl>${dd('วัน/เวลา', dLabel(r.when) + (tLabel(r.when)?' '+tLabel(r.when):''))}${dd('เลขคดี', s.caseno)}${dd('ผู้จับกุม', r.officer)}${dd('ผู้ถูกจับกุม', s.suspect + (s.age?` (อายุ ${s.age} ปี)`:''))}${dd('เลขบัตรประชาชน', s.idno)}${dd('ที่อยู่', s.addr)}${dd('สถานที่จับกุม', s.place)}${dd('ข้อหา / พฤติกรรม', s.charge)}${dd('ของกลาง', s.evid)}${dd('พฤติการณ์', s.story)}</dl>`
     + (files ? `<p class="msg">${files}</p>` : '')
     + ((s.photos||[]).length ? '<div class="pics" id="dtPics"><span class="msg">⏳ กำลังโหลดรูป…</span></div>' : '');
+  $('dtBody').insertAdjacentHTML('beforeend', `<div class="dt-flag" data-row="${r.row}"><div class="row1">🏷️ หมวดคดี / ความสำคัญ <button type="button" class="vip-tg" id="dVip" aria-pressed="${!!r.vip}"><span class="vstar">${r.vip?'★':'☆'}</span> จับกุมสำคัญ</button></div><div class="catpick" id="dCats"></div><div class="acts2"><button type="button" class="btn btn-print" id="dSave" hidden>💾 บันทึกการแก้ไข</button></div></div>`);
+  catChips('dCats', r.cats);
   $('dtDlg').showModal();
   if(!(s.photos||[]).length) return;
   const ids = [...new Set(s.photos.map(driveId).filter(Boolean))].slice(0, 4), out = [];
@@ -1524,12 +1570,26 @@ $('iFiles').addEventListener('change', e=>{ addFiles(e.target.files); e.target.v
 ['dragenter','dragover'].forEach(ev=>$('drop').addEventListener(ev, e=>{ e.preventDefault(); $('drop').classList.add('over'); }));
 ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev, e=>{ e.preventDefault(); $('drop').classList.remove('over'); }));
 $('drop').addEventListener('drop', e=>{ if(e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
-$('iReset').addEventListener('click', ()=>{ FILES = []; drawThumbs(); setTimeout(()=>{ $('iWhen').value = nowLocal(); }, 0); });
+$('iReset').addEventListener('click', ()=>{ FILES = []; drawThumbs(); setTimeout(()=>{ $('iWhen').value = nowLocal(); resetCatVip(); }, 0); });
+/* หมวดคดี (เลือกเอง) + จับกุมสำคัญ */
+const CAT_RX = [['ยาเสพติด',/ยาเสพติด|ยาบ้า|ไอซ์|กัญชา|เฮโรอีน|เมทแอม|กระท่อม|เคตามีน|ยาอี/],['อาวุธปืน / อาวุธ',/อาวุธ|ปืน|กระสุน|ระเบิด|มีด/],['ชีวิตและร่างกาย',/ฆ่า|ทำร้าย|ทะเลาะ|วิวาท|บาดเจ็บ/],
+  ['ทรัพย์',/ลัก|ปล้น|ชิง|ฉ้อโกง|ยักยอก|รับของโจร|ทรัพย์|วิ่งราว/],['ตามหมายจับ',/หมายจับ/],['การพนัน',/พนัน/],['จราจร',/จราจร|เมาแล้วขับ|เมาสุรา|ใบอนุญาตขับขี่|ป้ายทะเบียน|ขับรถ/]];
+const catGuess = t=>CAT_RX.filter(c=>c[1].test(t)).map(c=>c[0]);
+const catChips = (id, sel)=>{ $(id).innerHTML = CAT_ORDER.map(k=>`<label><input type="checkbox" value="${esc(k)}"${sel.includes(k)?' checked':''}><span>${esc(k)}</span></label>`).join(''); };
+const catPicked = id=>[...$(id).querySelectorAll('input:checked')].map(x=>x.value);
+let catTouched = false;
+function setVip(btn, on){ btn.setAttribute('aria-pressed', on); btn.querySelector('.vstar').textContent = on ? '★' : '☆'; }
+function resetCatVip(){ catTouched = false; catChips('iCats', []); setVip($('iVip'), false); }
+catChips('iCats', []);
+$('iCats').addEventListener('change', ()=>{ catTouched = true; });
+['iCharge','iTitle'].forEach(id=>$(id).addEventListener('input', ()=>{ if(!catTouched) catChips('iCats', catGuess($('iTitle').value + ' ' + $('iCharge').value)); }));
+$('iVip').addEventListener('click', e=>{ const b = e.currentTarget; setVip(b, b.getAttribute('aria-pressed')!=='true'); BB.haptic && BB.haptic('tap'); });
 $('iId').addEventListener('input', e=>{ const d = e.target.value.replace(/\D/g,'').slice(0,13); const p = [1,4,5,2,1]; let o = '', k = 0; for(const n of p){ if(k>=d.length) break; o += (o?'-':'') + d.slice(k, k+n); k += n; } e.target.value = o; });
 function formRow(){
   const v = id=>$(id).value.trim();
   return { when:v('iWhen'), caseno:v('iCase'), title:v('iTitle'), officer:v('iOff'), place:v('iPlace'), suspect:v('iSus'), age:v('iAge'),
-           idno:v('iId').replace(/\D/g,''), addr:v('iAddr'), charge:v('iCharge'), evid:v('iEvid'), story:v('iStory') };
+           idno:v('iId').replace(/\D/g,''), addr:v('iAddr'), charge:v('iCharge'), evid:v('iEvid'), story:v('iStory'),
+           cats: catPicked('iCats'), vip: $('iVip').getAttribute('aria-pressed')==='true' };
 }
 async function save(){
   if(!ARREST_API) return toast('⚠️ ยังไม่ได้เชื่อมต่อ Apps Script');
@@ -1544,7 +1604,7 @@ async function save(){
     if(!j.ok){ if(j.auth) authFail(j, save); else toast('⚠️ ' + (j.error||'บันทึกไม่สำเร็จ')); return; }
     toast(`✓ บันทึกแล้ว (แถวที่ ${j.row}${j.files?` · ${j.files} ไฟล์`:''})`);
     const keep = {officer:row.officer, place:row.place};
-    $('szForm').reset(); FILES = []; drawThumbs();
+    $('szForm').reset(); FILES = []; drawThumbs(); resetCatVip();
     $('iWhen').value = nowLocal(); $('iOff').value = keep.officer;
     await load(true);
   }catch(err){ toast('⚠️ เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
@@ -1594,7 +1654,8 @@ async function load(quiet, pre){
   const el = $('fMonth'), cur = el.value;
   el.innerHTML = '<option value="">📅 ทุกช่วงเวลา</option>' + yrs.map(y=>`<optgroup label="ปี ${+y+543}"><option value="${y}">ทั้งปี ${+y+543}</option>${mos.filter(m=>m.startsWith(y)).map(m=>`<option value="${m}">${ymFull(m)}</option>`).join('')}</optgroup>`).join('');
   if([...el.options].some(o=>o.value===cur)) el.value = cur;
-  fillSel('fCat', CAT_ORDER.filter(k=>R.some(r=>r.cats.includes(k))), '🏷️ ทุกหมวดคดี');
+  { const cur = $('fCat').value; fillSel('fCat', CAT_ORDER.filter(k=>R.some(r=>r.cats.includes(k))), '🏷️ ทุกหมวดคดี');
+    $('fCat').insertAdjacentHTML('beforeend', '<option value="★">⭐ เฉพาะจับกุมสำคัญ</option>'); if(cur==='★') $('fCat').value = '★'; }
   fillSel('fOff', uniq(R.map(r=>r.officer)).sort(), '👮 ผู้จับกุมทุกนาย');
   if(STAFF && quiet){ try{ const s = await api({action:'full', pin:PIN}); if(s.ok){ STAFF = {}; s.rows.forEach(x=>STAFF[x.row] = x); } }catch(_){} }
   fillForm();
