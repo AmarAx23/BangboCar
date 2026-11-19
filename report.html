@@ -690,9 +690,6 @@ async function build(){
     kpi('🛵','รถจักรยานยนต์หาย',ex('theft')?'–':fmt(tfc.length),ex('theft')?{t:'โหลดไม่สำเร็จ'}:delta(tfc.length,tfp.length,false),ex('theft')),
     kpi('🚔','ผลการจับกุม',ar?fmt(ar.n):'–',ar?delta(ar.n,arp&&arp.n,true):{t:'โหลดไม่สำเร็จ'},!ar),
     kpi('🚗','ตรวจยึดรถ',sz?fmt(sz.n):'–',sz?delta(sz.n,szp&&szp.n,true):{t:'โหลดไม่สำเร็จ'},!sz),
-    kpi('📮','ตรวจตู้แดง',rb&&!rb.missing?fmt(rb.total):'–',rb&&!rb.missing?delta(rb.total,rb.prev,true):{t:'ยังไม่มีข้อมูลเดือนนี้'},!rb||rb.missing),
-    kpi('✅','เช็คลิสต์ผลัด (ข้อบังคับ)',shAvg!=null?Math.round(shAvg*100)+'%':'–',shAvg!=null?(shAvgP!=null?{t:`${shAvg>=shAvgP?'▲':'▼'} ${Math.abs(Math.round((shAvg-shAvgP)*100))} จุด (${Math.round(shAvgP*100)}%)`,c:shAvg>=shAvgP?'good':'bad'}:{t:sh&&sh.days?`นับ ${sh.days} วัน`:''}):{t:'ไม่มีข้อมูลเดือนนี้'},shAvg==null),
-    kpi('⭐','ผู้บังคับบัญชา ทำครบ',cmPct!=null?Math.round(cmPct*100)+'%':'–',cm&&cm.weeks?{t:`${cm.weeks} สัปดาห์`}:{t:'ไม่มีข้อมูลเดือนนี้'},cmPct==null),
     kpi('⚠️','กลุ่มเสี่ยงบันทึกใหม่',rk?fmt(rk.n):'–',rk?{t:`ทั้งหมด ${fmt(rk.total)} ราย`}:{t:'โหลดไม่สำเร็จ'},!rk)
   ].join('');
 
@@ -709,7 +706,6 @@ async function build(){
   if(!ex('theft')) sent.push(`รถจักรยานยนต์หาย ${fmt(tfc.length)} คัน`);
   if(ar) sent.push(`ผลจับกุม ${fmt(ar.n)} ราย${ar.cats[0]?` ส่วนใหญ่เป็นคดี${esc(ar.cats[0][0])}`:''}`);
   if(sz) sent.push(`ตรวจยึดรถ ${fmt(sz.n)} คัน`);
-  if(sh&&sh.units){ const low=sh.units.flatMap(u=>['เช้า','ดึก'].map(s=>({l:u.label,s,p:u[s]}))).filter(x=>x.p!=null).sort((a,b)=>a.p-b.p)[0]; if(low&&low.p<.9) sent.push(`เช็คลิสต์ที่ต้องติดตามคือ <b>${esc(low.l)} ผลัด${low.s}</b> (${Math.round(low.p*100)}%)`); }
   const summary=sent.join(' · ');
 
   /* ตารางเหตุตามประเภท */
@@ -720,7 +716,7 @@ async function build(){
 
   const p1=`<div class="paper">
   <div class="r-hd"><img src="logo.webp" alt=""><div><h1>รายงานสรุปผลการปฏิบัติงานประจำเดือน</h1><div class="s">งานป้องกันปราบปราม · สถานีตำรวจภูธรบางบ่อ</div></div><div class="r">ประจำเดือน<b>${monTxt}</b>1–${last} ${TH_M[m]} ${String(y+543).slice(2)} · พิมพ์ ${new Date().getDate()} ${TH_M[new Date().getMonth()]} ${String(new Date().getFullYear()+543).slice(2)}</div></div>
-  <div class="kpis">${K}</div>
+  <div class="kpis" style="grid-template-columns:repeat(5,1fr)">${K}</div>
   <h2>สรุปภาพรวม</h2>
   <div class="note" contenteditable="true" spellcheck="false">${summary||'—'}</div>
   <div class="edit-tip">* ข้อความสร้างจากตัวเลขอัตโนมัติ แตะเพื่อแก้ไขก่อนพิมพ์ได้</div>
@@ -741,25 +737,17 @@ async function build(){
 
   const mxA=ar&&ar.cats[0]?ar.cats[0][1]:1, mxS=sz&&sz.charges[0]?sz.charges[0][1]:1;
   const p2=`<div class="paper">
-  <div class="r-hd"><img src="logo.webp" alt=""><div><h1>ผลการปฏิบัติงาน</h1><div class="s">จับกุม · ตรวจยึด · ตู้แดง · เช็คลิสต์ · ผู้บังคับบัญชา · กำลังพล</div></div><div class="r">ประจำเดือน<b>${monTxt}</b></div></div>
+  <div class="r-hd"><img src="logo.webp" alt=""><div><h1>ผลการปฏิบัติงาน</h1><div class="s">จับกุม · ตรวจยึด · กลุ่มเสี่ยง · กำลังพล</div></div><div class="r">ประจำเดือน<b>${monTxt}</b></div></div>
   <div class="two">
     <div><h2>ผลการจับกุม <small>${ar?fmt(ar.n)+' ราย':''}</small></h2>
       ${!ar?'<div class="empty">โหลดไม่สำเร็จ</div>':ar.cats.length?`<table><tr><th>ประเภทคดี</th><th class="n">ราย</th><th style="width:38%"></th></tr>${ar.cats.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${fmt(v)}</td><td>${bar(v,mxA,'#7c3aed')}</td></tr>`).join('')}</table><div class="src">1 รายอาจมีหลายประเภทคดี</div>`:'<div class="empty">ไม่มีการจับกุมที่บันทึกในเดือนนี้</div>'}</div>
     <div><h2>ตรวจยึดรถ <small>${sz?fmt(sz.n)+' คัน':''}</small></h2>
       ${!sz?'<div class="empty">โหลดไม่สำเร็จ</div>':sz.n?`<table><tr><th>ข้อหา</th><th class="n">คัน</th><th style="width:38%"></th></tr>${sz.charges.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${fmt(v)}</td><td>${bar(v,mxS,'#0ea5e9')}</td></tr>`).join('')}</table><div class="src">${sz.teams.map(([k,v])=>`${esc(k)} ${v}`).join(' · ')}</div>`:'<div class="empty">ไม่มีการตรวจยึดที่บันทึกในเดือนนี้</div>'}</div>
   </div>
-  <div class="two">
-    <div><h2>ตรวจตู้แดง <small>${rb&&!rb.missing?`${fmt(rb.total)} ครั้ง · ${rb.people} นาย`:''}</small></h2>
-      ${!rb?'<div class="empty">ไม่มีข้อมูลตู้แดง</div>':rb.missing?`<div class="empty">ยังไม่มีข้อมูลตู้แดงของเดือนนี้ (ข้อมูลล่าสุดถึง ${esc(rb.last||'')})</div>`:`<table><tr><th>เจ้าหน้าที่ (5 อันดับ)</th><th class="n">ครั้ง</th></tr>${rb.top.map(o=>`<tr><td>${esc(o.name)}</td><td class="n">${fmt(o.n)}</td></tr>`).join('')}</table>`}
-      <h2>ผู้บังคับบัญชา <small>${cm&&cm.weeks?cm.weeks+' สัปดาห์':''}</small></h2>
-      ${!cm?'<div class="empty">โหลดไม่สำเร็จ</div>':cm.empty?'<div class="empty">ไม่มีสัปดาห์ที่จบในเดือนนี้</div>':`<table><tr><th>ตำแหน่ง</th><th class="n">ทำแล้ว</th><th class="n"></th></tr>${cm.roles.map(r=>`<tr><td>${esc(r.name)}</td><td class="n">${r.done}/${r.tot}</td><td class="n">${pctPill(r.tot?r.done/r.tot:null)}</td></tr>`).join('')}</table>`}
-    </div>
-    <div><h2>เช็คลิสต์ประจำผลัด <small>เฉพาะข้อบังคับ</small></h2>
-      ${!sh?'<div class="empty">โหลดไม่สำเร็จ</div>':sh.empty?'<div class="empty">ไม่มีการติ๊กเช็คลิสต์ในเดือนนี้</div>':`<table><tr><th>รายการ</th><th class="n">ผลัดเช้า</th><th class="n">ผลัดดึก</th></tr>${sh.units.map(u=>`<tr><td>${esc(u.label)}</td><td class="n">${pctPill(u['เช้า'])}</td><td class="n">${pctPill(u['ดึก'])}</td></tr>`).join('')}</table><div class="src">นับ ${sh.days} วัน ตั้งแต่ ${(d=>`${d.getDate()} ${TH_M[d.getMonth()]}`)(pDate(sh.from))} · เขียว ≥90% · เหลือง ≥75% · แดง &lt;75%</div>`}
+  <div>
       <h2>กลุ่มเสี่ยง <small>${rk?`บันทึกใหม่ ${fmt(rk.n)} ราย`:''}</small></h2>
       ${!rk?'<div class="empty">โหลดไม่สำเร็จ</div>':rk.n?`<table><tr><th>ประเภท</th><th class="n">ราย</th></tr>${rk.types.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${fmt(v)}</td></tr>`).join('')}</table>`:'<div class="empty">ไม่มีการบันทึกใหม่ในเดือนนี้</div>'}
       ${rk&&rk.pending?`<div class="src">รอตรวจสอบจากสายตรวจ ${fmt(rk.pending)} รายการ</div>`:''}
-    </div>
   </div>
   <h2>กำลังพล</h2>
   <div class="kpis" style="margin-top:0">
