@@ -710,6 +710,17 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 .dt th{text-align:center}
 .dt th.grp{border-bottom:1px solid var(--border)}
 .dt td{text-align:center;white-space:nowrap}
+.dt td.ed-c,.dt th.ed-h{position:sticky;left:0;z-index:1;background:var(--surface);width:44px;padding-left:6px;padding-right:6px}
+.ed-btn{border:1px solid var(--border);background:var(--surface2);border-radius:8px;width:34px;height:30px;cursor:pointer;font-size:14px;line-height:1}
+.ed-btn:hover{background:#dbeafe;border-color:#93c5fd}
+#edDlg{border:0;border-radius:16px;padding:0;width:min(94vw,820px);max-width:none;background:var(--surface);color:var(--text);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+#edDlg[open]{margin:auto}
+#edDlg::backdrop{background:rgba(15,23,42,.6);backdrop-filter:blur(3px)}
+#edDlg .hd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700}
+#edDlg .hd button{margin-left:auto;border:0;background:var(--surface2);color:var(--text);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px}
+#edDlg .bd{padding:14px 16px;max-height:70vh;overflow:auto}
+#edDlg .ft{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--border)}
+#edDlg .ed-tip{font-size:12.5px;color:var(--muted);margin:0 0 10px}
 .dt td.l{text-align:left;white-space:normal}
 .dt .ok{color:#16a34a;font-weight:700}
 .dt .no{color:#dc2626;font-weight:600}
@@ -946,7 +957,7 @@ nav .tab{font-size:15px;padding:.55em 1.7em}
 #rvDlg .bd{padding:14px 16px;max-height:calc(100vh - 200px);overflow:auto}
 #rvDlg .rv-meta{font-size:13px;color:var(--muted);background:var(--surface2);border-radius:10px;padding:9px 12px;margin-bottom:12px;line-height:1.6}
 #rvDlg .rv-meta .msg{display:block;color:var(--text-2);margin-top:4px}
-#rvFields{display:contents}
+#rvFields,#edFields{display:contents}
 #rvMap{grid-column:1/-1;height:240px;border-radius:10px;overflow:hidden;background:var(--track);z-index:0;cursor:crosshair}
 :root[data-theme="dark"] #rvMap .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
 #rvDlg .ft{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-top:1px solid var(--border)}
@@ -1206,6 +1217,23 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
     <button class="btn btn-ok" type="button" id="rvOk">✅ ยืนยัน เข้าชีต</button>
   </div>
 </dialog>
+<dialog id="edDlg" aria-labelledby="edTitle">
+  <div class="hd"><span id="edTitle">✏️ แก้ไขข้อมูล</span><button type="button" id="edClose" aria-label="ปิด">✕</button></div>
+  <div class="bd">
+    <p class="ed-tip" id="edTip"></p>
+    <form class="ff" id="edForm" autocomplete="off" novalidate>
+      <div id="edFields"></div>
+      <div class="sec">🧭 ตำแหน่งที่ตั้ง <small style="font-weight:400;color:var(--muted)">(แก้เฉพาะเมื่อต้องการย้ายหมุด)</small></div>
+      <label><span>ละติจูด (Lat)</span><input type="text" id="edLat" inputmode="decimal" placeholder="เช่น 13.58"></label>
+      <label><span>ลองจิจูด (Lng)</span><input type="text" id="edLng" inputmode="decimal" placeholder="เช่น 100.83"></label>
+      <label class="full"><span>หรือลิงก์ Google Maps</span><input type="url" id="edMap" placeholder="https://maps.app.goo.gl/…"></label>
+    </form>
+  </div>
+  <div class="ft">
+    <button class="btn btn-reset" type="button" id="edCancel">ยกเลิก</button>
+    <button class="btn btn-ok" type="button" id="edSave">💾 บันทึกการแก้ไข</button>
+  </div>
+</dialog>
 <dialog id="phDlg" aria-label="รูปถ่ายสถานที่"><img id="phImg" alt="รูปถ่ายสถานที่"></dialog>
 <dialog id="pinDlg">
   <div class="pl-card"><div class="pl-card2">
@@ -1421,10 +1449,53 @@ function renderSecure(){
     else { top += `<th${hasGroup?' rowspan="2"':''}>${esc(c.name)}</th>`; i++; }
   }
   const leftCols = new Set(cols.map((c,i)=>/ชื่อ|ที่ตั้ง/.test(c.name)?i:-1).filter(i=>i>=0));
-  $('secTable').innerHTML = `<thead><tr>${top}</tr>${hasGroup?`<tr>${sub}</tr>`:''}</thead><tbody>` +
-    sh.rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${leftCols.has(i)?'l':''}${lvOf(cols[i]) && lvMark(v) ? ' lv-'+lvOf(cols[i]) : ''}${isNo(v) ? ' no' : ''}">${cell(v, cols[i]||{name:''})}</td>`).join('')}</tr>`).join('') + '</tbody>';
+  $('secTable').innerHTML = `<thead><tr><th class="ed-h"${hasGroup?' rowspan="2"':''}>แก้ไข</th>${top}</tr>${hasGroup?`<tr>${sub}</tr>`:''}</thead><tbody>` +
+    sh.rows.map((r,ri)=>`<tr><td class="ed-c"><button type="button" class="ed-btn" data-r="${ri}" title="แก้ไขแถวนี้" aria-label="แก้ไข ${esc(r[cols.findIndex(c=>c.name==='ชื่อสถานที่')]||'')}">✏️</button></td>${r.map((v,i)=>`<td class="${leftCols.has(i)?'l':''}${lvOf(cols[i]) && lvMark(v) ? ' lv-'+lvOf(cols[i]) : ''}${isNo(v) ? ' no' : ''}">${cell(v, cols[i]||{name:''})}</td>`).join('')}</tr>`).join('') + '</tbody>';
 }
 $('secTabs').addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; S.sheet = b.dataset.s; renderSecure(); });
+/* ---------- แก้ไขแถวเดิม (โหมดเจ้าหน้าที่) ---------- */
+let ED = null, edBound = false;
+$('secTable').addEventListener('click', e=>{ const b = e.target.closest('.ed-btn'); if(b) openEdit(+b.dataset.r); });
+async function openEdit(ri){
+  const sh = (S.full && S.full.sheets || []).find(s=>s.name===S.sheet); if(!sh) return;
+  if(!sh.rn || !sh.ci) return toast('⚠️ ต้องอัปเดต Apps Script (เวอร์ชันที่มีการแก้ไข) ก่อน จึงจะแก้ไขจากหน้าเว็บได้');
+  if(!PF_TABS.length) await pfLoadSchema();
+  const t = PF_TABS.find(x=>x.tab===sh.name) || PF_TABS.find(x=>x.tab.trim()===sh.name.trim());
+  if(!t) return toast('⚠️ โหลดหัวคอลัมน์ของแท็บนี้ไม่ได้ ลองรีเฟรชหน้า');
+  const row = sh.rows[ri], vals = {};
+  sh.ci.forEach((c,k)=>{ vals[c] = row[k] ?? ''; });
+  const name = row[sh.cols.findIndex(c=>c.name==='ชื่อสถานที่')] || '';
+  const pub = (S.full.rows || []).find(r=>String(r.name).replace(/\s+/g,'')===String(name).replace(/\s+/g,'')) || {};
+  ED = { tab: t.tab, rn: sh.rn[ri], orig: name, locDirty: false };
+  $('edTitle').textContent = `✏️ แก้ไข · ${name}`;
+  $('edTip').textContent = `แท็บ "${sh.name.trim()}" แถวที่ ${sh.rn[ri]} ในชีต · แก้เฉพาะช่องที่ต้องการ แล้วกดบันทึก (ช่องที่ไม่ได้แก้จะไม่ถูกเปลี่ยน)`;
+  $('edFields').innerHTML = pfHTML(t);
+  if(!edBound){ pfBind($('edFields')); edBound = true; }
+  pfFill($('edFields'), vals);
+  $('edLat').value = pub.lat ?? ''; $('edLng').value = pub.lng ?? ''; $('edMap').value = pub.map && !/google\.com\/maps\?q=/.test(pub.map) ? pub.map : '';
+  $('edDlg').showModal();
+}
+['edLat','edLng','edMap'].forEach(id=>$(id).addEventListener('input', ()=>{ if(ED) ED.locDirty = true; if(id!=='edMap') $('edMap').value = ''; }));
+$('edClose').addEventListener('click', ()=>$('edDlg').close());
+$('edCancel').addEventListener('click', ()=>$('edDlg').close());
+$('edSave').addEventListener('click', async ()=>{
+  if(!ED) return;
+  const box = $('edFields'), fields = pfCollect(box); if(!fields) return;
+  box.querySelectorAll('input[data-i]').forEach(x=>{ if(!(x.dataset.i in fields)) fields[x.dataset.i] = ''; });          // ช่องที่ลบออก = ล้างค่า
+  box.querySelectorAll('input[data-mark]').forEach(x=>{ if(!x.checked && !(x.dataset.mark in fields)) fields[x.dataset.mark] = ''; });
+  const lat = parseFloat($('edLat').value), lng = parseFloat($('edLng').value), map = $('edMap').value.trim();
+  const body = { action:'edit', pin:S.pin, tab:ED.tab, rn:ED.rn, orig:ED.orig, fields,
+    map: ED.locDirty ? map : '', lat: ED.locDirty && !map && isFinite(lat) ? lat : '', lng: ED.locDirty && !map && isFinite(lng) ? lng : '' };
+  const b = $('edSave'); b.disabled = true; b.textContent = '⏳ กำลังบันทึก…';
+  try{
+    const j = await api(body);
+    if(!j.ok){ if(j.auth){ $('edDlg').close(); authFail(j, ()=>{}); } else if(/ไม่รู้จักคำสั่ง/.test(j.error||'')) toast('⚠️ ต้องอัปเดต Apps Script ก่อน จึงจะแก้ไขได้'); else toast('⚠️ ' + (j.error || 'บันทึกไม่สำเร็จ')); return; }
+    $('edDlg').close(); ED = null; BB.haptic && BB.haptic('ok');
+    toast(j.changed ? `✅ แก้ไขแล้ว ${j.changed} ช่อง · แท็บ "${String(j.tab||'').trim()}" แถวที่ ${j.row}${j.sumRow?' + รวมข้อมูล':''}` : 'ไม่มีช่องที่เปลี่ยน');
+    if(j.changed){ try{ const f = await api({action:'full', pin:S.pin}); if(f.ok){ S.full = f; renderSecure(); } }catch(_){} load(null, true); }
+  }catch(_){ toast('⚠️ ส่งข้อมูลไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
+  finally{ b.disabled = false; b.textContent = '💾 บันทึกการแก้ไข'; }
+});
 /* ---------- แชร์เป็นภาพ: แบบสรุปผู้บริหาร / แบบเอกสารราชการ (ของแท็บที่เลือก) ---------- */
 let h2iP = null;
 function loadH2I(){
