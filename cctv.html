@@ -1086,6 +1086,12 @@ main{transition:filter .6s}
 .fm-err{color:#dc2626;font-size:13px;font-weight:600;min-height:1em}
 .fm-err:empty{display:none}
 .fm-act{display:flex;gap:10px;justify-content:flex-end}
+.ed-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:#fef3c7;border:1px solid #fcd34d;color:#78350f;font-size:14px}
+.ed-bar b{font-weight:700}.ed-bar .sp{flex:1}
+:root[data-theme="dark"] .ed-bar{background:rgba(245,158,11,.14);border-color:rgba(252,211,77,.35);color:#fde68a}
+.ed-btn{border:1px solid var(--border);background:var(--surface2);border-radius:8px;width:34px;height:30px;cursor:pointer;font-size:14px;line-height:1}
+.ed-btn:hover{background:#dbeafe;border-color:#93c5fd}
+#addForm.editing #fCount{opacity:.6}
 .fm-act .btn{padding:10px 18px;font-size:15px}
 .fm-act .btn:disabled{opacity:.6;cursor:wait}
 #typeRow[hidden]{display:none}
@@ -1214,6 +1220,7 @@ main{transition:filter .6s}
   </div>
   <div id="panelAdd" hidden>
     <div class="form-link"><span>📋 <b>ฟอร์มสำหรับสายตรวจ</b> · ส่งข้อมูลกล้องได้อย่างเดียว ไม่เห็นข้อมูลอื่น · ที่ส่งมาจะขึ้นในแท็บ 🕓 รอตรวจสอบ</span><span class="fl-b"><button type="button" class="btn btn-reset" id="copyForm">🔗 คัดลอกลิงก์</button><a class="btn btn-reset" href="cctv-form.html" target="_blank" rel="noopener" style="text-decoration:none">เปิด ↗</a></span></div>
+    <div class="ed-bar" id="edBar" hidden><span>✏️ กำลังแก้ไขจุด <b id="edName"></b> · <span id="edN"></span></span><span class="sp"></span><button type="button" class="btn btn-reset" id="edCancel">ยกเลิกการแก้ไข</button></div>
     <form class="fm" id="addForm" novalidate autocomplete="off">
       <div class="fm-grid">
         <div class="card fm-card">
@@ -1423,9 +1430,9 @@ function renderSide(vis,anim){
   if(anim) stagger('#sideList .it',28);
 }
 function renderTable(vis,anim){
-  $('liTable').innerHTML=`<thead><tr><th>#</th><th>สถานที่ติดตั้ง</th><th>หน่วยงาน</th><th>จำนวน</th><th>เก็บภาพ</th><th>ผู้ประสานขอภาพ</th><th>แผนที่</th></tr></thead><tbody>`+
-    (vis.length?vis.map((g,k)=>`<tr><td class="n">${k+1}</td><td class="nm">${esc(g.place)}<div class="li-note">${esc(g.zone)} · ${esc(g.stores.join(', '))}</div>${g.lat==null?`<div class="li-note" style="color:#dc2626;font-weight:600">⚠️ พิกัดไม่ถูกต้อง · แถวในชีต: ${g.cams.map(c=>c.row).join(', ')}</div>`:''}</td><td>${esc(g.agency)}<div class="li-note">${esc(g.owner)}</div></td><td class="c">${fmt(g.n)} ตัว</td><td class="c">${g.days!=null?`<span class="tpill${g.days<=7?' warn':''}">${g.days} วัน</span>`:'–'}</td><td>${g.contacts.map(c=>`<div>${esc(c.name||'–')}${c.tel?` · <a class="tel" href="tel:${esc(c.tel)}">📞 ${esc(telFmt(c.tel))}</a>`:''}</div>`).join('')||'–'}</td><td><button type="button" class="btn-map" data-i="${g.i}"${g.lat==null?' disabled':''}>🗺️ ดู</button></td></tr>`).join('')
-      :'<tr><td colspan="7" class="li-empty">ไม่พบกล้องตามตัวกรอง</td></tr>')+'</tbody>';
+  $('liTable').innerHTML=`<thead><tr>${CAN_EDIT?'<th>แก้ไข</th>':''}<th>#</th><th>สถานที่ติดตั้ง</th><th>หน่วยงาน</th><th>จำนวน</th><th>เก็บภาพ</th><th>ผู้ประสานขอภาพ</th><th>แผนที่</th></tr></thead><tbody>`+
+    (vis.length?vis.map((g,k)=>`<tr>${CAN_EDIT?`<td><button type="button" class="ed-btn" data-ed="${g.i}" title="แก้ไขจุดนี้" aria-label="แก้ไข ${esc(g.place)}">✏️</button></td>`:''}<td class="n">${k+1}</td><td class="nm">${esc(g.place)}<div class="li-note">${esc(g.zone)} · ${esc(g.stores.join(', '))}</div>${g.lat==null?`<div class="li-note" style="color:#dc2626;font-weight:600">⚠️ พิกัดไม่ถูกต้อง · แถวในชีต: ${g.cams.map(c=>c.row).join(', ')}</div>`:''}</td><td>${esc(g.agency)}<div class="li-note">${esc(g.owner)}</div></td><td class="c">${fmt(g.n)} ตัว</td><td class="c">${g.days!=null?`<span class="tpill${g.days<=7?' warn':''}">${g.days} วัน</span>`:'–'}</td><td>${g.contacts.map(c=>`<div>${esc(c.name||'–')}${c.tel?` · <a class="tel" href="tel:${esc(c.tel)}">📞 ${esc(telFmt(c.tel))}</a>`:''}</div>`).join('')||'–'}</td><td><button type="button" class="btn-map" data-i="${g.i}"${g.lat==null?' disabled':''}>🗺️ ดู</button></td></tr>`).join('')
+      :`<tr><td colspan="${CAN_EDIT?8:7}" class="li-empty">ไม่พบกล้องตามตัวกรอง</td></tr>`)+'</tbody>';
   if(anim&&VIEW==='list') stagger('#liTable tbody tr',18);
 }
 function popup(g){
@@ -1573,7 +1580,7 @@ function posInfo(){
   const lat=parseFloat($('fLat').value), lng=parseFloat($('fLng').value), ok=okPos(lat,lng);
   $('fPosH').innerHTML=!$('fLat').value&&!$('fLng').value?'':ok?`✅ อยู่ใน <b>${esc(zoneOf(lat,lng))}</b>`:'⚠️ พิกัดไม่อยู่ในประเทศไทย ตรวจละติจูด/ลองจิจูดอีกครั้ง';
   const nb=$('fNear');
-  if(!ok){ nb.hidden=true; return; }
+  if(!ok||EDIT){ nb.hidden=true; return; }
   const near=G.filter(g=>g.lat!=null).map(g=>Object.assign({},g,{dd:distM(lat,lng,g.lat,g.lng)})).filter(g=>g.dd<=40).sort((a,b)=>a.dd-b.dd).slice(0,3);
   nb.hidden=!near.length;
   nb.innerHTML=near.length?'ℹ️ มีจุดกล้องเดิมอยู่ใกล้ ถ้าเป็นจุดเดียวกันให้แตะเพื่อใช้ชื่อและพิกัดเดิม (จะรวมเป็นจุดเดียว)'+near.map(g=>`<button type="button" class="fm-pick" data-i="${g.i}">📹 ${esc(g.place)} · ${esc(g.agency)} <b>${fmt(g.n)} ตัว · ${dTxt(g.dd)}</b></button>`).join(''):'';
@@ -1603,6 +1610,7 @@ $('fMe').onclick=()=>{
   ()=>{ $('fMe').textContent='📍 ตำแหน่งฉัน'; toast('หาตำแหน่งไม่ได้ (ต้องอนุญาตตำแหน่งในเบราว์เซอร์)'); },{enableHighAccuracy:true,timeout:15000});
 };
 function clearForm(keepMe){
+  if(EDIT) return endEdit();
   Object.values(FD).forEach(id=>{ if(keepMe&&(id==='fName'||id==='fTel')) return; $(id).value=''; $(id).classList.remove('bad'); });
   $('fCount').value=1; $('fLat').value=''; $('fLng').value=''; if(fMark){ fMark.remove(); fMark=null; }
   $('fErr').textContent=''; $('fPlaceH').innerHTML=''; posInfo(); syncDays();
@@ -1614,19 +1622,20 @@ $('addForm').addEventListener('submit',async e=>{
   const v={}; Object.entries(FD).forEach(([k,id])=>v[k]=$(id).value.trim());
   const tel=v.tel.replace(/\D/g,''), n=parseInt($('fCount').value,10), days=parseInt(v.days,10);
   const lat=parseFloat($('fLat').value), lng=parseFloat($('fLng').value);
-  const bad=[];
-  if(!v.name) bad.push(['fName','ชื่อ-สกุลผู้ลงข้อมูล']);
-  if(!/^0\d{8,9}$/.test(tel)) bad.push(['fTel','เบอร์โทร (9–10 หลัก ขึ้นต้น 0)']);
+  const bad=[], need=k=>!(EDIT&&EDIT.mixed.includes(k)&&!v[k]);   // แก้ไข: ช่องหลายค่าที่เว้นว่าง = ไม่เปลี่ยน
+  if(need('name')&&!v.name) bad.push(['fName','ชื่อ-สกุลผู้ลงข้อมูล']);
+  if(need('tel')&&!/^0\d{8,9}$/.test(tel)) bad.push(['fTel','เบอร์โทร (9–10 หลัก ขึ้นต้น 0)']);
   if(!v.place) bad.push(['fPlace','สถานที่ติดตั้ง']);
-  if(!v.owner) bad.push(['fOwner','ประเภทหน่วยงาน']);
-  if(!v.agency) bad.push(['fAgency','ชื่อหน่วยงาน']);
-  if(!(n>=1&&n<=50)) bad.push(['fCount','จำนวนกล้อง (1–50)']);
-  if(!(days>=1&&days<=3650)) bad.push(['fDays','ระยะเวลาเก็บภาพ (วัน)']);
+  if(need('owner')&&!v.owner) bad.push(['fOwner','ประเภทหน่วยงาน']);
+  if(need('agency')&&!v.agency) bad.push(['fAgency','ชื่อหน่วยงาน']);
+  if(!EDIT&&!(n>=1&&n<=50)) bad.push(['fCount','จำนวนกล้อง (1–50)']);
+  if(need('days')&&!(days>=1&&days<=3650)) bad.push(['fDays','ระยะเวลาเก็บภาพ (วัน)']);
   if(!okPos(lat,lng)) bad.push(['fLat','พิกัด (แตะแผนที่เพื่อปักหมุด)']);
   document.querySelectorAll('#addForm .bad').forEach(x=>x.classList.remove('bad'));
   if(bad.length){ bad.forEach(([id])=>$(id).classList.add('bad')); $('fErr').textContent='กรอกให้ครบ: '+bad.map(b=>b[1]).join(' · ');
     const f=$(bad[0][0]); f.focus({preventScroll:true}); f.scrollIntoView({behavior:RM?'auto':'smooth',block:'center'}); return; }
   const rec=Object.assign(v,{tel,days,lat,lng,count:n});
+  if(EDIT) return saveEdit(rec);
   fBusy=true; const sb=$('fSave'); sb.disabled=true; sb.textContent='⏳ กำลังบันทึก…'; $('fErr').textContent='';
   try{
     const j=await fetch(CCTV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'add',pin:PIN,rec})}).then(r=>r.json());
@@ -1638,6 +1647,55 @@ $('addForm').addEventListener('submit',async e=>{
   }catch(err){ $('fErr').textContent='❌ '+(err.message==='Failed to fetch'?'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง':err.message); }
   finally{ fBusy=false; sb.disabled=false; sb.textContent='💾 บันทึกลงชีต'; }
 });
+/* ---------- แก้ไขจุดติดตั้งเดิม (ใช้ฟอร์มบันทึกกล้อง) ----------
+   แก้ทุกกล้องในจุดเดียวกันพร้อมกัน · ส่งเฉพาะช่องที่เปลี่ยน · ช่องที่แต่ละกล้องต่างกันจะเว้นว่าง = ไม่เปลี่ยน */
+let EDIT=null;
+const ED_KEYS=['name','tel','place','owner','agency','use','detail','store','trans','days'];
+function edCommon(g,k){ const vs=[...new Set(g.cams.map(c=>String(c[k]??'').trim()))]; return vs.length===1?vs[0]:null; }
+function startEdit(g){
+  if(!CAN_EDIT) return;
+  const orig={}, mixed=[];
+  ED_KEYS.forEach(k=>{ const v=edCommon(g,k); orig[k]=v==null?'':v; if(v==null) mixed.push(k); });
+  if(orig.tel){ orig.tel=orig.tel.replace(/\D/g,''); }
+  EDIT={rows:g.cams.map(c=>c.row).filter(x=>x!=null),place:g.place,orig,mixed,lat:g.lat,lng:g.lng};
+  if(!EDIT.rows.length){ EDIT=null; return toast('⚠️ ต้องอัปเดต Apps Script ก่อน จึงจะแก้ไขจากหน้าเว็บได้'); }
+  showView('add',true);
+  Object.entries(FD).forEach(([k,id])=>{ const x=$(id); x.classList.remove('bad'); x.value=k==='tel'&&orig.tel?telFmt(orig.tel):orig[k];
+    x.placeholder=mixed.includes(k)?'หลายค่า · เว้นว่าง = ไม่เปลี่ยน':(x.dataset.ph||x.placeholder); });
+  $('fCount').value=g.n; $('fCount').disabled=true;
+  $('addForm').classList.add('editing'); $('edBar').hidden=false; $('edName').textContent=g.place; $('edN').textContent=`${fmt(g.n)} กล้อง (จำนวนกล้องแก้ในชีต)`;
+  $('fSave').textContent='💾 บันทึกการแก้ไข'; $('fErr').textContent='';
+  setTimeout(()=>{ if(g.lat!=null) setPos(g.lat,g.lng,true); else { $('fLat').value=''; $('fLng').value=''; posInfo(); } syncDays(); },120);
+  window.scrollTo({top:0,behavior:RM?'auto':'smooth'});
+}
+function endEdit(){
+  EDIT=null; $('addForm').classList.remove('editing'); $('edBar').hidden=true; $('fCount').disabled=false; $('fSave').textContent='💾 บันทึกลงชีต';
+  Object.values(FD).forEach(id=>{ const x=$(id); if(x.dataset.ph!=null) x.placeholder=x.dataset.ph; x.value=''; x.classList.remove('bad'); });
+  $('fCount').value=1; $('fLat').value=''; $('fLng').value=''; if(fMark){ fMark.remove(); fMark=null; }
+  $('fErr').textContent=''; $('fPlaceH').innerHTML=''; posInfo(); syncDays();
+  try{ const me=JSON.parse(sessionStorage.getItem('cctv-me')||'{}'); if(me.name) $('fName').value=me.name; if(me.tel) $('fTel').value=me.tel; }catch(_){}
+}
+Object.values(FD).forEach(id=>{ const x=$(id); x.dataset.ph=x.placeholder; });
+$('edCancel').addEventListener('click',()=>{ endEdit(); showView('list',true); });
+$('liTable').addEventListener('click',e=>{ const b=e.target.closest('[data-ed]'); if(b) startEdit(G[+b.dataset.ed]); });
+async function saveEdit(rec){
+  const E=EDIT, ch={};
+  ED_KEYS.forEach(k=>{ let v=String(rec[k]??'').trim(); if(k==='tel') v=v.replace(/\D/g,''); if(k==='days') v=isFinite(rec.days)?String(rec.days):'';
+    if(E.mixed.includes(k)&&!v) return;                                   // หลายค่า + เว้นว่าง = ไม่เปลี่ยน
+    if(v!==String(E.orig[k]??'')) ch[k]=v; });
+  const moved=E.lat==null||Math.abs(rec.lat-E.lat)>1e-6||Math.abs(rec.lng-E.lng)>1e-6;
+  if(moved){ ch.lat=rec.lat; ch.lng=rec.lng; }
+  if(!Object.keys(ch).length){ toast('ไม่มีช่องที่เปลี่ยน'); return; }
+  fBusy=true; const sb=$('fSave'); sb.disabled=true; sb.textContent='⏳ กำลังบันทึก…';
+  try{
+    const j=await fetch(CCTV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'edit',pin:PIN,rows:E.rows,place:E.place,rec:ch})}).then(r=>r.json());
+    if(!j.ok){ if(j.auth){ PIN=''; try{ sessionStorage.removeItem('cctv-pin'); }catch(_){} openPin(j.error); }
+      throw new Error(/ไม่รู้จัก|unknown/i.test(j.error||'')?'ต้องอัปเดต Apps Script ก่อน จึงจะแก้ไขได้':(j.error||'บันทึกไม่สำเร็จ')); }
+    toast(`✅ แก้ไขแล้ว ${fmt(j.rows||E.rows.length)} กล้อง`);
+    endEdit(); const d=await fetchRows(PIN); start(d,true); showView('list',true);
+  }catch(err){ $('fErr').textContent='❌ '+(err.message==='Failed to fetch'?'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง':err.message); }
+  finally{ fBusy=false; sb.disabled=false; if(EDIT) sb.textContent='💾 บันทึกการแก้ไข'; }
+}
 boot();
 </script>
 <script>/* สลับแท็บ: เนื้อหาจางเข้า */document.addEventListener('click',e=>{ if(e.target.closest('[data-view]')) document.documentElement.classList.add('tabbed'); },true);</script>
