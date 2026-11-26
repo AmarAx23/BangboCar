@@ -1088,6 +1088,7 @@ main{transition:filter .6s}
 .fm-act{display:flex;gap:10px;justify-content:flex-end}
 .ed-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:#fef3c7;border:1px solid #fcd34d;color:#78350f;font-size:14px}
 .ed-bar b{font-weight:700}.ed-bar .sp{flex:1}
+.ed-by{display:flex;align-items:center;gap:6px;font-weight:600}.ed-by i{color:#dc2626;font-style:normal}.ed-by input{height:34px;border:1px solid #fcd34d;border-radius:8px;padding:0 10px;font:inherit;font-weight:400;min-width:180px;background:#fff;color:#0f172a}
 :root[data-theme="dark"] .ed-bar{background:rgba(245,158,11,.14);border-color:rgba(252,211,77,.35);color:#fde68a}
 .ed-btn{border:1px solid var(--border);background:var(--surface2);border-radius:8px;width:34px;height:30px;cursor:pointer;font-size:14px;line-height:1}
 .ed-btn:hover{background:#dbeafe;border-color:#93c5fd}
@@ -1220,7 +1221,7 @@ main{transition:filter .6s}
   </div>
   <div id="panelAdd" hidden>
     <div class="form-link"><span>📋 <b>ฟอร์มสำหรับสายตรวจ</b> · ส่งข้อมูลกล้องได้อย่างเดียว ไม่เห็นข้อมูลอื่น · ที่ส่งมาจะขึ้นในแท็บ 🕓 รอตรวจสอบ</span><span class="fl-b"><button type="button" class="btn btn-reset" id="copyForm">🔗 คัดลอกลิงก์</button><a class="btn btn-reset" href="cctv-form.html" target="_blank" rel="noopener" style="text-decoration:none">เปิด ↗</a></span></div>
-    <div class="ed-bar" id="edBar" hidden><span>✏️ กำลังแก้ไขจุด <b id="edName"></b> · <span id="edN"></span></span><span class="sp"></span><button type="button" class="btn btn-reset" id="edCancel">ยกเลิกการแก้ไข</button></div>
+    <div class="ed-bar" id="edBar" hidden><span>✏️ กำลังแก้ไขจุด <b id="edName"></b> · <span id="edN"></span></span><span class="sp"></span><label class="ed-by">ผู้แก้ไข <i>*</i> <input id="edBy" maxlength="60" placeholder="ชื่อผู้แก้ไข" autocomplete="name"></label><button type="button" class="btn btn-reset" id="edCancel">ยกเลิกการแก้ไข</button></div>
     <form class="fm" id="addForm" novalidate autocomplete="off">
       <div class="fm-grid">
         <div class="card fm-card">
@@ -1665,6 +1666,7 @@ function startEdit(g){
   $('fCount').value=g.n; $('fCount').disabled=true;
   $('addForm').classList.add('editing'); $('edBar').hidden=false; $('edName').textContent=g.place; $('edN').textContent=`${fmt(g.n)} กล้อง (จำนวนกล้องแก้ในชีต)`;
   $('fSave').textContent='💾 บันทึกการแก้ไข'; $('fErr').textContent='';
+  try{ $('edBy').value=localStorage.getItem('bb-editor')||''; }catch(_){}
   setTimeout(()=>{ if(g.lat!=null) setPos(g.lat,g.lng,true); else { $('fLat').value=''; $('fLng').value=''; posInfo(); } syncDays(); },120);
   window.scrollTo({top:0,behavior:RM?'auto':'smooth'});
 }
@@ -1686,9 +1688,12 @@ async function saveEdit(rec){
   const moved=E.lat==null||Math.abs(rec.lat-E.lat)>1e-6||Math.abs(rec.lng-E.lng)>1e-6;
   if(moved){ ch.lat=rec.lat; ch.lng=rec.lng; }
   if(!Object.keys(ch).length){ toast('ไม่มีช่องที่เปลี่ยน'); return; }
+  const by=$('edBy').value.trim();
+  if(!by){ $('fErr').textContent='กรอกชื่อผู้แก้ไข (แถบสีเหลืองด้านบน) ก่อนบันทึก'; $('edBy').focus(); $('edBy').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'}); return; }
+  try{ localStorage.setItem('bb-editor',by); }catch(_){}
   fBusy=true; const sb=$('fSave'); sb.disabled=true; sb.textContent='⏳ กำลังบันทึก…';
   try{
-    const j=await fetch(CCTV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'edit',pin:PIN,rows:E.rows,place:E.place,rec:ch})}).then(r=>r.json());
+    const j=await fetch(CCTV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'edit',pin:PIN,by,rows:E.rows,place:E.place,rec:ch})}).then(r=>r.json());
     if(!j.ok){ if(j.auth){ PIN=''; try{ sessionStorage.removeItem('cctv-pin'); }catch(_){} openPin(j.error); }
       throw new Error(/ไม่รู้จัก|unknown/i.test(j.error||'')?'ต้องอัปเดต Apps Script ก่อน จึงจะแก้ไขได้':(j.error||'บันทึกไม่สำเร็จ')); }
     toast(`✅ แก้ไขแล้ว ${fmt(j.rows||E.rows.length)} กล้อง`);

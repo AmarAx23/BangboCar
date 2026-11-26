@@ -1222,6 +1222,7 @@ a,button,label,summary,[role=button],[data-tab],[data-view]{-webkit-tap-highligh
   <div class="bd">
     <p class="ed-tip" id="edTip"></p>
     <form class="ff" id="edForm" autocomplete="off" novalidate>
+      <label class="full"><span>ชื่อผู้แก้ไข <i style="color:#dc2626;font-style:normal">*</i> <small style="font-weight:400;color:var(--muted)">(บันทึกในประวัติการแก้ไข)</small></span><input id="edBy" maxlength="60" placeholder="เช่น ส.ต.ต.สมชาย ใจดี" autocomplete="name"></label>
       <div id="edFields"></div>
       <div class="sec">🧭 ตำแหน่งที่ตั้ง <small style="font-weight:400;color:var(--muted)">(แก้เฉพาะเมื่อต้องการย้ายหมุด)</small></div>
       <label><span>ละติจูด (Lat)</span><input type="text" id="edLat" inputmode="decimal" placeholder="เช่น 13.58"></label>
@@ -1473,6 +1474,7 @@ async function openEdit(ri){
   if(!edBound){ pfBind($('edFields')); edBound = true; }
   pfFill($('edFields'), vals);
   $('edLat').value = pub.lat ?? ''; $('edLng').value = pub.lng ?? ''; $('edMap').value = pub.map && !/google\.com\/maps\?q=/.test(pub.map) ? pub.map : '';
+  try{ $('edBy').value = localStorage.getItem('bb-editor') || ''; }catch(_){}
   $('edDlg').showModal();
 }
 ['edLat','edLng','edMap'].forEach(id=>$(id).addEventListener('input', ()=>{ if(ED) ED.locDirty = true; if(id!=='edMap') $('edMap').value = ''; }));
@@ -1480,11 +1482,14 @@ $('edClose').addEventListener('click', ()=>$('edDlg').close());
 $('edCancel').addEventListener('click', ()=>$('edDlg').close());
 $('edSave').addEventListener('click', async ()=>{
   if(!ED) return;
+  const by = $('edBy').value.trim();
+  if(!by){ toast('กรอกชื่อผู้แก้ไขก่อน'); $('edBy').focus(); return; }
+  try{ localStorage.setItem('bb-editor', by); }catch(_){}
   const box = $('edFields'), fields = pfCollect(box); if(!fields) return;
   box.querySelectorAll('input[data-i]').forEach(x=>{ if(!(x.dataset.i in fields)) fields[x.dataset.i] = ''; });          // ช่องที่ลบออก = ล้างค่า
   box.querySelectorAll('input[data-mark]').forEach(x=>{ if(!x.checked && !(x.dataset.mark in fields)) fields[x.dataset.mark] = ''; });
   const lat = parseFloat($('edLat').value), lng = parseFloat($('edLng').value), map = $('edMap').value.trim();
-  const body = { action:'edit', pin:S.pin, tab:ED.tab, rn:ED.rn, orig:ED.orig, fields,
+  const body = { action:'edit', pin:S.pin, by, tab:ED.tab, rn:ED.rn, orig:ED.orig, fields,
     map: ED.locDirty ? map : '', lat: ED.locDirty && !map && isFinite(lat) ? lat : '', lng: ED.locDirty && !map && isFinite(lng) ? lng : '' };
   const b = $('edSave'); b.disabled = true; b.textContent = '⏳ กำลังบันทึก…';
   try{
